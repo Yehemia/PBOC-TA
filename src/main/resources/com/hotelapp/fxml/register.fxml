@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+
+<GridPane fx:id="registerPane" alignment="CENTER" hgap="10" vgap="10"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.hotelapp.controller.RegisterController">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+    <TextField fx:id="usernameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+    <Label text="Nama Lengkap:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+    <TextField fx:id="nameField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+    <Label text="Email:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+    <TextField fx:id="emailField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+    <Label text="Password:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+    <PasswordField fx:id="passwordField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+    <Button text="Daftar" onAction="#handleRegister" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+    <Hyperlink text="Sudah punya akun? Login" onAction="#handleShowLogin" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+</GridPane>

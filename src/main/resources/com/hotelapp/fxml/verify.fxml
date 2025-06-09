@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<GridPane hgap="10" vgap="10" alignment="CENTER"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.hotelapp.controller.VerifyController">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Masukkan kode verifikasi:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+    <TextField fx:id="codeField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+    <Label text="Waktu tersisa:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+    <Label fx:id="timerLabel" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+    <ProgressBar fx:id="progressBar" prefWidth="200" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+    <Button text="Verifikasi" onAction="#handleVerify" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+    <Hyperlink fx:id="resendLink" text="Kirim Ulang Kode" onAction="#handleResend" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+    <Label fx:id="msgLabel" textFill="red" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+</GridPane>
+
