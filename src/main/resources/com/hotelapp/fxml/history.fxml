@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.HistoryBookingController">
+    <center>
+        <TableView fx:id="historyTable">
+            <columns>
+                <TableColumn fx:id="idColumn" text="ID" />
+                <TableColumn fx:id="checkInColumn" text="Check-In" />
+                <TableColumn fx:id="checkOutColumn" text="Check-Out" />
+                <TableColumn fx:id="statusColumn" text="Status" />
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

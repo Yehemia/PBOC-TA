@@ -62,7 +62,6 @@ public class UserDAO {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                // Mengambil data dari kolom database sesuai dengan model User kamu
                 int userId = rs.getInt("id");
                 String username = rs.getString("username");
                 String name = rs.getString("name");
@@ -73,10 +72,9 @@ public class UserDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null; // Jika user tidak ditemukan atau terjadi error
+        return null;
     }
 
-    // Metode untuk memperbarui role user, misalnya dari PENDING menjadi customer
     public static boolean updateRole(int userId, String newRole) {
         String query = "UPDATE users SET role = ? WHERE id = ?";
         try (Connection conn = Database.getConnection();
@@ -91,7 +89,6 @@ public class UserDAO {
         return false;
     }
 
-    // Metode autentikasi login, menggunakan hash untuk verifikasi password.
     public static User authenticate(String username, String password) {
         String query = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = Database.getConnection();

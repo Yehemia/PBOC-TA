@@ -13,10 +13,10 @@ public class RoomCell extends ListCell<Room> {
     private FXMLLoader loader;
     private HBox root;
     private RoomCellController controller;
-    private DashboardCustomerController dashboardController; // Referensi langsung ke Dashboard
+    private DashboardCustomerController dashboardController;
 
     public RoomCell(DashboardCustomerController dashboardController) {
-        this.dashboardController = dashboardController; // Simpan referensi langsung
+        this.dashboardController = dashboardController;
     }
 
     protected void updateItem(Room room, boolean empty) {
@@ -37,7 +37,7 @@ public class RoomCell extends ListCell<Room> {
                 }
 
                 if (controller != null) {
-                    controller.setRoomData(room, dashboardController); // Kirim referensi ke RoomCellController
+                    controller.setRoomData(room, dashboardController);
                     setGraphic(root);
                 }
             }

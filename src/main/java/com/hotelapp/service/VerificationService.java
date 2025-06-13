@@ -75,7 +75,7 @@ public class VerificationService {
         }
     }
 
-    // Log percobaan verifikasi ke tabel audit
+    // Log percobaan verifikasi
     public static void logVerificationAttempt(int userId, String tokenInput, boolean success) {
         String sql = "INSERT INTO verification_logs (user_id, token_input, success) VALUES (?, ?, ?)";
         try (Connection conn = Database.getConnection();

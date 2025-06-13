@@ -53,10 +53,8 @@ public class PaymentController {
                 confirmPaymentButton.setText("Pembayaran Berhasil!");
                 confirmPaymentButton.setDisable(true);
 
-                // ✅ Generate PDF Invoice
                 String pdfPath = PDFGenerator.generateInvoice(reservation);
 
-                // ✅ Kirim email dengan invoice sebagai lampiran
                 if (customer != null && customer.getEmail() != null) {
                     EmailUtil.sendInvoiceEmailWithAttachment(customer.getEmail(), pdfPath);
                 } else {

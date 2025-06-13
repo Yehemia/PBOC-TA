@@ -24,7 +24,6 @@
     <Button text="Login" onAction="#handleLogin"
             GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-    <!-- Hyperlink menuju halaman Registrasi -->
     <Hyperlink text="Belum punya akun? Daftar"
                onAction="#handleShowRegister"
                GridPane.rowIndex="3" GridPane.columnIndex="1"/>

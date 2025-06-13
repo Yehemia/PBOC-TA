@@ -65,8 +65,6 @@ public class RoomCellController {
                 System.err.println("❌ Gagal mendapatkan DashboardCustomerController!");
             }
         });
-
-
     }
 
     private void loadDefaultImage() {

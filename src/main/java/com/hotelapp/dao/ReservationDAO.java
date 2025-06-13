@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReservationDAO {
 
@@ -14,7 +16,6 @@ public class ReservationDAO {
         String sql = "INSERT INTO reservations (user_id, room_id, check_in, check_out, payment_method, status, total_price, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
 
         try (Connection con = Database.getConnection();
-             // Pastikan menyatakan bahwa kita ingin generated keys
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setInt(1, reservation.getUserId());
@@ -30,7 +31,7 @@ public class ReservationDAO {
                 try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         int id = generatedKeys.getInt(1);
-                        reservation.setId(id);  // Pastikan Reservation memiliki setter untuk ID
+                        reservation.setId(id);
                         System.out.println("✅ Reservasi tersimpan dengan ID: " + id);
                     }
                 }
@@ -44,32 +45,32 @@ public class ReservationDAO {
         }
     }
 
+    public static List<Reservation> getReservationsByUserId(int userId) {
+        List<Reservation> reservations = new ArrayList<>();
+        String sql = "SELECT id, user_id, room_id, check_in, check_out, payment_method, status, total_price FROM reservations WHERE user_id = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Reservation reservation = new Reservation(
+                        rs.getInt("id"),
+                        rs.getInt("user_id"),
+                        rs.getInt("room_id"),
+                        rs.getDate("check_in").toLocalDate(),
+                        rs.getDate("check_out").toLocalDate(),
+                        rs.getString("payment_method"),
+                        rs.getString("status"),
+                        rs.getDouble("total_price")
+                );
+                reservations.add(reservation);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-//    public static Reservation getReservationById(int id) {
-//        String sql = "SELECT * FROM reservations WHERE id = ?";
-//
-//        try (Connection con = Database.getConnection();
-//             PreparedStatement ps = con.prepareStatement(sql)) {
-//            ps.setInt(1, id);
-//            ResultSet rs = ps.executeQuery();
-//
-//            if (rs.next()) {
-//                return new Reservation(
-//                        rs.getInt("id"),
-//                        rs.getInt("user_id"),
-//                        rs.getInt("room_id"),
-//                        rs.getDate("check_in").toLocalDate(),
-//                        rs.getDate("check_out").toLocalDate(),
-//                        rs.getString("payment_method"),
-//                        rs.getString("status"),
-//                        rs.getDouble("total_price") // ✅ Baca total harga
-//                );
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
+        return reservations;
+    }
 
     public static boolean updatePaymentStatus(int reservationId, String status) {
         String sql = "UPDATE reservations SET payment_status = ? WHERE id = ?";

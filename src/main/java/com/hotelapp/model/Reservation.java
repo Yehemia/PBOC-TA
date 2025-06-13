@@ -23,6 +23,17 @@ public class Reservation {
         this.totalPrice = totalPrice;
     }
 
+    public Reservation(int id, int userId, int roomId, LocalDate checkIn, LocalDate checkOut, String paymentMethod, String status, double totalPrice) {
+        this.id = id;
+        this.userId = userId;
+        this.roomId = roomId;
+        this.checkIn = checkIn;
+        this.checkOut = checkOut;
+        this.paymentMethod = paymentMethod;
+        this.status = status;
+        this.totalPrice = totalPrice;
+    }
+
     public int getId() {
         return id;
     }

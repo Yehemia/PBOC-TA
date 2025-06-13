@@ -61,11 +61,9 @@ public class EmailUtil {
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(customerEmail));
             message.setSubject("Invoice Reservasi Hotel Anda");
 
-            // ✅ Tambahkan teks email
             MimeBodyPart messageBodyPart = new MimeBodyPart();
             messageBodyPart.setText("Terima kasih atas reservasi Anda! Invoice terlampir.");
 
-            // ✅ Tambahkan lampiran PDF
             MimeBodyPart attachmentPart = new MimeBodyPart();
             attachmentPart.setDataHandler(new DataHandler(new FileDataSource(pdfPath)));
             attachmentPart.setFileName("Invoice.pdf");

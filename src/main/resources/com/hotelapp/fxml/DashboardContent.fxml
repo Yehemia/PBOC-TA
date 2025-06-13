@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.DashboardContentController">
+    <ListView fx:id="roomList" layoutX="10" layoutY="10" prefWidth="580" prefHeight="380"/>
+</AnchorPane>

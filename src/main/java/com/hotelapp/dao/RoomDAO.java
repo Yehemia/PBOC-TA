@@ -43,21 +43,13 @@ public class RoomDAO {
         if (dbImageUrl == null || dbImageUrl.trim().isEmpty()) {
             return "/com/hotelapp/images/default_room.jpeg";
         }
-
-        // Normalisasi path
         String normalizedUrl = dbImageUrl.trim();
-
-        // Jika sudah berupa absolute path, return langsung
         if (normalizedUrl.startsWith("/com/hotelapp/images/")) {
             return normalizedUrl;
         }
-
-        // Jika hanya nama file, tambahkan path dasar
         if (!normalizedUrl.contains("/")) {
             return "/com/hotelapp/images/" + normalizedUrl;
         }
-
-        // Fallback untuk path lain
         return normalizedUrl;
     }
 }
