@@ -6,25 +6,47 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
-<GridPane fx:id="loginPane" alignment="CENTER" hgap="10" vgap="10"
-          xmlns:fx="http://javafx.com/fxml"
-          fx:controller="com.hotelapp.controller.LoginController">
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
-    </padding>
+<StackPane fx:id="rootPane" prefHeight="558.0" prefWidth="1500.0" styleClass="main-bg" stylesheets="@../styles/login-style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.login.LoginController">
+    <children>
+        <Region styleClass="bottom-arc" StackPane.alignment="BOTTOM_CENTER" />
 
-    <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-    <TextField fx:id="usernameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="541.0" prefWidth="350.0" spacing="15.0" StackPane.alignment="CENTER">
+            <children>
+            <ImageView fitHeight="192.0" fitWidth="270.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../images/logo.png" />
+               </image>
+            </ImageView>
+                <VBox alignment="TOP_LEFT" prefHeight="290.0" prefWidth="350.0" spacing="10.0" styleClass="form-card">
+                    <children>
+                        <Label styleClass="form-label" text="Username" />
+                        <TextField fx:id="usernameField" prefHeight="22.0" prefWidth="290.0" promptText="enter username" styleClass="form-input" />
+                        <Label styleClass="form-label" text="password" />
+                        <PasswordField fx:id="passwordField" prefHeight="36.0" prefWidth="290.0" promptText="enter password" styleClass="form-input" />
 
-    <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-    <PasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                        <Button fx:id="loginButton" onAction="#handleLogin" prefHeight="40.0" prefWidth="300.0" styleClass="sign-in-button" text="Sign In" />
 
-    <Button text="Login" onAction="#handleLogin"
-            GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-
-    <Hyperlink text="Belum punya akun? Daftar"
-               onAction="#handleShowRegister"
-               GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-</GridPane>
+                        <VBox alignment="CENTER" spacing="5.0">
+                            <children>
+                                <Label styleClass="or-label" text="or" />
+                                <Hyperlink fx:id="registerLink" onAction="#handleShowRegister" styleClass="create-account-link" text="Create Account" />
+                            </children>
+                            <padding>
+                                <Insets top="5.0" />
+                            </padding>
+                        </VBox>
+                    </children>
+                    <VBox.margin>
+                        <Insets top="15.0" />
+                    </VBox.margin>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</StackPane>

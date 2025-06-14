@@ -1,0 +1,94 @@
+.root {
+    /* Langsung gunakan nama "Poppins" */
+    -fx-font-family: "Poppins", sans-serif;
+}
+/* --- Latar Belakang Utama --- */
+.main-bg {
+    -fx-background-color: #2A2A4E; /* Warna ungu tua */
+}
+
+/* --- Kurva Putih di Bawah --- */
+.bottom-arc {
+    -fx-pref-height: 250px;
+    -fx-pref-width: 1500px;
+    -fx-background-color: white;
+    -fx-shape: "M 0 100 C 400 200, 1100 200, 1500 100 L 1500 250 L 0 250 Z";
+    -fx-translate-y: 50px; /* Sesuaikan untuk menaikkan/menurunkan kurva */
+}
+
+/* --- Teks Judul & Sub-judul --- */
+.title-label {
+    -fx-font-family: "Arial Black", "Impact", sans-serif;
+    -fx-font-size: 42px;
+    -fx-text-fill: white;
+}
+
+.subtitle-label {
+    -fx-font-family: "Arial", sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #A0A0C0; /* Warna putih keabu-abuan */
+}
+
+/* --- Kartu Form Login --- */
+.form-card {
+    -fx-background-color: #E9E9E9;
+    -fx-background-radius: 25px; /* Membuat sudut tumpul */
+    -fx-padding: 30px;
+    -fx-max-width: 350px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 20, 0, 0, 10);
+}
+
+/* --- Label di Dalam Form --- */
+.form-label {
+    -fx-font-family: "Poppins", sans-serif;
+    -fx-font-size: 13px;
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 0 5px; /* Sedikit padding kiri */
+}
+
+/* --- Input Field (Email & Password) --- */
+.form-input {
+    -fx-background-color: #D8D8D8;
+    -fx-background-radius: 10px;
+    -fx-border-color: transparent;
+    -fx-font-family: "Poppins", sans-serif;
+    -fx-font-size: 14px;
+    -fx-pref-height: 45px;
+}
+
+/* Prompt text (enter email/password) */
+.form-input .text-field-prompt-text {
+    -fx-fill: #888888;
+}
+
+/* --- Tombol Sign In --- */
+.sign-in-button {
+    -fx-background-color: #3F6373; /* Warna hijau kebiruan tua */
+    -fx-text-fill: white;
+    -fx-font-family: "Poppins", sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20px; /* Radius besar untuk bentuk pil */
+    -fx-cursor: hand;
+}
+
+.sign-in-button:hover {
+    -fx-background-color: #507A8B; /* Warna sedikit lebih terang saat hover */
+}
+
+/* --- Teks "or" & Link "Create Account" --- */
+.or-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #555555;
+}
+
+.create-account-link {
+    -fx-font-size: 13px;
+    -fx-text-fill: #3F6373;
+    -fx-underline: false; /* Menghilangkan garis bawah default */
+}
+
+.create-account-link:hover {
+    -fx-underline: true;
+}
