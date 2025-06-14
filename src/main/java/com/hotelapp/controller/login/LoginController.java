@@ -55,7 +55,7 @@ public class LoginController {
                     getClass().getResource("/com/hotelapp/fxml/register.fxml")
             );
             Stage stage = (Stage) usernameField.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            stage.setScene(new Scene(root, 920, 710));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -73,7 +73,7 @@ public class LoginController {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
                 Parent root = loader.load();
                 Stage stage = (Stage) usernameField.getScene().getWindow();
-                stage.setScene(new Scene(root));
+                stage.setScene(new Scene(root, stage.getWidth(), stage.getHeight()));
                 stage.show();
             } else {
                 System.out.println("Role tidak dikenali!");

@@ -15,10 +15,6 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws IOException {
         Parent root = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/login.fxml"));
         Scene scene = new Scene(root);
-        primaryStage.setWidth(920);
-        primaryStage.setHeight(710);
-        primaryStage.setMinWidth(850);
-        primaryStage.setMinHeight(680);
         primaryStage.setTitle("Sistem Reservasi Hotel");
         primaryStage.setScene(scene);
         primaryStage.show();

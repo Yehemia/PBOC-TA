@@ -5,13 +5,21 @@ import com.hotelapp.util.Database;
 import java.sql.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.UUID;
 
 public class VerificationService {
     private static final Duration VALIDITY = Duration.ofMinutes(15);
 
     // Simpan token baru dan kembalikan waktu kedaluwarsa (expiry)
-    public static LocalDateTime createAndSaveToken(int userId, String token) throws SQLException {
+    private static final Random random = new Random();
+
+    // DIUBAH: Metode ini sekarang menghasilkan token 6-digit
+    public static String createAndSaveToken(int userId) throws SQLException {
+        // Buat 6 digit angka acak (antara 100000 dan 999999)
+        int codeInt = 100000 + random.nextInt(900000);
+        String token = String.valueOf(codeInt);
+
         LocalDateTime expires = LocalDateTime.now().plus(VALIDITY);
         try (Connection conn = Database.getConnection();
              PreparedStatement p = conn.prepareStatement(
@@ -22,7 +30,8 @@ public class VerificationService {
             p.setTimestamp(3, Timestamp.valueOf(expires));
             p.executeUpdate();
         }
-        return expires;
+        // Kembalikan token yang baru dibuat agar bisa dikirim via email
+        return token;
     }
 
     // Ambil waktu kedaluwarsa token terakhir yang belum digunakan
