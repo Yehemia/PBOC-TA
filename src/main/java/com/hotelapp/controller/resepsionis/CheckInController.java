@@ -28,7 +28,7 @@ public class CheckInController {
     public void initialize() {
         // Pastikan semua kolom memiliki pemetaan ke model Reservation
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("userId")); // Mungkin perlu diubah ke nama lengkap
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("guestName")); // Mungkin perlu diubah ke nama lengkap
         roomColumn.setCellValueFactory(new PropertyValueFactory<>("roomId"));
         checkInColumn.setCellValueFactory(new PropertyValueFactory<>("checkIn"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));

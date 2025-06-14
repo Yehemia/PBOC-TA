@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.hotelapp.controller.resepsionis.OfflineReservationController"
+            prefWidth="800" prefHeight="600">
+    <GridPane layoutX="20" layoutY="20" hgap="10" vgap="10">
+        <!-- Form Reservasi Offline -->
+        <Label text="Reservasi Offline" GridPane.columnSpan="2" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+        <Label text="Nama Tamu:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <TextField fx:id="nameField" promptText="Masukkan nama tamu" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+        <Label text="Check-In:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <DatePicker fx:id="checkInDatePicker" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+        <Label text="Check-Out:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+        <DatePicker fx:id="checkOutDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+        <Label text="Metode Pembayaran:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+        <ComboBox fx:id="paymentMethodComboBox" prefWidth="200" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+
+        <!-- Tombol Submit Reservasi -->
+        <Button text="Submit Reservasi" fx:id="submitButton" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+    </GridPane>
+
+    <!-- FlowPane untuk menampilkan kartu kamar -->
+    <FlowPane fx:id="roomFlowPane" layoutX="20" layoutY="300" prefWidth="760" hgap="10" vgap="10">
+        <!-- Kartu-kartu kamar akan ditambahkan secara dinamis -->
+    </FlowPane>
+
+</AnchorPane>

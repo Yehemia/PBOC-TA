@@ -5,7 +5,6 @@
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.hotelapp.controller.resepsionis.CheckOutController">
-
     <!-- Judul -->
     <Label text="Daftar Tamu - Check-Out" layoutX="20" layoutY="20" style="-fx-font-size: 18px;"/>
 
@@ -21,15 +20,8 @@
         </columns>
     </TableView>
 
-    <!-- Input untuk Denda/Penalti -->
-    <HBox spacing="10" layoutX="20" layoutY="420">
-        <Label text="Denda (jika ada):"/>
-        <TextField fx:id="penaltyAmountField" promptText="Masukkan jumlah denda"/>
-        <Button text="Terapkan Denda" fx:id="applyPenaltyButton" onAction="#applyPenalty"/>
-    </HBox>
-
     <!-- Tombol Refresh Data -->
-    <HBox spacing="10" layoutX="20" layoutY="460">
+    <HBox spacing="10" layoutX="20" layoutY="500">
         <Button text="Refresh" onAction="#refreshData"/>
     </HBox>
 

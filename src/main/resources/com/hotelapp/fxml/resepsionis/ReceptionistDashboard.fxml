@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.resepsionis.ReceptionistDashboardController">
+
+    <!-- 🔼 Panel Statistik Cepat (Top) -->
+    <top>
+        <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-background-color: #f8f9fa; -fx-padding: 15;">
+            <!-- Kartu Statistik -->
+            <VBox fx:id="cardReservasi" alignment="CENTER" style="-fx-border-color: #007bff; -fx-border-width: 2; -fx-padding: 10;">
+                <Label text="📅" style="-fx-font-size: 30px;"/>
+                <Label fx:id="reservasiCount" text="15" style="-fx-font-size: 36px; -fx-font-weight: bold;"/>
+                <Label text="JUMLAH RESERVASI HARI INI" style="-fx-font-size: 12px;"/>
+            </VBox>
+            <VBox fx:id="cardCheckIn" alignment="CENTER" style="-fx-padding: 10;">
+                <Label text="✅" style="-fx-font-size: 30px;"/>
+                <Label fx:id="checkInCount" text="30" style="-fx-font-size: 36px; -fx-font-weight: bold;"/>
+                <Label text="JUMLAH CHECK-IN HARI INI" style="-fx-font-size: 12px;"/>
+            </VBox>
+            <VBox fx:id="cardCheckOut" alignment="CENTER" style="-fx-padding: 10;">
+                <Label text="❌" style="-fx-font-size: 30px;"/>
+                <Label fx:id="checkOutCount" text="12" style="-fx-font-size: 36px; -fx-font-weight: bold;"/>
+                <Label text="JUMLAH CHECK-OUT HARI INI" style="-fx-font-size: 12px;"/>
+            </VBox>
+            <!-- Tombol Logout -->
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="logoutBtn" text="Log Out" style="-fx-background-color:#d9534f; -fx-text-fill: white;"/>
+        </HBox>
+    </top>
+
+    <!-- 📂 Sidebar Navigasi (Left) -->
+    <left>
+        <VBox spacing="10" style="-fx-background-color: #2c3e50; -fx-padding: 20;">
+            <Label text="Resepsionis" style="-fx-text-fill: white; -fx-font-size: 18px;"/>
+            <Button fx:id="checkInButton" text="Check-In" style="-fx-text-fill: white;"/>
+            <Button fx:id="checkOutButton" text="Check-Out" style="-fx-text-fill: white;"/>
+            <Button fx:id="offlineReservationButton" text="Reservasi Offline" style="-fx-text-fill: white;"/>
+            <Button fx:id="penaltyButton" text="Denda/Penalti" style="-fx-text-fill: white;"/>
+            <Button fx:id="historyButton" text="Riwayat Tamu" style="-fx-text-fill: white;"/>
+        </VBox>
+    </left>
+
+    <!-- 🎯 Konten Dinamis (Center) -->
+    <center>
+        <AnchorPane fx:id="contentPane"/>
+    </center>
+
+</BorderPane>

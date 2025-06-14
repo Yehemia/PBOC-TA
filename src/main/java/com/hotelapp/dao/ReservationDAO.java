@@ -10,22 +10,25 @@ import java.util.List;
 public class ReservationDAO {
 
     public static boolean createReservation(Reservation reservation) {
-        // Pastikan query sudah mencakup kolom guest_name
         String sql = "INSERT INTO reservations (user_id, room_id, check_in, check_out, payment_method, booking_type, status, total_price, created_at, guest_name) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            // Untuk reservasi online, user_id dan guest_name diambil dari akun; untuk offline, bisa diset default dan diinput oleh resepsionis.
-            ps.setInt(1, reservation.getUserId());
+            // Jika offline, user_id bisa diset null (asumsikan reservation.getUserId() mengembalikan 0 untuk offline)
+            if (reservation.getUserId() == 0) {
+                ps.setNull(1, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(1, reservation.getUserId());
+            }
             ps.setInt(2, reservation.getRoomId());
             ps.setDate(3, java.sql.Date.valueOf(reservation.getCheckIn()));
             ps.setDate(4, java.sql.Date.valueOf(reservation.getCheckOut()));
             ps.setString(5, reservation.getPaymentMethod());
-            ps.setString(6, reservation.getBookingType()); // misalnya "online" atau "offline"
+            ps.setString(6, reservation.getBookingType());
             ps.setString(7, reservation.getStatus());
             ps.setDouble(8, reservation.getTotalPrice());
-            ps.setString(9, reservation.getGuestName());  // Guest name untuk online maupun offline
+            ps.setString(9, reservation.getGuestName());
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -45,7 +48,6 @@ public class ReservationDAO {
             return false;
         }
     }
-
 
     public static List<Reservation> getReservationsByUserId(int userId) {
         List<Reservation> reservations = new ArrayList<>();
@@ -193,7 +195,11 @@ public class ReservationDAO {
         return list;
     }
 
-    public static boolean processCheckOut(int reservationId, double penaltyFee) {
+    /**
+     * Proses check-out secara langsung tanpa penalty.
+     * Perbaharui status menjadi 'checked_out' dan catat waktu check_out.
+     */
+    public static boolean processCheckOut(int reservationId) {
         String sql = "UPDATE reservations SET status = 'checked_out', check_out_time = NOW(), penalty_status = 'paid' WHERE id = ?";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -205,6 +211,26 @@ public class ReservationDAO {
         return false;
     }
 
+    /**
+     * Mengaplikasikan penalty ke dalam reservasi dengan menambahkan penalty fee ke total_price
+     * dan mengubah penalty_status menjadi 'pending'.
+     */
+    public static boolean applyPenalty(int reservationId, double penaltyAmount) {
+        String sql = "UPDATE reservations SET penalty_status = 'pending', total_price = total_price + ? WHERE id = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setDouble(1, penaltyAmount);
+            ps.setInt(2, reservationId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Menambahkan entri penalty ke tabel penalties (jika Anda menggunakan tabel penalties terpisah).
+     */
     public static boolean addPenalty(int reservationId, String reason, double amount) {
         String sql = "INSERT INTO penalties (reservation_id, reason, amount, penalty_status, created_at) VALUES (?, ?, ?, 'pending', NOW())";
         try (Connection con = Database.getConnection();
@@ -233,9 +259,8 @@ public class ReservationDAO {
                 rs.getString("status"),
                 rs.getDouble("total_price"),
                 rs.getString("penalty_status"),
-                rs.getString("payment_status")
+                rs.getString("payment_status"),
+                rs.getString("guest_name")
         );
     }
-
 }
-

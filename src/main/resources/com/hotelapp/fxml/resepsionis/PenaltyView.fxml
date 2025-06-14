@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.resepsionis.PenaltyController">
+    <children>
+        <VBox spacing="10" layoutX="20" layoutY="20">
+            <Label text="Manajemen Denda/Penalti" style="-fx-font-size: 18px;"/>
+            <!-- Tabel Penalty -->
+            <TableView fx:id="penaltyTable" prefWidth="720" prefHeight="300">
+                <columns>
+                    <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
+                    <TableColumn fx:id="reservationIdColumn" text="ID Reservasi" prefWidth="100"/>
+                    <TableColumn fx:id="reasonColumn" text="Alasan" prefWidth="300"/>
+                    <TableColumn fx:id="amountColumn" text="Jumlah" prefWidth="100"/>
+                    <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+                </columns>
+            </TableView>
+
+            <!-- Baris aksinya -->
+            <HBox spacing="10">
+                <Button text="Tandai Dibayar" onAction="#markPenaltyPaid" prefWidth="150"/>
+                <Button text="Refresh Data" onAction="#refreshData" prefWidth="150"/>
+            </HBox>
+        </VBox>
+    </children>
+</AnchorPane>
