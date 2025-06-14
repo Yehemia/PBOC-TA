@@ -1,4 +1,4 @@
-package com.hotelapp.controller;
+package com.hotelapp.controller.login;
 
 import com.hotelapp.dao.UserDAO;
 import com.hotelapp.model.User;
@@ -125,7 +125,7 @@ public class VerifyController {
 
     private void redirectWithAnimation() {
         try {
-            Parent dashboardRoot = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/dashboard_customer.fxml"));
+            Parent dashboardRoot = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/customer/dashboard_customer.fxml"));
             Scene scene = new Scene(dashboardRoot);
             Stage stage = (Stage) codeField.getScene().getWindow();
             FadeTransition fade = new FadeTransition(Duration.seconds(1), dashboardRoot);

@@ -1,4 +1,4 @@
-package com.hotelapp.controller;
+package com.hotelapp.controller.login;
 
 import com.hotelapp.dao.UserDAO;
 

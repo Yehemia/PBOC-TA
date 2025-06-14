@@ -3,28 +3,29 @@ package com.hotelapp.dao;
 import com.hotelapp.model.Reservation;
 import com.hotelapp.util.Database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReservationDAO {
 
-    public static boolean saveReservation(Reservation reservation) {
-        String sql = "INSERT INTO reservations (user_id, room_id, check_in, check_out, payment_method, status, total_price, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
-
+    public static boolean createReservation(Reservation reservation) {
+        // Pastikan query sudah mencakup kolom guest_name
+        String sql = "INSERT INTO reservations (user_id, room_id, check_in, check_out, payment_method, booking_type, status, total_price, created_at, guest_name) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
+            // Untuk reservasi online, user_id dan guest_name diambil dari akun; untuk offline, bisa diset default dan diinput oleh resepsionis.
             ps.setInt(1, reservation.getUserId());
             ps.setInt(2, reservation.getRoomId());
             ps.setDate(3, java.sql.Date.valueOf(reservation.getCheckIn()));
             ps.setDate(4, java.sql.Date.valueOf(reservation.getCheckOut()));
             ps.setString(5, reservation.getPaymentMethod());
-            ps.setString(6, reservation.getStatus());
-            ps.setDouble(7, reservation.getTotalPrice());
+            ps.setString(6, reservation.getBookingType()); // misalnya "online" atau "offline"
+            ps.setString(7, reservation.getStatus());
+            ps.setDouble(8, reservation.getTotalPrice());
+            ps.setString(9, reservation.getGuestName());  // Guest name untuk online maupun offline
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -44,6 +45,7 @@ public class ReservationDAO {
             return false;
         }
     }
+
 
     public static List<Reservation> getReservationsByUserId(int userId) {
         List<Reservation> reservations = new ArrayList<>();
@@ -88,6 +90,152 @@ public class ReservationDAO {
         }
     }
 
+    public static List<Reservation> getAllReservations() {
+        List<Reservation> list = new ArrayList<>();
+        String sql = "SELECT * FROM reservations";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapReservation(rs));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static List<Reservation> searchReservations(String keyword) {
+        List<Reservation> list = new ArrayList<>();
+        String sql = "SELECT * FROM reservations WHERE user_id LIKE ? OR id LIKE ?";
+        // Jika kamu memiliki kolom nama tamu, ganti query sesuai
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            String searchPattern = "%" + keyword + "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);  // Sesuaikan jika ingin mencari berdasarkan ID atau kolom lainnya
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapReservation(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static boolean processCheckIn(int reservationId) {
+        String sql = "UPDATE reservations SET status = 'checked_in', check_in_time = NOW() WHERE id = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, reservationId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static int getJumlahReservasiHariIni() {
+        String sql = "SELECT COUNT(*) FROM reservations WHERE DATE(created_at) = CURDATE()";
+        return getCount(sql);
+    }
+
+    public static int getJumlahCheckInHariIni() {
+        String sql = "SELECT COUNT(*) FROM reservations WHERE status = 'checked_in' AND DATE(check_in_time) = CURDATE()";
+        return getCount(sql);
+    }
+
+    public static int getJumlahCheckOutHariIni() {
+        String sql = "SELECT COUNT(*) FROM reservations WHERE status = 'checked_out' AND DATE(check_out_time) = CURDATE()";
+        return getCount(sql);
+    }
+
+    private static int getCount(String sql) {
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static List<Reservation> getReservationsForCheckIn() {
+        List<Reservation> list = new ArrayList<>();
+        String sql = "SELECT * FROM reservations WHERE status = 'pending' AND DATE(check_in) = CURDATE()";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapReservation(rs));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static List<Reservation> getReservationsForCheckOut() {
+        List<Reservation> list = new ArrayList<>();
+        String sql = "SELECT * FROM reservations WHERE status = 'checked_in'";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapReservation(rs));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static boolean processCheckOut(int reservationId, double penaltyFee) {
+        String sql = "UPDATE reservations SET status = 'checked_out', check_out_time = NOW(), penalty_status = 'paid' WHERE id = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, reservationId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean addPenalty(int reservationId, String reason, double amount) {
+        String sql = "INSERT INTO penalties (reservation_id, reason, amount, penalty_status, created_at) VALUES (?, ?, ?, 'pending', NOW())";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, reservationId);
+            ps.setString(2, reason);
+            ps.setDouble(3, amount);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static Reservation mapReservation(ResultSet rs) throws SQLException {
+        return new Reservation(
+                rs.getInt("id"),
+                rs.getInt("user_id"),
+                rs.getInt("room_id"),
+                rs.getDate("check_in").toLocalDate(),
+                rs.getDate("check_out").toLocalDate(),
+                rs.getTimestamp("check_in_time") != null ? rs.getTimestamp("check_in_time").toLocalDateTime() : null,
+                rs.getTimestamp("check_out_time") != null ? rs.getTimestamp("check_out_time").toLocalDateTime() : null,
+                rs.getString("payment_method"),
+                rs.getString("booking_type"),
+                rs.getString("status"),
+                rs.getDouble("total_price"),
+                rs.getString("penalty_status"),
+                rs.getString("payment_status")
+        );
+    }
 
 }
 

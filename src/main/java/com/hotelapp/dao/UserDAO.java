@@ -89,6 +89,24 @@ public class UserDAO {
         return false;
     }
 
+    public static boolean updateUser(User user) {
+        String sql = "UPDATE users SET name = ?, email = ?, username = ? WHERE id = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, user.getName());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getUsername());
+            ps.setInt(4, user.getId());
+
+            int affectedRows = ps.executeUpdate();
+            return (affectedRows > 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public static User authenticate(String username, String password) {
         String query = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = Database.getConnection();

@@ -10,7 +10,7 @@
 
 <GridPane fx:id="registerPane" alignment="CENTER" hgap="10" vgap="10"
           xmlns:fx="http://javafx.com/fxml"
-          fx:controller="com.hotelapp.controller.RegisterController">
+          fx:controller="com.hotelapp.controller.login.RegisterController">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
