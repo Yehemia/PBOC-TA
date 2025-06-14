@@ -5,7 +5,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.PaymentController" spacing="15" alignment="CENTER">
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.customer.PaymentController" spacing="15" alignment="CENTER">
     <Label text="Pembayaran Online" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
     <Label fx:id="totalPriceLabel" text="Total: Rp0" />
     <Label text="Scan QR Code untuk membayar:" />

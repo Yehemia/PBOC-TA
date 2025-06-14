@@ -1,7 +1,7 @@
 package com.hotelapp.util;
 
-import com.hotelapp.controller.DashboardCustomerController;
-import com.hotelapp.controller.RoomCellController;
+import com.hotelapp.controller.customer.DashboardCustomerController;
+import com.hotelapp.controller.customer.RoomCellController;
 import com.hotelapp.model.Room;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListCell;
@@ -26,7 +26,7 @@ public class RoomCell extends ListCell<Room> {
                 setGraphic(null);
             } else {
                 if (loader == null) {
-                    loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/RoomCell.fxml"));
+                    loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/RoomCell.fxml"));
                     try {
                         root = loader.load();
                         controller = loader.getController();

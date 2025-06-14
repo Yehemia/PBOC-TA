@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.collections.FXCollections?>
 <?import java.lang.String?>
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.BookingController" spacing="15" alignment="CENTER">
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.customer.BookingController" spacing="15" alignment="CENTER">
     <Label text="Form Pemesanan" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
     <Label text="Tanggal Check-in:" />
     <DatePicker fx:id="checkInPicker" />
@@ -18,8 +18,6 @@
         <items>
             <FXCollections fx:factory="observableArrayList">
                 <String fx:value="online" />
-                <String fx:value="cash" />
-                <String fx:value="pay_later" />
             </FXCollections>
         </items>
     </ComboBox>

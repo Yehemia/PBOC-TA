@@ -1,4 +1,4 @@
-package com.hotelapp.controller;
+package com.hotelapp.controller.customer;
 
 import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.model.Reservation;
@@ -39,7 +39,7 @@ public class BookingController {
 
     private void navigateToPayment(Reservation reservation) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/payment.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/payment.fxml"));
             Parent root = loader.load();
 
             PaymentController paymentController = loader.getController();
@@ -85,12 +85,13 @@ public class BookingController {
                 checkInDate,
                 checkOutDate,
                 paymentMethod,
+                "online",
                 "pending",
-                totalPrice
+                totalPrice,
+                currentUser.getName()
         );
 
-
-        boolean success = ReservationDAO.saveReservation(reservation);
+        boolean success = ReservationDAO.createReservation(reservation);
         if (success) {
             System.out.println("✅ Reservasi berhasil! Mengalihkan ke menu pembayaran...");
             navigateToPayment(reservation);

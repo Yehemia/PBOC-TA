@@ -6,12 +6,14 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<HBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.RoomCellController" spacing="10" alignment="CENTER_LEFT">
+<HBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.customer.RoomCellController" spacing="10" alignment="CENTER_LEFT">
     <ImageView fx:id="roomImage" fitWidth="100" fitHeight="80" />
     <VBox spacing="5">
         <Label fx:id="roomNumberLabel" style="-fx-font-weight: bold;" text="Nomor:" />
         <Label fx:id="roomTypeLabel" text="Tipe:" />
         <Label fx:id="priceLabel" text="Harga:" />
+        <!-- Tambahkan tombol di dalam VBox -->
+        <Button fx:id="detailButton" text="Lihat Detail" style="-fx-background-color: #17a2b8; -fx-text-fill: white;" />
         <Button fx:id="bookButton" text="Pesan Sekarang" style="-fx-background-color: #28a745; -fx-text-fill: white;" />
     </VBox>
 </HBox>

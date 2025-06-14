@@ -1,4 +1,4 @@
-package com.hotelapp.controller;
+package com.hotelapp.controller.customer;
 
 import com.hotelapp.model.Room;
 import com.hotelapp.model.User;
@@ -43,7 +43,7 @@ public class DashboardCustomerController {
     // Memuat konten dashboard (daftar kamar) dari FXML terpisah
     private void loadDashboardContent() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/dashboardContent.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/DashboardContent.fxml"));
             Parent dashboardContent = loader.load();
             // Dapatkan controller dari dashboardContent.fxml
             DashboardContentController contentController = loader.getController();
@@ -63,7 +63,7 @@ public class DashboardCustomerController {
     // Metode untuk memuat tampilan history booking (sesuaikan jika sudah ada FXML untuk History)
     private void loadHistoryContent() {
         try {
-            Parent historyContent = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/history.fxml"));
+            Parent historyContent = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/customer/history.fxml"));
             contentPane.getChildren().setAll(historyContent);
             AnchorPane.setTopAnchor(historyContent, 0.0);
             AnchorPane.setRightAnchor(historyContent, 0.0);
@@ -77,7 +77,7 @@ public class DashboardCustomerController {
     // Metode untuk memuat tampilan profil (sesuaikan jika sudah ada FXML untuk Profile)
     private void loadProfileContent() {
         try {
-            Parent profileContent = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/profile.fxml"));
+            Parent profileContent = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/customer/profile.fxml"));
             contentPane.getChildren().setAll(profileContent);
             AnchorPane.setTopAnchor(profileContent, 0.0);
             AnchorPane.setRightAnchor(profileContent, 0.0);
@@ -105,7 +105,7 @@ public class DashboardCustomerController {
     public void openBooking(Room selectedRoom) {
         try {
             System.out.println("✅ Navigasi ke booking.fxml dengan kamar: " + selectedRoom.getRoomNumber());
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/booking.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/booking.fxml"));
             Parent root = loader.load();
             BookingController bookingController = loader.getController();
             bookingController.setRoom(selectedRoom);

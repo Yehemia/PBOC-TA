@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.hotelapp.controller.resepsionis.CheckOutController">
+
+    <!-- Judul -->
+    <Label text="Daftar Tamu - Check-Out" layoutX="20" layoutY="20" style="-fx-font-size: 18px;"/>
+
+    <!-- Tabel Reservasi -->
+    <TableView fx:id="checkOutTable" layoutX="20" layoutY="60" prefWidth="760" prefHeight="350">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="nameColumn" text="Nama Tamu" prefWidth="200"/>
+            <TableColumn fx:id="roomColumn" text="Nomor Kamar" prefWidth="150"/>
+            <TableColumn fx:id="checkInTimeColumn" text="Waktu Check-In" prefWidth="150"/>
+            <TableColumn fx:id="statusColumn" text="Status" prefWidth="120"/>
+            <TableColumn fx:id="actionColumn" text="Aksi" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+    <!-- Input untuk Denda/Penalti -->
+    <HBox spacing="10" layoutX="20" layoutY="420">
+        <Label text="Denda (jika ada):"/>
+        <TextField fx:id="penaltyAmountField" promptText="Masukkan jumlah denda"/>
+        <Button text="Terapkan Denda" fx:id="applyPenaltyButton" onAction="#applyPenalty"/>
+    </HBox>
+
+    <!-- Tombol Refresh Data -->
+    <HBox spacing="10" layoutX="20" layoutY="460">
+        <Button text="Refresh" onAction="#refreshData"/>
+    </HBox>
+
+</AnchorPane>

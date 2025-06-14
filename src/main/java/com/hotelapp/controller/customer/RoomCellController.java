@@ -1,11 +1,15 @@
-package com.hotelapp.controller;
+package com.hotelapp.controller.customer;
 
 import com.hotelapp.model.Room;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
 
 import java.net.URL;
 
@@ -56,6 +60,11 @@ public class RoomCellController {
             loadDefaultImage();
         }
 
+        detailButton.setOnAction(event -> {
+            System.out.println("Membuka detail kamar untuk: " + room.getRoomNumber());
+            openRoomDetail(room);
+        });
+
         bookButton.setOnAction(event -> {
             System.out.println("✅ Tombol 'Pesan Sekarang' ditekan!");
             if (dashboardController != null) {
@@ -66,7 +75,24 @@ public class RoomCellController {
             }
         });
     }
+    private void openRoomDetail(Room room) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/RoomDetail.fxml"));
+            Parent detailRoot = loader.load();
+            RoomDetailController detailController = loader.getController();
+            detailController.setRoom(room);
+            detailController.setDashboardController(this.dashboardController);
+            Stage stage = new Stage();
+            stage.setScene(new Scene(detailRoot));
+            stage.setTitle("Detail Kamar");
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+        } catch (Exception e) {
+            System.err.println("Gagal memuat detail kamar: " + e.getMessage());
+        }
+    }
 
+    @FXML private Button detailButton;
     private void loadDefaultImage() {
         try {
             String defaultPath = "/com/hotelapp/images/default_room.jpeg";

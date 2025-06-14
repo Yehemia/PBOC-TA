@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.customer.ProfileController">
+    <VBox spacing="10" layoutX="20" layoutY="20">
+        <Label text="Profil Saya" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+        <Label text="Nama:"/>
+        <TextField fx:id="nameField" prefWidth="300"/>
+
+        <Label text="Email:"/>
+        <TextField fx:id="emailField" prefWidth="300"/>
+
+        <Label text="Username:"/>
+        <TextField fx:id="usernameField" prefWidth="300"/>
+
+        <Button fx:id="updateButton" text="Perbarui Profile" style="-fx-background-color: #007bff; -fx-text-fill: white;"/>
+    </VBox>
+</AnchorPane>

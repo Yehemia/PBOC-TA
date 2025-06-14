@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.HistoryBookingController">
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.customer.HistoryBookingController">
     <center>
         <TableView fx:id="historyTable">
             <columns>

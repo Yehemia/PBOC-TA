@@ -1,4 +1,4 @@
-package com.hotelapp.controller;
+package com.hotelapp.controller.customer;
 
 import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.model.Reservation;

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:id="mainBorderPane"
-            fx:controller="com.hotelapp.controller.DashboardCustomerController">
+            fx:controller="com.hotelapp.controller.customer.DashboardCustomerController">
     <top>
         <Label fx:id="welcomeLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Selamat Datang, Customer" />
     </top>
