@@ -20,7 +20,6 @@
         </columns>
     </TableView>
 
-    <!-- Tombol Refresh Data -->
     <HBox spacing="10" layoutX="20" layoutY="500">
         <Button text="Refresh" onAction="#refreshData"/>
     </HBox>

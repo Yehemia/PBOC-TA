@@ -4,8 +4,7 @@ import com.hotelapp.model.Reservation;
 import com.hotelapp.util.Database;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ReservationDAO {
 
@@ -262,5 +261,71 @@ public class ReservationDAO {
                 rs.getString("payment_status"),
                 rs.getString("guest_name")
         );
+    }
+
+    public static double getTotalRevenue() {
+        String sql = "SELECT SUM(total_price) FROM reservations WHERE payment_status = 'paid'";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getDouble(1) : 0.0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    public static int getTotalReservations() {
+        String sql = "SELECT COUNT(*) FROM reservations";
+        return getCount(sql); // Kita bisa pakai ulang metode getCount yang sudah ada
+    }
+    // Tambahkan metode ini di dalam kelas ReservationDAO
+    public static Map<String, Integer> getRoomTypeReservationCount() {
+        Map<String, Integer> roomTypeCounts = new HashMap<>();
+        // Query ini menggabungkan tabel reservations dan rooms, lalu menghitung reservasi untuk setiap room_type
+        String sql = "SELECT r.room_type, COUNT(res.id) AS reservation_count " +
+                "FROM reservations res " +
+                "JOIN rooms r ON res.room_id = r.id " +
+                "GROUP BY r.room_type";
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                String roomType = rs.getString("room_type");
+                int count = rs.getInt("reservation_count");
+                roomTypeCounts.put(roomType, count);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return roomTypeCounts;
+    }
+
+    public static Map<String, Double> getDailyRevenueTrend(int limit) {
+        // LinkedHashMap digunakan agar urutan data berdasarkan tanggal tetap terjaga
+        Map<String, Double> dailyRevenue = new LinkedHashMap<>();
+        // Query ini menghitung total pendapatan per hari untuk 30 hari terakhir
+        String sql = "SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS day, SUM(total_price) AS daily_total " +
+                "FROM reservations " +
+                "WHERE payment_status = 'paid' " +
+                "GROUP BY DATE(created_at) " +
+                "ORDER BY DATE(created_at) DESC " +
+                "LIMIT ?";
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, limit); // set limit, misal 30 hari terakhir
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                dailyRevenue.put(rs.getString("day"), rs.getDouble("daily_total"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dailyRevenue;
     }
 }

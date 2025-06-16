@@ -65,7 +65,7 @@ public class LoginController {
             String fxmlFile = switch (role.toLowerCase()) {
                 case "customer" -> "/com/hotelapp/fxml/customer/dashboard_customer.fxml";
                 case "receptionist" -> "/com/hotelapp/fxml/resepsionis/ReceptionistDashboard.fxml";
-                case "admin" -> "/com/hotelapp/fxml/dashboard_admin.fxml";
+                case "admin" -> "/com/hotelapp/fxml/admin/AdminDashboard.fxml";
                 default -> null;
             };
 
@@ -73,7 +73,9 @@ public class LoginController {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
                 Parent root = loader.load();
                 Stage stage = (Stage) usernameField.getScene().getWindow();
-                stage.setScene(new Scene(root, stage.getWidth(), stage.getHeight()));
+                Scene scene = new Scene(root);
+                stage.setScene(scene);
+                stage.centerOnScreen();
                 stage.show();
             } else {
                 System.out.println("Role tidak dikenali!");

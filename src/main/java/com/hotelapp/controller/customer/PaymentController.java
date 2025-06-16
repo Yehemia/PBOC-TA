@@ -34,7 +34,6 @@ public class PaymentController {
 
         totalPriceLabel.setText("Total: Rp" + reservation.getTotalPrice());
 
-        // ✅ Buat QR Code simulasi berdasarkan ID reservasi & total harga
         Image qrImage = QRCodeGenerator.generateQRCode("Booking ID: " + reservation.getId() + " | Total: Rp" + reservation.getTotalPrice(), 200, 200);
         qrImageView.setImage(qrImage);
     }
