@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane styleClass="content-pane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.admin.DashboardContentController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <top>
+        <VBox spacing="20.0" BorderPane.alignment="CENTER">
+            <children>
+                <HBox alignment="CENTER_LEFT">
+                    <children>
+                        <VBox HBox.hgrow="ALWAYS">
+                            <children>
+                                <Label style="-fx-font-size: 28px; -fx-font-weight: 700; -fx-text-fill: -fx-text-primary;" text="Hi, Welcome back!" />
+                                <Label text="Admin Dashboard" />
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+                <GridPane hgap="20.0">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <children>
+                        <VBox spacing="10.0" styleClass="stat-card">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <HBox alignment="CENTER" styleClass="stat-icon-bg-purple">
+                                            <children>
+                                                <FontIcon iconLiteral="fa-book" iconSize="20" style="-fx-icon-color: -fx-accent-purple;" />
+                                            </children>
+                                        </HBox>
+                                        <Label styleClass="stat-title" text="Total Booking" />
+                                    </children>
+                                </HBox>
+                                <Label fx:id="totalReservationsLabel" styleClass="stat-value" text="0" />
+                                <ProgressBar fx:id="totalReservationsProgress" maxWidth="1.7976931348623157E308" progress="0.0" style="-fx-accent: -fx-accent-purple;" styleClass="stat-progress-bar" />
+                            </children>
+                        </VBox>
+                        <VBox spacing="10.0" styleClass="stat-card" GridPane.columnIndex="1">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <HBox alignment="CENTER" styleClass="stat-icon-bg-orange">
+                                            <children>
+                                                <FontIcon iconLiteral="fa-bed" iconSize="20" style="-fx-icon-color: -fx-accent-orange;" />
+                                            </children>
+                                        </HBox>
+                                        <Label styleClass="stat-title" text="Rooms Available" />
+                                    </children>
+                                </HBox>
+                                <Label fx:id="totalRoomsLabel" styleClass="stat-value" text="0" />
+                                <ProgressBar fx:id="roomsAvailableProgress" maxWidth="1.7976931348623157E308" progress="0.0" style="-fx-accent: -fx-accent-orange;" styleClass="stat-progress-bar" />
+                            </children>
+                        </VBox>
+                        <VBox spacing="10.0" styleClass="stat-card" GridPane.columnIndex="2">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <HBox alignment="CENTER" styleClass="stat-icon-bg-green">
+                                            <children>
+                                                <FontIcon iconLiteral="fa-users" iconSize="20" style="-fx-icon-color: -fx-accent-green;" />
+                                            </children>
+                                        </HBox>
+                                        <Label styleClass="stat-title" text="New Customers" />
+                                    </children>
+                                </HBox>
+                                <Label fx:id="totalCustomersLabel" styleClass="stat-value" text="0" />
+                                <ProgressBar fx:id="newCustomersProgress" maxWidth="1.7976931348623157E308" progress="0.0" style="-fx-accent: -fx-accent-green;" styleClass="stat-progress-bar" />
+                            </children>
+                        </VBox>
+                        <VBox spacing="10.0" styleClass="stat-card" GridPane.columnIndex="3">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <HBox alignment="CENTER" styleClass="stat-icon-bg-blue">
+                                            <children>
+                                                <FontIcon iconLiteral="fa-dollar" iconSize="20" style="-fx-icon-color: -fx-accent-blue;" />
+                                            </children>
+                                        </HBox>
+                                        <Label styleClass="stat-title" text="Total Revenue" />
+                                    </children>
+                                </HBox>
+                                <Label fx:id="totalRevenueLabel" styleClass="stat-value" text="Rp0" />
+                                <ProgressBar fx:id="totalRevenueProgress" maxWidth="1.7976931348623157E308" progress="0.0" style="-fx-accent: -fx-accent-blue;" styleClass="stat-progress-bar" />
+                            </children>
+                        </VBox>
+                    </children>
+                </GridPane>
+            </children>
+            <BorderPane.margin>
+                <Insets bottom="20.0" />
+            </BorderPane.margin>
+        </VBox>
+    </top>
+    <center>
+        <GridPane hgap="20.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" percentWidth="65.0" />
+                <ColumnConstraints hgrow="SOMETIMES" percentWidth="35.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="350.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+            <children>
+                <VBox styleClass="chart-card">
+                    <children>
+                        <Label styleClass="chart-title" text="Tren Pendapatan" />
+                        <LineChart fx:id="revenueChart" VBox.vgrow="ALWAYS">
+                            <xAxis>
+                                <CategoryAxis side="BOTTOM" tickLabelRotation="-45" />
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis side="LEFT" />
+                            </yAxis>
+                        </LineChart>
+                    </children>
+                </VBox>
+                <VBox styleClass="chart-card" GridPane.columnIndex="1">
+                    <children>
+                        <Label styleClass="chart-title" text="Room Booking Chart" />
+                        <PieChart fx:id="roomTypePieChart" VBox.vgrow="ALWAYS" />
+                        <VBox fx:id="legendContainer" spacing="5.0">
+                            <padding>
+                                <Insets top="15.0" />
+                            </padding>
+                        </VBox>
+                    </children>
+                </VBox>
+            </children>
+        </GridPane>
+    </center>
+</BorderPane>

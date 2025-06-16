@@ -1,0 +1,313 @@
+/* --- Style Sidebar --- */
+.sidebar {
+    -fx-background-color: -fx-card-bg; /* Warna sama dengan kartu agar serasi */
+}
+
+.sidebar-title {
+    -fx-font-family: "Poppins", sans-serif;
+    -fx-font-weight: 700; /* Bold */
+    -fx-text-fill: -fx-text-primary;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-family: "Poppins", sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-padding: 0 0 0 30px; /* Padding kiri untuk teks */
+    -fx-cursor: hand;
+    -fx-background-radius: 0; /* Pastikan tidak ada sudut tumpul */
+}
+
+.nav-button:hover {
+    -fx-background-color: #3A3F58;
+    -fx-text-fill: white;
+}
+
+.nav-button-selected {
+    -fx-background-color: -fx-main-bg;
+    -fx-text-fill: white;
+    -fx-border-width: 0 0 0 4px; /* Garis penanda di kiri */
+    -fx-border-color: -fx-accent-purple;
+}
+
+.nav-button .ikonli-font-icon {
+    -fx-icon-color: -fx-text-secondary;
+    -fx-icon-size: 18;
+}
+
+.nav-button:hover .ikonli-font-icon,
+.nav-button-selected .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+.nav-button-logout {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-family: "Poppins", sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-cursor: hand;
+}
+
+.nav-button-logout:hover {
+    -fx-background-color: #D32F2F;
+    -fx-text-fill: white;
+}
+
+.nav-button-logout .ikonli-font-icon {
+     -fx-icon-color: -fx-text-secondary;
+}
+.nav-button-logout:hover .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+/* --- Definisi Variabel Warna (Dark Mode) --- */
+.root {
+    -fx-main-bg: #1E2139;
+    -fx-card-bg: #252945;
+    -fx-text-primary: #FFFFFF;
+    -fx-text-secondary: #DFDCEC;
+    -fx-accent-purple: #A455F1;
+    -fx-accent-orange: #F9A458;
+    -fx-accent-green: #34CAA5;
+    -fx-accent-blue: #5499C7;
+}
+
+/* --- Style Dasar --- */
+.content-pane {
+    -fx-background-color: -fx-main-bg;
+}
+
+.label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-family: "Poppins", sans-serif;
+}
+
+/* --- Style Kartu Statistik --- */
+.stat-card {
+    -fx-padding: 20px;
+    -fx-background-color: -fx-card-bg;
+    -fx-background-radius: 14px;
+    -fx-border-color: #3A3F58;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+}
+
+.stat-icon-bg {
+    -fx-background-radius: 50%;
+    -fx-padding: 10px;
+}
+
+.stat-icon-bg-purple { -fx-background-color: #352A4E; }
+.stat-icon-bg-orange { -fx-background-color: #4A3A4E; }
+.stat-icon-bg-green { -fx-background-color: #2D414D; }
+.stat-icon-bg-blue { -fx-background-color: #323E58; }
+
+.stat-title {
+    -fx-font-size: 18px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.stat-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700; /* Bold */
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* --- Style Progress Bar --- */
+.stat-progress-bar {
+    -fx-pref-height: 4px;
+    -fx-accent: -fx-accent-purple;
+}
+.stat-progress-bar .bar {
+    -fx-background-color: linear-gradient(to right, -fx-accent, derive(-fx-accent, 50%));
+    -fx-background-insets: 0;
+    -fx-background-radius: 2px;
+}
+.stat-progress-bar .track {
+    -fx-background-color: #3A3F58;
+    -fx-background-insets: 0;
+    -fx-background-radius: 2px;
+}
+
+/* --- Style Grafik --- */
+.chart-card {
+    -fx-padding: 20px;
+    -fx-background-color: -fx-card-bg;
+    -fx-background-radius: 14px;
+    -fx-border-color: #3A3F58;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+}
+
+.chart-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600; /* SemiBold */
+    -fx-text-fill: -fx-text-primary;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+.axis {
+    -fx-tick-label-fill: -fx-text-secondary;
+    -fx-tick-mark-visible: false;
+    -fx-border-color: transparent;
+}
+.chart-vertical-grid-lines, .chart-horizontal-grid-lines {
+    -fx-stroke: #3A3F58;
+    -fx-stroke-dash-array: 2 4;
+}
+
+/* Warna untuk Line Chart */
+.default-color0.chart-series-line { -fx-stroke: #5499C7; }
+.default-color1.chart-series-line { -fx-stroke: #F9A458; }
+
+/* Warna untuk Pie Chart / Doughnut */
+.default-color0.chart-pie { -fx-pie-color: #5499C7; } /* Apartments -> Biru */
+.default-color1.chart-pie { -fx-pie-color: #A455F1; } /* Executive -> Ungu */
+.default-color2.chart-pie { -fx-pie-color: #F9A458; } /* King -> Oranye */
+.default-color3.chart-pie { -fx-pie-color: #E74C3C; } /* Double -> Merah */
+.default-color4.chart-pie { -fx-pie-color: #34CAA5; } /* Single -> Hijau */
+
+.chart-pie-label-line {
+    -fx-stroke: -fx-text-secondary;
+}
+.chart-pie-label {
+    -fx-fill: -fx-text-secondary;
+}
+.doughnut-hole {
+    -fx-fill: -fx-card-bg; /* Warna lubang sama dengan background kartu */
+}
+
+.add-button {
+    -fx-background-color: -fx-accent-green;
+    -fx-text-fill: white;
+    -fx-font-weight: 700;
+}
+.add-button:hover {
+    -fx-background-color: derive(-fx-accent-green, 20%);
+}
+
+.cancel-button {
+    -fx-background-color: #4A3F58;
+    -fx-text-fill: -fx-text-secondary;
+}
+.cancel-button:hover {
+    -fx-background-color: #6A5F78;
+}
+
+.form-input {
+    -fx-background-color: -fx-main-bg;
+    -fx-text-fill: -fx-text-primary;
+    -fx-border-color: #3A3F58;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.edit-button {
+    -fx-background-color: -fx-accent-orange;
+    -fx-text-fill: white;
+}
+.edit-button .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+.delete-button {
+    -fx-background-color: #D32F2F; /* Merah */
+    -fx-text-fill: white;
+}
+.delete-button .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+/* --- Style untuk TableView (Versi Ditingkatkan) --- */
+.table-view {
+    -fx-background-color: -fx-card-bg;
+    -fx-border-color: transparent;
+    -fx-padding: 1px; /* Padding kecil untuk estetika */
+    -fx-background-radius: 14px;
+}
+
+/* Header Tabel */
+.table-view .column-header-background {
+    -fx-background-color: -fx-card-bg;
+    -fx-background-radius: 14px 14px 0 0;
+    -fx-background-insets: 0;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
+    -fx-padding: 15px; /* Padding seragam */
+}
+
+/* Baris Tabel */
+.table-view .table-row-cell {
+    /* Gunakan satu warna solid untuk semua baris */
+    -fx-background-color: -fx-card-bg;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: -fx-main-bg;
+}
+
+/* Dihapus: style untuk baris ganjil agar tidak belang */
+/* .table-view .table-row-cell:odd { ... } */
+
+/* Sel Tabel */
+.table-view .table-cell {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 13px;
+    -fx-alignment: CENTER_LEFT;
+    /* Disesuaikan: padding agar lebih seimbang */
+    -fx-padding: 15px;
+    /* Ditambahkan: border bawah untuk membuat garis pemisah antar baris */
+    -fx-border-color: #3A3F58;
+    -fx-border-width: 0 0 1 0; /* Hanya border bawah */
+}
+
+/* Menghilangkan border header default */
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+/* Style untuk scroll-bar agar sesuai tema (opsional tapi bagus) */
+.table-view .scroll-bar:vertical, .table-view .scroll-bar:horizontal {
+    -fx-background-color: -fx-card-bg;
+}
+.table-view .scroll-bar .thumb {
+    -fx-background-color: #3A3F58;
+    -fx-background-radius: 10px;
+}
+.table-view .scroll-bar .track {
+    -fx-background-color: -fx-card-bg;
+}
+
+/* --- Style untuk Legenda Kustom --- */
+.legend-item {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+}
+
+.legend-dot {
+    -fx-stroke: transparent;
+}
+
+.legend-name {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.legend-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600; /* SemiBold */
+    -fx-text-fill: -fx-text-primary;
+}
+
