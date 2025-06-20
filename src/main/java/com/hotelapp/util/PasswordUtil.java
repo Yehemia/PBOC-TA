@@ -1,29 +1,16 @@
 package com.hotelapp.util;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
+import org.mindrot.jbcrypt.BCrypt;
 public class PasswordUtil {
 
-    // Hash SHA-256
-    public static String hashPassword(String password) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(password.getBytes());
-            // Konversi bytes ke Hex String
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static String hashPassword(String plainTextPassword) {
+        return BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
     }
 
-    public static boolean verifyPassword(String inputPassword, String storedHash) {
-        String inputHash = hashPassword(inputPassword);
-        return inputHash != null && inputHash.equals(storedHash);
+    public static boolean verifyPassword(String plainTextPassword, String hashedPassword) {
+        if (hashedPassword == null || !hashedPassword.startsWith("$2a$")) {
+            return false;
+        }
+        return BCrypt.checkpw(plainTextPassword, hashedPassword);
     }
 }
