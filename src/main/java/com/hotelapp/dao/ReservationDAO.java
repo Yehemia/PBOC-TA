@@ -8,18 +8,12 @@ import java.util.*;
 
 public class ReservationDAO {
 
-    public static boolean createReservation(Reservation reservation) {
+    public static boolean createReservation(Reservation reservation, Connection con) throws SQLException {
         String sql = "INSERT INTO reservations (user_id, room_id, check_in, check_out, payment_method, booking_type, status, total_price, created_at, guest_name) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            // Jika offline, user_id bisa diset null (asumsikan reservation.getUserId() mengembalikan 0 untuk offline)
-            if (reservation.getUserId() == 0) {
-                ps.setNull(1, java.sql.Types.INTEGER);
-            } else {
-                ps.setInt(1, reservation.getUserId());
-            }
+        try (PreparedStatement ps = con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, reservation.getUserId());
             ps.setInt(2, reservation.getRoomId());
             ps.setDate(3, java.sql.Date.valueOf(reservation.getCheckIn()));
             ps.setDate(4, java.sql.Date.valueOf(reservation.getCheckOut()));
@@ -33,24 +27,24 @@ public class ReservationDAO {
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        int id = generatedKeys.getInt(1);
-                        reservation.setId(id);
-                        System.out.println("✅ Reservasi tersimpan dengan ID: " + id);
+                        reservation.setId(generatedKeys.getInt(1));
                     }
                 }
                 return true;
-            } else {
-                return false;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
     public static List<Reservation> getReservationsByUserId(int userId) {
         List<Reservation> reservations = new ArrayList<>();
-        String sql = "SELECT id, user_id, room_id, check_in, check_out, payment_method, status, total_price FROM reservations WHERE user_id = ?";
+        String sql = "SELECT res.id, res.check_in, res.check_out, res.status, " +
+                "r.room_number, rt.name as room_type_name " +
+                "FROM reservations res " +
+                "JOIN rooms r ON res.room_id = r.id " +
+                "JOIN room_types rt ON r.room_type_id = rt.id " +
+                "WHERE res.user_id = ? ORDER BY res.created_at DESC";
+
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -58,20 +52,17 @@ public class ReservationDAO {
             while (rs.next()) {
                 Reservation reservation = new Reservation(
                         rs.getInt("id"),
-                        rs.getInt("user_id"),
-                        rs.getInt("room_id"),
                         rs.getDate("check_in").toLocalDate(),
                         rs.getDate("check_out").toLocalDate(),
-                        rs.getString("payment_method"),
                         rs.getString("status"),
-                        rs.getDouble("total_price")
+                        rs.getString("room_type_name"),
+                        rs.getInt("room_number")
                 );
                 reservations.add(reservation);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return reservations;
     }
 
@@ -106,36 +97,12 @@ public class ReservationDAO {
         return list;
     }
 
-    public static List<Reservation> searchReservations(String keyword) {
-        List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT * FROM reservations WHERE user_id LIKE ? OR id LIKE ?";
-        // Jika kamu memiliki kolom nama tamu, ganti query sesuai
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            String searchPattern = "%" + keyword + "%";
-            ps.setString(1, searchPattern);
-            ps.setString(2, searchPattern);  // Sesuaikan jika ingin mencari berdasarkan ID atau kolom lainnya
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(mapReservation(rs));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public static boolean processCheckIn(int reservationId) {
+    public static boolean processCheckIn(int reservationId, Connection conn) throws SQLException {
         String sql = "UPDATE reservations SET status = 'checked_in', check_in_time = NOW() WHERE id = ?";
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, reservationId);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return false;
     }
 
     public static int getJumlahReservasiHariIni() {
@@ -194,54 +161,21 @@ public class ReservationDAO {
         return list;
     }
 
-    /**
-     * Proses check-out secara langsung tanpa penalty.
-     * Perbaharui status menjadi 'checked_out' dan catat waktu check_out.
-     */
-    public static boolean processCheckOut(int reservationId) {
-        String sql = "UPDATE reservations SET status = 'checked_out', check_out_time = NOW(), penalty_status = 'paid' WHERE id = ?";
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+    public static boolean processCheckOut(int reservationId, Connection conn) throws SQLException {
+        String sql = "UPDATE reservations SET status = 'checked_out', check_out_time = NOW() WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, reservationId);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return false;
     }
 
-    /**
-     * Mengaplikasikan penalty ke dalam reservasi dengan menambahkan penalty fee ke total_price
-     * dan mengubah penalty_status menjadi 'pending'.
-     */
-    public static boolean applyPenalty(int reservationId, double penaltyAmount) {
-        String sql = "UPDATE reservations SET penalty_status = 'pending', total_price = total_price + ? WHERE id = ?";
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setDouble(1, penaltyAmount);
+    public static boolean updatePenaltyStatus(int reservationId, String status, Connection conn) throws SQLException {
+        String sql = "UPDATE reservations SET penalty_status = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
             ps.setInt(2, reservationId);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return false;
-    }
-
-    /**
-     * Menambahkan entri penalty ke tabel penalties (jika Anda menggunakan tabel penalties terpisah).
-     */
-    public static boolean addPenalty(int reservationId, String reason, double amount) {
-        String sql = "INSERT INTO penalties (reservation_id, reason, amount, penalty_status, created_at) VALUES (?, ?, ?, 'pending', NOW())";
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, reservationId);
-            ps.setString(2, reason);
-            ps.setDouble(3, amount);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     private static Reservation mapReservation(ResultSet rs) throws SQLException {
@@ -277,23 +211,22 @@ public class ReservationDAO {
 
     public static int getTotalReservations() {
         String sql = "SELECT COUNT(*) FROM reservations";
-        return getCount(sql); // Kita bisa pakai ulang metode getCount yang sudah ada
+        return getCount(sql);
     }
-    // Tambahkan metode ini di dalam kelas ReservationDAO
+
     public static Map<String, Integer> getRoomTypeReservationCount() {
         Map<String, Integer> roomTypeCounts = new HashMap<>();
-        // Query ini menggabungkan tabel reservations dan rooms, lalu menghitung reservasi untuk setiap room_type
-        String sql = "SELECT r.room_type, COUNT(res.id) AS reservation_count " +
+        String sql = "SELECT r.room_type_id, COUNT(res.id) AS reservation_count " +
                 "FROM reservations res " +
                 "JOIN rooms r ON res.room_id = r.id " +
-                "GROUP BY r.room_type";
+                "GROUP BY r.room_type_id";
 
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                String roomType = rs.getString("room_type");
+                String roomType = rs.getString("room_type_id");
                 int count = rs.getInt("reservation_count");
                 roomTypeCounts.put(roomType, count);
             }
@@ -304,9 +237,7 @@ public class ReservationDAO {
     }
 
     public static Map<String, Double> getDailyRevenueTrend(int limit) {
-        // LinkedHashMap digunakan agar urutan data berdasarkan tanggal tetap terjaga
         Map<String, Double> dailyRevenue = new LinkedHashMap<>();
-        // Query ini menghitung total pendapatan per hari untuk 30 hari terakhir
         String sql = "SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS day, SUM(total_price) AS daily_total " +
                 "FROM reservations " +
                 "WHERE payment_status = 'paid' " +
@@ -317,7 +248,7 @@ public class ReservationDAO {
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setInt(1, limit); // set limit, misal 30 hari terakhir
+            ps.setInt(1, limit);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -327,5 +258,18 @@ public class ReservationDAO {
             e.printStackTrace();
         }
         return dailyRevenue;
+    }
+
+    public static Reservation getReservationById(int reservationId, Connection conn) throws SQLException {
+        String sql = "SELECT * FROM reservations WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, reservationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapReservation(rs);
+                }
+            }
+        }
+        return null;
     }
 }

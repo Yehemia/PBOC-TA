@@ -20,6 +20,9 @@ public class Reservation {
     private String penaltyStatus;
     private String paymentStatus;
     private String guestName;
+    private String roomTypeName;
+    private int roomNumber;
+
 
     public Reservation(int id, int userId, int roomId, LocalDate checkIn, LocalDate checkOut, LocalDateTime checkInTime, LocalDateTime checkOutTime, String paymentMethod, String bookingType, String status, double totalPrice, String penaltyStatus, String paymentStatus, String guestName) {
         this.id = id;
@@ -77,7 +80,14 @@ public class Reservation {
         this.totalPrice = totalPrice;
     }
 
-    // Getter dan setter untuk semua properti
+    public Reservation(int id, LocalDate checkIn, LocalDate checkOut, String status, String roomTypeName, int roomNumber) {
+        this.id = id;
+        this.checkIn = checkIn;
+        this.checkOut = checkOut;
+        this.status = status;
+        this.roomTypeName = roomTypeName;
+        this.roomNumber = roomNumber;
+    }
     public int getId() {
         return id;
     }
@@ -186,27 +196,22 @@ public class Reservation {
         this.guestName = guestName;
     }
 
-    // Metode tambahan untuk modul penalty
-
-    /**
-     * Mengembalikan waktu check-out standar (expected) yaitu tanggal checkOut pada pukul 12:00 (NOON).
-     */
     public LocalDateTime getExpectedCheckOutTime() {
         return this.checkOut.atTime(LocalTime.NOON);
     }
 
-    /**
-     * Menghitung penalty berdasarkan keterlambatan check-out.
-     * Jika checkOutTime (aktual) terlambat dari waktu check-out yang diharapkan,
-     * penalty dihitung sebesar Rp50.000 per jam keterlambatan.
-     */
+    public String getRoomTypeName() { return roomTypeName; }
+    public void setRoomTypeName(String roomTypeName) { this.roomTypeName = roomTypeName; }
+    public int getRoomNumber() { return roomNumber; }
+    public void setRoomNumber(int roomNumber) { this.roomNumber = roomNumber; }
+
     public double calculatePenalty() {
         double penalty = 0;
         if (this.checkOutTime != null) {
             LocalDateTime expectedTime = getExpectedCheckOutTime();
             if (this.checkOutTime.isAfter(expectedTime)) {
                 long hoursLate = ChronoUnit.HOURS.between(expectedTime, this.checkOutTime);
-                penalty = hoursLate * 50000; // Rp50.000 per jam
+                penalty = hoursLate * 50000;
             }
         }
         return penalty;
