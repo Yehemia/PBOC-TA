@@ -32,7 +32,6 @@ public class UserDAO {
         return false;
     }
 
-    // Ambil data user berdasarkan username (digunakan untuk verifikasi registrasi)
     public static User getUserByUsername(String username) {
         String query = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = Database.getConnection();
@@ -41,7 +40,6 @@ public class UserDAO {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                // Mengembalikan objek User tanpa memasukkan password, agar lebih aman.
                 return new User(
                         rs.getInt("id"),
                         rs.getString("username"),
@@ -93,7 +91,6 @@ public class UserDAO {
 
     public static List<User> searchUsers(String keyword) {
         List<User> userList = new ArrayList<>();
-        // Query untuk mencari di beberapa kolom sekaligus: name, username, dan email
         String sql = "SELECT id, username, name, email, role FROM users WHERE name LIKE ? OR username LIKE ? OR email LIKE ?";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -127,16 +124,55 @@ public class UserDAO {
 
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
-            if (rs.next() && PasswordUtil.verifyPassword(password, rs.getString("password"))) {
-                return new User(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        rs.getString("name"),
-                        rs.getString("email"),
-                        rs.getString("role")
-                );
+            if (rs.next()) {
+                String storedHash = rs.getString("password");
+                int userId = rs.getInt("id");
+                if (PasswordUtil.verifyPassword(password, storedHash)) {
+                    return new User(
+                            userId,
+                            rs.getString("username"),
+                            rs.getString("name"),
+                            rs.getString("email"),
+                            rs.getString("role")
+                    );
+                } else {
+                    String inputHashSha256 = hashSha256(password);
+
+                    if (inputHashSha256 != null && inputHashSha256.equals(storedHash)) {
+                        System.out.println("Password lama terdeteksi untuk user ID: " + userId + ". Meng-upgrade hash...");
+                        String newHashedPassword = PasswordUtil.hashPassword(password);
+                        String updateQuery = "UPDATE users SET password = ? WHERE id = ?";
+                        try (PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
+                            updateStmt.setString(1, newHashedPassword);
+                            updateStmt.setInt(2, userId);
+                            updateStmt.executeUpdate();
+                        }
+                        return new User(
+                                userId,
+                                rs.getString("username"),
+                                rs.getString("name"),
+                                rs.getString("email"),
+                                rs.getString("role")
+                        );
+                    }
+                }
             }
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static String hashSha256(String password) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return null;
@@ -178,7 +214,6 @@ public class UserDAO {
     }
 
     public static boolean updateUser(User user) {
-        // Query ini tidak mengupdate password. Password diubah melalui mekanisme lain.
         String sql = "UPDATE users SET username = ?, name = ?, email = ?, role = ? WHERE id = ?";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
