@@ -4,18 +4,23 @@ import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.model.Reservation;
 import com.hotelapp.model.Room;
 import com.hotelapp.model.User;
+import com.hotelapp.service.BookingException;
+import com.hotelapp.service.ReservationService;
+import com.hotelapp.util.AlertHelper;
 import com.hotelapp.util.Session;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Button;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
+import net.synedra.validatorfx.Validator;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
@@ -25,16 +30,45 @@ public class BookingController {
     @FXML private DatePicker checkOutPicker;
     @FXML private ComboBox<String> paymentMethodComboBox;
     @FXML private Button confirmBookingButton;
-
     private Room selectedRoom;
+    private final Validator validator = new Validator();
+    private ReservationService reservationService = new ReservationService();
+    @FXML private Label roomInfoLabel;
 
-    public void setRoom(Room room) {
-        this.selectedRoom = room;
-    }
+
+
 
     @FXML
     public void initialize() {
+        paymentMethodComboBox.setItems(FXCollections.observableArrayList("online", "pay_later"));
         confirmBookingButton.setOnAction(event -> processBooking());
+        setupValidation();
+    }
+
+    public void setRoom(Room room) {
+        this.selectedRoom = room;
+        roomInfoLabel.setText("untuk Kamar " + room.getRoomType().getName() + " - " + room.getRoomNumber());
+    }
+
+    private void setupValidation() {
+        BooleanBinding isFormInvalid = Bindings.createBooleanBinding(() -> {
+                    LocalDate checkIn = checkInPicker.getValue();
+                    LocalDate checkOut = checkOutPicker.getValue();
+                    String paymentMethod = paymentMethodComboBox.getValue();
+
+                    if (checkIn == null) return true;
+                    if (checkOut == null) return true;
+                    if (paymentMethod == null) return true;
+                    if (!checkOut.isAfter(checkIn)) return true;
+                    return false;
+
+                },
+
+                checkInPicker.valueProperty(),
+                checkOutPicker.valueProperty(),
+                paymentMethodComboBox.valueProperty());
+
+        confirmBookingButton.disableProperty().bind(isFormInvalid);
     }
 
     private void navigateToPayment(Reservation reservation) {
@@ -43,7 +77,7 @@ public class BookingController {
             Parent root = loader.load();
 
             PaymentController paymentController = loader.getController();
-            paymentController.setReservation(reservation); // Kirim data reservasi ke halaman pembayaran
+            paymentController.setReservation(reservation);
 
             Stage stage = (Stage) confirmBookingButton.getScene().getWindow();
             stage.setScene(new Scene(root));
@@ -53,57 +87,27 @@ public class BookingController {
         }
     }
 
-    private void processBooking() {
+    public void processBooking() {
         LocalDate checkInDate = checkInPicker.getValue();
         LocalDate checkOutDate = checkOutPicker.getValue();
         String paymentMethod = paymentMethodComboBox.getValue();
-
-        if (checkInDate == null || checkOutDate == null || paymentMethod == null) {
-            showAlert("Error", "Harap isi semua field sebelum melanjutkan.");
-            return;
-        }
-
-        if (checkOutDate.isBefore(checkInDate)) {
-            showAlert("Error", "Tanggal check-out harus lebih lambat dari check-in.");
-            return;
-        }
-
         User currentUser = Session.getInstance().getCurrentUser();
         if (currentUser == null) {
-            showAlert("Error", "Anda harus login untuk melakukan pemesanan.");
+            AlertHelper.showError("Login Dibutuhkan", "Anda harus login untuk melakukan pemesanan.");
             return;
         }
 
-        // ✅ Hitung jumlah malam & total harga
-        long nights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
-        double totalPrice = selectedRoom.getPrice() * nights;
-
-        // Buat objek reservasi dengan total harga yang diperhitungkan
-        Reservation reservation = new Reservation(
-                currentUser.getId(),
-                selectedRoom.getId(),
-                checkInDate,
-                checkOutDate,
-                paymentMethod,
-                "online",
-                "pending",
-                totalPrice,
-                currentUser.getName()
-        );
-
-        boolean success = ReservationDAO.createReservation(reservation);
-        if (success) {
-            System.out.println("✅ Reservasi berhasil! Mengalihkan ke menu pembayaran...");
-            navigateToPayment(reservation);
-        } else {
-            showAlert("Error", "Terjadi kesalahan saat menyimpan pemesanan.");
+        try {
+            Reservation newReservation = reservationService.createBooking(
+                    currentUser, selectedRoom, checkInPicker.getValue(),
+                    checkOutPicker.getValue(), paymentMethodComboBox.getValue()
+            );
+            navigateToPayment(newReservation);
+        } catch (BookingException e) {
+            AlertHelper.showWarning("Booking Gagal", e.getMessage());
+        } catch (SQLException e) {
+            AlertHelper.showError("Error Database", "Gagal menyimpan pemesanan.");
+            e.printStackTrace();
         }
-    }
-
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

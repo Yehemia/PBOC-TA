@@ -1,25 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.collections.FXCollections?>
-<?import java.lang.String?>
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.customer.BookingController" spacing="15" alignment="CENTER">
-    <Label text="Form Pemesanan" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
-    <Label text="Tanggal Check-in:" />
-    <DatePicker fx:id="checkInPicker" />
-    <Label text="Tanggal Check-out:" />
-    <DatePicker fx:id="checkOutPicker" />
-    <Label text="Metode Pembayaran:" />
-    <ComboBox fx:id="paymentMethodComboBox">
-        <items>
-            <FXCollections fx:factory="observableArrayList">
-                <String fx:value="online" />
-            </FXCollections>
-        </items>
-    </ComboBox>
-    <Button fx:id="confirmBookingButton" text="Konfirmasi Pemesanan" style="-fx-background-color: #28a745; -fx-text-fill: white;" />
+
+<VBox prefWidth="380.0" alignment="TOP_CENTER" spacing="20.0" styleClass="booking-form-pane" stylesheets="@../../styles/booking-form-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.customer.BookingController">
+    <children>
+        <VBox alignment="CENTER" spacing="5.0">
+            <children>
+                <Label styleClass="form-title" text="Form Pemesanan" />
+                <Label fx:id="roomInfoLabel" styleClass="form-subtitle" text="untuk Kamar Deluxe - 101" />
+            </children>
+        </VBox>
+        <VBox spacing="8.0">
+            <children>
+                <Label styleClass="form-label" text="Tanggal Check-in:" />
+                <DatePicker fx:id="checkInPicker" prefWidth="Infinity" styleClass="form-input" />
+            </children>
+        </VBox>
+        <VBox spacing="8.0">
+            <children>
+                <Label styleClass="form-label" text="Tanggal Check-out:" />
+                <DatePicker fx:id="checkOutPicker" prefWidth="Infinity" styleClass="form-input" />
+            </children>
+        </VBox>
+        <VBox spacing="8.0">
+            <children>
+                <Label styleClass="form-label" text="Metode Pembayaran:" />
+                <ComboBox fx:id="paymentMethodComboBox" prefWidth="Infinity" promptText="Pilih metode pembayaran" styleClass="form-input" />
+            </children>
+        </VBox>
+        <Button fx:id="confirmBookingButton" mnemonicParsing="false" onAction="#processBooking" prefWidth="Infinity" styleClass="confirm-button" text="Konfirmasi Pemesanan">
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+        </Button>
+    </children>
 </VBox>

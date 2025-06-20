@@ -1,0 +1,62 @@
+/* --- booking-form-style.css --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+.root {
+    -fx-font-family: "Poppins", sans-serif;
+}
+
+.booking-form-pane {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 25px;
+}
+
+.form-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2C3E50;
+}
+
+.form-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.form-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #34495E;
+}
+
+.form-input {
+    -fx-background-color: #ECF0F1;
+    -fx-background-radius: 8px;
+    -fx-border-color: #BDC3C7;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-font-size: 14px;
+    -fx-pref-height: 45px;
+}
+
+.form-input:focused {
+    -fx-border-color: #3498DB;
+    -fx-border-width: 2px;
+}
+
+.confirm-button {
+    -fx-background-color: #27AE60;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-background-radius: 10px;
+    -fx-pref-height: 50px;
+    -fx-cursor: hand;
+}
+
+.confirm-button:hover {
+    -fx-background-color: derive(#27AE60, -10%);
+}
+
+.confirm-button:disabled {
+    -fx-background-color: #BDC3C7;
+    -fx-opacity: 0.7;
+}
