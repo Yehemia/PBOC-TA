@@ -10,13 +10,9 @@ import java.util.UUID;
 
 public class VerificationService {
     private static final Duration VALIDITY = Duration.ofMinutes(15);
-
-    // Simpan token baru dan kembalikan waktu kedaluwarsa (expiry)
     private static final Random random = new Random();
 
-    // DIUBAH: Metode ini sekarang menghasilkan token 6-digit
     public static String createAndSaveToken(int userId) throws SQLException {
-        // Buat 6 digit angka acak (antara 100000 dan 999999)
         int codeInt = 100000 + random.nextInt(900000);
         String token = String.valueOf(codeInt);
 
@@ -30,11 +26,9 @@ public class VerificationService {
             p.setTimestamp(3, Timestamp.valueOf(expires));
             p.executeUpdate();
         }
-        // Kembalikan token yang baru dibuat agar bisa dikirim via email
         return token;
     }
 
-    // Ambil waktu kedaluwarsa token terakhir yang belum digunakan
     public static LocalDateTime getTokenExpiry(int userId) throws SQLException {
         String sql = "SELECT expires_at FROM verification_tokens " +
                 "WHERE user_id = ? AND used = false " +
@@ -50,7 +44,6 @@ public class VerificationService {
         return null;
     }
 
-    // Validasi token: cek apakah token cocok, belum digunakan, dan belum kedaluwarsa
     public static boolean verifyToken(int userId, String tokenInput) {
         String sql = "SELECT token, expires_at, used FROM verification_tokens " +
                 "WHERE user_id = ? AND token = ? AND used = false";
@@ -63,7 +56,7 @@ public class VerificationService {
                 Timestamp ts = rs.getTimestamp("expires_at");
                 LocalDateTime expiresAt = ts.toLocalDateTime();
                 if (LocalDateTime.now().isBefore(expiresAt)) {
-                    return true; // token valid
+                    return true;
                 }
             }
         } catch (SQLException e) {
@@ -72,7 +65,6 @@ public class VerificationService {
         return false;
     }
 
-    // Tandai semua token untuk user sebagai sudah digunakan (used)
     public static void markAllTokensUsed(int userId) {
         String sql = "UPDATE verification_tokens SET used = true WHERE user_id = ? AND used = false";
         try (Connection conn = Database.getConnection();
@@ -84,7 +76,6 @@ public class VerificationService {
         }
     }
 
-    // Log percobaan verifikasi
     public static void logVerificationAttempt(int userId, String tokenInput, boolean success) {
         String sql = "INSERT INTO verification_logs (user_id, token_input, success) VALUES (?, ?, ?)";
         try (Connection conn = Database.getConnection();

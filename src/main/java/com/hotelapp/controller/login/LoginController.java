@@ -1,6 +1,7 @@
 package com.hotelapp.controller.login;
 
 import com.hotelapp.dao.UserDAO;
+import com.hotelapp.util.AlertHelper;
 import com.hotelapp.util.Session;
 import com.hotelapp.model.User;
 import javafx.event.ActionEvent;
@@ -19,8 +20,6 @@ import java.io.IOException;
 
 public class LoginController {
     @FXML
-    private ImageView logoImageView;
-    @FXML
     private TextField usernameField;
 
     @FXML
@@ -33,7 +32,7 @@ public class LoginController {
         String password = passwordField.getText();
 
         if (username.isBlank() || password.isBlank()) {
-            showAlert(Alert.AlertType.WARNING, "Input Tidak Valid", "Email dan Password tidak boleh kosong.");
+            AlertHelper.showWarning("Input Tidak Valid", "Email dan Password tidak boleh kosong.");
             return;
         }
 
@@ -44,7 +43,7 @@ public class LoginController {
 
             redirectUser(user.getRole());
         } else {
-            showAlert(Alert.AlertType.ERROR, "Login Gagal", "Email atau Password yang Anda masukkan salah.");
+            AlertHelper.showError("Login Gagal", "Email atau Password yang Anda masukkan salah.");
         }
     }
 
@@ -84,12 +83,4 @@ public class LoginController {
             e.printStackTrace();
         }
     }
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
 }

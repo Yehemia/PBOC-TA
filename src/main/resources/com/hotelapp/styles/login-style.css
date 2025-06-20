@@ -1,10 +1,9 @@
 .root {
-    /* Langsung gunakan nama "Poppins" */
     -fx-font-family: "Poppins", sans-serif;
 }
 /* --- Latar Belakang Utama --- */
 .main-bg {
-    -fx-background-color: #2A2A4E; /* Warna ungu tua */
+    -fx-background-color: #2A2A4E;
 }
 
 /* --- Kurva Putih di Bawah --- */
@@ -13,7 +12,7 @@
     -fx-pref-width: 920px;
     -fx-background-color: white;
     -fx-shape: "M 0 100 C 400 200, 1100 200, 1500 100 L 1500 250 L 0 250 Z";
-    -fx-translate-y: 75px; /* Sesuaikan untuk menaikkan/menurunkan kurva */
+    -fx-translate-y: 75px; /* untuk menaikkan/menurunkan kurva */
 }
 
 /* --- Teks Judul & Sub-judul --- */
@@ -26,13 +25,13 @@
 .subtitle-label {
     -fx-font-family: "Arial", sans-serif;
     -fx-font-size: 14px;
-    -fx-text-fill: #A0A0C0; /* Warna putih keabu-abuan */
+    -fx-text-fill: #A0A0C0;
 }
 
 /* --- Kartu Form Login --- */
 .form-card {
     -fx-background-color: #E9E9E9;
-    -fx-background-radius: 25px; /* Membuat sudut tumpul */
+    -fx-background-radius: 25px; /* sudut tumpul */
     -fx-padding: 30px;
     -fx-max-width: 350px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 20, 0, 0, 10);
