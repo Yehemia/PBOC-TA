@@ -15,13 +15,13 @@
             <content>
                 <VBox>
                     <children>
-                        <ImageView fx:id="roomImage" fitHeight="300.0" pickOnBounds="true" preserveRatio="true" />
-                        <VBox spacing="5.0" styleClass="detail-content-box">
+                        <ImageView fx:id="roomImage" fitHeight="300.0" fitWidth="600.0" pickOnBounds="true" preserveRatio="false" />
+                        <VBox spacing="10.0" styleClass="detail-content-box">
                             <children>
                                 <Label fx:id="roomTypeLabel" styleClass="detail-title" text="Tipe Kamar" />
-                                <Label fx:id="roomNumberLabel" styleClass="detail-subtitle" text="Kamar Nomor..." />
+                                <Label fx:id="availabilityLabel" styleClass="detail-subtitle" text="... kamar tersedia" />
 
-                                <Label styleClass="detail-section-title" text="Highlights" />
+                                <Label styleClass="detail-section-title" text="Fasilitas Unggulan" />
                                 <FlowPane fx:id="highlightsPane" hgap="10.0" vgap="10.0" />
 
                                 <Label styleClass="detail-section-title" text="Deskripsi" />

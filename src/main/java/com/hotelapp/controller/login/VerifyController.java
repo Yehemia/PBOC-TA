@@ -137,7 +137,6 @@ public class VerifyController {
             if (countdown != null) countdown.stop();
             msgLabel.setText("Verifikasi sukses! Anda akan dialihkan...");
             msgLabel.setTextFill(javafx.scene.paint.Color.GREEN);
-            redirectWithAnimation();
         } else {
             msgLabel.setText("Kode salah.");
             msgLabel.setTextFill(javafx.scene.paint.Color.RED);

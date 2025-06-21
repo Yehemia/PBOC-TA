@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.image.Image?>
-<BorderPane styleClass="main-bg" stylesheets="@../../styles/customer-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.customer.DashboardCustomerController">
+<BorderPane prefWidth="1200.0" prefHeight="720.0" styleClass="main-bg" stylesheets="@../../styles/customer-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.customer.DashboardCustomerController">
     <left>
         <VBox prefWidth="300.0" spacing="15.0" styleClass="sidebar">
             <children>

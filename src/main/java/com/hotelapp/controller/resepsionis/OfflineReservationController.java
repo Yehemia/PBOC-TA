@@ -47,7 +47,7 @@ public class OfflineReservationController {
 
     @FXML
     public void initialize() {
-        ObservableList<String> paymentOptions = FXCollections.observableArrayList("cash", "online", "pay_later");
+        ObservableList<String> paymentOptions = FXCollections.observableArrayList("cash", "online");
         paymentMethodComboBox.setItems(paymentOptions);
         submitButton.setOnAction(e -> handleSubmit());
         loadAvailableRoomTypes();

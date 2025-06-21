@@ -11,7 +11,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane fx:id="mainPane" prefHeight="720.0" prefWidth="1200.0" stylesheets="@../../styles/admin-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.admin.AdminDashboardController">
+<BorderPane fx:id="mainPane" prefWidth="1200.0" prefHeight="720.0" stylesheets="@../../styles/admin-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.admin.AdminDashboardController">
     <left>
         <VBox fx:id="sidebar" alignment="TOP_CENTER" prefWidth="220.0" spacing="10.0" styleClass="sidebar">
             <children>

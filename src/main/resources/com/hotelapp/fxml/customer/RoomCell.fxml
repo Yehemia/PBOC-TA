@@ -23,7 +23,7 @@
         </VBox>
         <BorderPane>
             <left>
-                <Label fx:id="priceLabel" styleClass="room-card-price" text="Harga/malam" BorderPane.alignment="CENTER" />
+                <Label fx:id="priceLabel" styleClass="room-card-price" text="Harga" BorderPane.alignment="CENTER" />
             </left>
             <right>
                 <HBox alignment="CENTER_RIGHT" spacing="8.0" BorderPane.alignment="CENTER">

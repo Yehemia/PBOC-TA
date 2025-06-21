@@ -16,9 +16,7 @@
             <top>
                 <HBox styleClass="content-top-bar">
                     <children>
-                        <TextField promptText="Cari kamar..." styleClass="search-bar" HBox.hgrow="ALWAYS" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <FontIcon iconLiteral="fas-user-circle" />
                     </children>
                 </HBox>
             </top>

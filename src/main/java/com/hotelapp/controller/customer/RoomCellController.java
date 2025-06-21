@@ -38,7 +38,7 @@ public class RoomCellController {
         roomTypeLabel.setText(roomType.getName());
 
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
-        priceLabel.setText(currencyFormat.format(roomType.getPrice()) + " / malam");
+        priceLabel.setText(currencyFormat.format(roomType.getPrice()));
 
         availabilityLabel.setText(roomType.getAvailableRoomCount() + " kamar tersedia");
         if (roomType.getAvailableRoomCount() <= 3) {
@@ -60,7 +60,6 @@ public class RoomCellController {
             loadDefaultImage();
         }
 
-        // --- TAMBAHKAN AKSI UNTUK TOMBOL DETAIL DI SINI ---
         detailButton.setOnAction(event -> openRoomDetail(roomType));
 
         bookButton.setOnAction(event -> {
@@ -70,29 +69,16 @@ public class RoomCellController {
         });
     }
 
-    /**
-     * Metode baru untuk membuka halaman detail.
-     * Ia akan mencari satu contoh kamar yang tersedia dari tipe ini untuk ditampilkan.
-     */
+
     private void openRoomDetail(RoomType roomType) {
         try {
-            // --- PERBAIKAN DI SINI: Panggil metode DAO baru yang aman ---
-            Room sampleRoom = RoomDAO.findSampleAvailableRoomByType(roomType.getId());
-
-            // Jika tidak ada kamar yang 'available', mungkin kita bisa ambil kamar manapun
-            // dari tipe itu hanya untuk menampilkan detail tipe kamarnya.
-            if (sampleRoom == null) {
-                // Ini memerlukan metode DAO lain, untuk sekarang kita beri pesan saja.
-                AlertHelper.showInformation("Info", "Saat ini tidak ada kamar tersedia untuk tipe ini, namun detail tipe kamar tetap ditampilkan.");
-                // Kita buat "dummy" room object dengan nomor 0
-                sampleRoom = new Room(0, 0, "N/A", roomType);
-            }
-
+            // Kita tidak perlu lagi mencari 'sampleRoom'
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/RoomDetail.fxml"));
             Parent detailRoot = loader.load();
 
             RoomDetailController detailController = loader.getController();
-            detailController.setRoom(sampleRoom); // Kirim objek Room yang sudah lengkap
+            // Langsung kirim objek RoomType ke detail controller
+            detailController.setRoomType(roomType);
             detailController.setDashboardController(this.dashboardController);
 
             Stage stage = new Stage();

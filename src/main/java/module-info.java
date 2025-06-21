@@ -13,6 +13,7 @@ module com.hotelapp {
     requires itextpdf;
     requires activation;
     requires org.kordamp.ikonli.fontawesome;
+    requires org.kordamp.ikonli.fontawesome5;
     requires org.kordamp.ikonli.core;
     requires jbcrypt;
     requires java.desktop;
