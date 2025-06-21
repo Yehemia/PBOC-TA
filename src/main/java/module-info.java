@@ -14,6 +14,8 @@ module com.hotelapp {
     requires activation;
     requires org.kordamp.ikonli.fontawesome;
     requires org.kordamp.ikonli.core;
+    requires jbcrypt;
+    requires java.desktop;
     uses org.kordamp.ikonli.IkonProvider;
 
     opens com.hotelapp.images to javafx.graphics;

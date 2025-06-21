@@ -14,6 +14,9 @@ import javax.mail.internet.MimeMultipart;
 
 public class EmailUtil {
     public static void sendVerificationEmail(String toEmail, String token) {
+        final String senderEmail = ConfigLoader.getProperty("email.username");
+        final String senderPassword = ConfigLoader.getProperty("email.password");
+
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.port", "587");
@@ -22,13 +25,13 @@ public class EmailUtil {
 
         Session session = Session.getInstance(props, new Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("cshotelkenangan1@gmail.com", "zjuu zoqd wyca awqn");
+                return new PasswordAuthentication(senderEmail, senderPassword);
             }
         });
 
         try {
             Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress("cshotelkenangan1@gmail.com"));
+            msg.setFrom(new InternetAddress(senderEmail));
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
             msg.setSubject("Kode Verifikasi Akun");
             msg.setText("Terima kasih telah mendaftar.\n\nKode verifikasi Anda: "
@@ -40,8 +43,8 @@ public class EmailUtil {
     }
 
     public static void sendInvoiceEmailWithAttachment(String customerEmail, String pdfPath) {
-        final String senderEmail = "cshotelkenangan1@gmail.com";
-        final String senderPassword = "zjuu zoqd wyca awqn";
+        final String senderEmail = ConfigLoader.getProperty("email.username");
+        final String senderPassword = ConfigLoader.getProperty("email.password");
 
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com");
