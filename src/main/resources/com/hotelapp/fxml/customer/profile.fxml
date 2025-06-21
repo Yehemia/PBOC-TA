@@ -6,6 +6,8 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.HBox?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.customer.ProfileController">
     <VBox spacing="10" layoutX="20" layoutY="20">
         <Label text="Profil Saya" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
@@ -19,6 +21,15 @@
         <Label text="Username:"/>
         <TextField fx:id="usernameField" prefWidth="300"/>
 
-        <Button fx:id="updateButton" text="Perbarui Profile" style="-fx-background-color: #007bff; -fx-text-fill: white;"/>
+        <HBox alignment="CENTER_LEFT" spacing="10.0" >
+            <children>
+                <Button fx:id="updateButton" onAction="#updateProfile" text="Simpan Perubahan" styleClass="sidebar-button-selected" />
+
+                <Button onAction="#handleChangePassword" text="Ubah Password" styleClass="sidebar-button-selected" />
+            </children>
+            <padding>
+                <Insets top="20.0" />
+            </padding>
+        </HBox>
     </VBox>
 </AnchorPane>
