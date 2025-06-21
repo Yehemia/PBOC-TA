@@ -1,5 +1,6 @@
 package com.hotelapp.controller.admin;
 
+import com.hotelapp.dao.PenaltyDAO;
 import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.dao.RoomDAO;
 import com.hotelapp.dao.UserDAO;
@@ -19,10 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class DashboardContentController {
 
@@ -65,22 +63,26 @@ public class DashboardContentController {
             protected ObservableList<PieChart.Data> call() throws Exception {
                 Map<String, Integer> roomTypeData = ReservationDAO.getRoomTypeReservationCount();
                 ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
-
-                // --- PERUBAHAN DI SINI ---
-                // Kita kembali menggunakan nama tipe kamar saja untuk label di grafik,
-                // tanpa menambahkan persentase.
                 roomTypeData.forEach((roomType, count) -> {
                     pieChartData.add(new PieChart.Data(roomType, count));
                 });
-
                 return pieChartData;
             }
         };
 
         task.setOnSucceeded(e -> {
             ObservableList<PieChart.Data> pieChartData = task.getValue();
+            if (pieChartData == null || pieChartData.isEmpty()) {
+                roomTypePieChart.setData(FXCollections.observableArrayList());
+                legendContainer.getChildren().clear();
+                return;
+            }
             roomTypePieChart.setData(pieChartData);
             buildCustomLegend(pieChartData);
+        });
+
+        task.setOnFailed(e -> {
+            e.getSource().getException().printStackTrace();
         });
 
         new Thread(task).start();
@@ -88,6 +90,7 @@ public class DashboardContentController {
 
     private void buildCustomLegend(ObservableList<PieChart.Data> pieChartData) {
         legendContainer.getChildren().clear();
+        double total = pieChartData.stream().mapToDouble(PieChart.Data::getPieValue).sum();
         final List<Color> colorPalette = Arrays.asList(
                 Color.web("#34CAA5"), Color.web("#E74C3C"), Color.web("#F9A458"),
                 Color.web("#A455F1"), Color.web("#5499C7")
@@ -95,25 +98,23 @@ public class DashboardContentController {
 
         int colorIndex = 0;
         for (PieChart.Data data : pieChartData) {
-            Color color = colorPalette.get(colorIndex % colorPalette.size());
+            double percentage = (data.getPieValue() / total) * 100;
+            String legendLabelText = String.format("%s (%.1f%%)", data.getName(), percentage);
 
-            Platform.runLater(() -> {
-                if (data.getNode() != null) {
-                    data.getNode().setStyle("-fx-pie-color: " + toWebColor(color) + ";");
-                }
-            });
-            // Legenda di bawah tetap menampilkan nama dan jumlah absolut
-            legendContainer.getChildren().add(createLegendItem(data.getName(), (int) data.getPieValue(), color));
+            int count = (int) data.getPieValue();
+            legendContainer.getChildren().add(createLegendItem(legendLabelText, count, colorPalette.get(colorIndex % colorPalette.size())));
             colorIndex++;
         }
     }
 
-    // ... sisa kode lainnya tidak ada yang berubah ...
     private void loadStats() {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                double totalRevenue = ReservationDAO.getTotalRevenue();
+                double reservationRevenue = ReservationDAO.getTotalRevenue();
+                double penaltyRevenue = PenaltyDAO.getTotalPaidPenalties();
+                double totalRevenue = reservationRevenue + penaltyRevenue;
+
                 int totalReservations = ReservationDAO.getTotalReservations();
                 int totalCustomers = UserDAO.getTotalCustomers();
                 int totalRooms = RoomDAO.getTotalRooms();

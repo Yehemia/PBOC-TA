@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.controlsfx.control.CheckListView?>
+
+<VBox spacing="15.0" style="-fx-background-color: -fx-card-bg; -fx-padding: 20;"  xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.admin.AddRoomTypeDialogController">
+    <children>
+        <Label fx:id="titleLabel" styleClass="chart-title" text="Tambah Tipe Kamar Baru" />
+        <ScrollPane fitToWidth="true" prefHeight="400.0">
+            <content>
+                <VBox spacing="10.0">
+                    <padding>
+                        <Insets right="10.0" />
+                    </padding>
+                    <children>
+                        <Label styleClass="form-label" text="Nama Tipe:" />
+                        <TextField fx:id="nameField" styleClass="form-input" />
+                        <Label styleClass="form-label" text="Harga per Malam:" />
+                        <TextField fx:id="priceField" styleClass="form-input" />
+                        <Label styleClass="form-label" text="Deskripsi:" />
+                        <TextArea fx:id="descriptionArea" prefHeight="80.0" styleClass="form-input" wrapText="true" />
+                        <Label styleClass="form-label" text="Kapasitas Tamu (orang):" />
+                        <TextField fx:id="maxGuestsField" styleClass="form-input" />
+                        <Label styleClass="form-label" text="Informasi Kasur:" />
+                        <TextField fx:id="bedInfoField" styleClass="form-input" />
+                        <Label styleClass="form-label" text="URL Gambar:" />
+                        <TextField fx:id="imageUrlField" styleClass="form-input" />
+                        <Label styleClass="form-label" text="Pilih Fasilitas:" />
+                        <CheckListView fx:id="facilitiesListView" prefHeight="150.0" />
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+            <children>
+                <Button onAction="#handleCancel" styleClass="cancel-button" text="Batal" />
+                <Button fx:id="saveButton" onAction="#handleSave" styleClass="add-button" text="Simpan" />
+            </children>
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+        </HBox>
+    </children>
+</VBox>

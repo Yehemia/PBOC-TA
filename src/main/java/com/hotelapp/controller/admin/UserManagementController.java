@@ -23,7 +23,7 @@ import java.util.Optional;
 public class UserManagementController {
 
     @FXML private Button addUserButton;
-    @FXML private TextField searchField; // Pastikan fx:id ini ada di FXML
+    @FXML private TextField searchField;
     @FXML private TableView<User> usersTable;
     @FXML private TableColumn<User, Integer> idColumn;
     @FXML private TableColumn<User, String> usernameColumn;
@@ -36,8 +36,6 @@ public class UserManagementController {
     public void initialize() {
         setupTableColumns();
         addUserButton.setOnAction(event -> handleAddNewUser());
-
-        // --- LOGIKA PENCARIAN DITAMBAHKAN DI SINI ---
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             filterUsers(newValue);
         });
@@ -50,10 +48,8 @@ public class UserManagementController {
             @Override
             protected ObservableList<User> call() {
                 if (keyword == null || keyword.trim().isEmpty()) {
-                    // Jika keyword kosong, tampilkan semua user
                     return FXCollections.observableArrayList(UserDAO.getAllUsers());
                 } else {
-                    // Jika ada keyword, panggil metode search
                     return FXCollections.observableArrayList(UserDAO.searchUsers(keyword));
                 }
             }
@@ -95,7 +91,6 @@ public class UserManagementController {
     }
 
     private void loadUsers() {
-        // Panggil filterUsers dengan string kosong untuk memuat semua data awal
         filterUsers("");
     }
 

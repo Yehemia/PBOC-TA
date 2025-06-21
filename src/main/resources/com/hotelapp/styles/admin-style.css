@@ -100,10 +100,18 @@
     -fx-padding: 10px;
 }
 
-.stat-icon-bg-purple { -fx-background-color: #352A4E; }
-.stat-icon-bg-orange { -fx-background-color: #4A3A4E; }
-.stat-icon-bg-green { -fx-background-color: #2D414D; }
-.stat-icon-bg-blue { -fx-background-color: #323E58; }
+.stat-icon-bg-blue .ikonli-font-icon{
+    -fx-icon-color: lightgreen;
+}
+.stat-icon-bg-purple .ikonli-font-icon{
+    -fx-icon-color: magenta;
+}
+.stat-icon-bg-green .ikonli-font-icon{
+    -fx-icon-color:  lightblue;
+}
+.stat-icon-bg-orange .ikonli-font-icon{
+    -fx-icon-color: orange;
+}
 
 .stat-title {
     -fx-font-size: 18px;
@@ -309,5 +317,9 @@
     -fx-font-size: 14px;
     -fx-font-weight: 600; /* SemiBold */
     -fx-text-fill: -fx-text-primary;
+}
+.split-pane > .split-pane-divider {
+    -fx-background-color: #3A3F58; /* Menggunakan warna border yang sudah ada di tema */
+    -fx-padding: 1px; /* Membuat garisnya lebih tipis */
 }
 

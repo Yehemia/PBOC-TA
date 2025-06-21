@@ -49,7 +49,7 @@
                                     <children>
                                         <HBox alignment="CENTER" styleClass="stat-icon-bg-purple">
                                             <children>
-                                                <FontIcon iconLiteral="fa-book" iconSize="20" style="-fx-icon-color: -fx-accent-purple;" />
+                                                <FontIcon iconLiteral="fa-book" iconSize="20" />
                                             </children>
                                         </HBox>
                                         <Label styleClass="stat-title" text="Total Booking" />
@@ -65,7 +65,7 @@
                                     <children>
                                         <HBox alignment="CENTER" styleClass="stat-icon-bg-orange">
                                             <children>
-                                                <FontIcon iconLiteral="fa-bed" iconSize="20" style="-fx-icon-color: -fx-accent-orange;" />
+                                                <FontIcon iconLiteral="fa-bed" iconSize="20" />
                                             </children>
                                         </HBox>
                                         <Label styleClass="stat-title" text="Rooms Available" />
@@ -81,7 +81,7 @@
                                     <children>
                                         <HBox alignment="CENTER" styleClass="stat-icon-bg-green">
                                             <children>
-                                                <FontIcon iconLiteral="fa-users" iconSize="20" style="-fx-icon-color: -fx-accent-green;" />
+                                                <FontIcon iconLiteral="fa-users" iconSize="20" />
                                             </children>
                                         </HBox>
                                         <Label styleClass="stat-title" text="New Customers" />
@@ -97,7 +97,7 @@
                                     <children>
                                         <HBox alignment="CENTER" styleClass="stat-icon-bg-blue">
                                             <children>
-                                                <FontIcon iconLiteral="fa-dollar" iconSize="20" style="-fx-icon-color: -fx-accent-blue;" />
+                                                <FontIcon iconLiteral="fas-dollar-sign" iconSize="25" />
                                             </children>
                                         </HBox>
                                         <Label styleClass="stat-title" text="Total Revenue" />

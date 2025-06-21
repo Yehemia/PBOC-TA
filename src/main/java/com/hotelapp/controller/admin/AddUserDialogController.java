@@ -16,8 +16,6 @@ public class AddUserDialogController {
     @FXML private PasswordField passwordField;
     @FXML private ComboBox<String> roleComboBox;
     @FXML private Button saveButton;
-
-    // Variabel untuk membedakan mode Add atau Edit
     private User userToEdit = null;
 
     @FXML
@@ -25,7 +23,6 @@ public class AddUserDialogController {
         roleComboBox.setItems(FXCollections.observableArrayList("customer", "receptionist", "admin"));
     }
 
-    // Metode ini dipanggil dari UserManagementController untuk mode Edit
     public void initData(User user) {
         this.userToEdit = user;
 
@@ -34,10 +31,8 @@ public class AddUserDialogController {
         emailField.setText(user.getEmail());
         roleComboBox.setValue(user.getRole());
 
-        // Password tidak ditampilkan/diedit di sini untuk keamanan
         passwordField.setPromptText("Kosongkan jika tidak ingin diubah");
-        passwordField.setDisable(true); // Matikan field password saat edit
-
+        passwordField.setDisable(true);
         saveButton.setText("Update User");
     }
 
@@ -55,7 +50,6 @@ public class AddUserDialogController {
 
         boolean success;
         if (userToEdit == null) {
-            // Mode Tambah User Baru
             String password = passwordField.getText();
             if (password.isEmpty()) {
                 showAlert(Alert.AlertType.ERROR, "Error", "Password harus diisi untuk user baru.");

@@ -1,111 +1,187 @@
 package com.hotelapp.controller.admin;
 
 import com.hotelapp.dao.RoomDAO;
+import com.hotelapp.dao.RoomTypeDAO;
 import com.hotelapp.model.Room;
+import com.hotelapp.model.RoomType;
+import com.hotelapp.util.AlertHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Optional;
 
 public class RoomManagementController {
 
-    @FXML private Button addRoomButton;
-    @FXML private TextField searchField; // Pastikan fx:id ini ada di FXML
-    @FXML private TableView<Room> roomsTable;
-    @FXML private TableColumn<Room, Integer> idColumn;
+    @FXML private TableView<RoomType> roomTypeTable;
+    @FXML private TableColumn<RoomType, String> typeNameColumn;
+    @FXML private TableColumn<RoomType, Double> typePriceColumn;
+    @FXML private TableColumn<RoomType, Integer> typeGuestsColumn;
+    @FXML private TableColumn<RoomType, String> typeBedInfoColumn;
+    @FXML private TableView<Room> roomInstanceTable;
     @FXML private TableColumn<Room, Integer> roomNumberColumn;
-    @FXML private TableColumn<Room, String> roomTypeColumn;
-    @FXML private TableColumn<Room, Double> priceColumn;
-    @FXML private TableColumn<Room, String> statusColumn;
-    @FXML private TableColumn<Room, Void> actionColumn;
+    @FXML private TableColumn<Room, String> roomStatusColumn;
+    @FXML private Label roomInstanceLabel;
 
     @FXML
     public void initialize() {
-        setupTableColumns();
-        addRoomButton.setOnAction(event -> handleAddNewRoom());
+        setupRoomTypeTable();
+        setupRoomInstanceTable();
 
-        // --- LOGIKA PENCARIAN DITAMBAHKAN DI SINI ---
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            filterRooms(newValue);
-        });
-
-        loadRooms();
+        loadRoomTypes();
+        roomTypeTable.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldSelection, newSelection) -> {
+                    if (newSelection != null) {
+                        loadRoomInstancesForType(newSelection);
+                    } else {
+                        roomInstanceTable.getItems().clear();
+                        roomInstanceLabel.setText("Daftar Kamar Fisik (Pilih Tipe Kamar di Atas)");
+                    }
+                }
+        );
     }
 
-    private void filterRooms(String keyword) {
-        Task<ObservableList<Room>> task = new Task<>() {
+    private void setupRoomTypeTable() {
+        typeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        typePriceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
+        typeGuestsColumn.setCellValueFactory(new PropertyValueFactory<>("maxGuests"));
+        typeBedInfoColumn.setCellValueFactory(new PropertyValueFactory<>("bedInfo"));
+
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+        typePriceColumn.setCellFactory(tc -> new TableCell<>() {
             @Override
-            protected ObservableList<Room> call() {
-                if (keyword == null || keyword.trim().isEmpty()) {
-                    return FXCollections.observableArrayList(RoomDAO.getAllRooms());
+            protected void updateItem(Double price, boolean empty) {
+                super.updateItem(price, empty);
+                if (empty || price == null) {
+                    setText(null);
                 } else {
-                    return FXCollections.observableArrayList(RoomDAO.searchRooms(keyword));
+                    setText(currencyFormat.format(price));
                 }
             }
-        };
-
-        task.setOnSucceeded(event -> roomsTable.setItems(task.getValue()));
-        task.setOnFailed(event -> event.getSource().getException().printStackTrace());
-
-        new Thread(task).start();
-    }
-
-    private void setupTableColumns() {
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        roomNumberColumn.setCellValueFactory(new PropertyValueFactory<>("roomNumber"));
-        roomTypeColumn.setCellValueFactory(new PropertyValueFactory<>("roomType"));
-        priceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-        addActionButtonsToTable();
-    }
-
-    private void addActionButtonsToTable() {
-        actionColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button editBtn = new Button("", new FontIcon("fa-pencil"));
-            private final Button deleteBtn = new Button("", new FontIcon("fa-trash"));
-            private final HBox pane = new HBox(5, editBtn, deleteBtn);
-            {
-                pane.setAlignment(Pos.CENTER);
-                editBtn.getStyleClass().add("edit-button");
-                deleteBtn.getStyleClass().add("delete-button");
-                editBtn.setOnAction(event -> handleEditRoom(getTableView().getItems().get(getIndex())));
-                deleteBtn.setOnAction(event -> handleDeleteRoom(getTableView().getItems().get(getIndex())));
-            }
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : pane);
-            }
         });
     }
 
-    private void loadRooms() {
-        // Panggil filterRooms dengan string kosong untuk memuat semua data awal
-        filterRooms("");
+    private void setupRoomInstanceTable() {
+        roomNumberColumn.setCellValueFactory(new PropertyValueFactory<>("roomNumber"));
+        roomStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
     }
 
-    private void handleAddNewRoom() {
-        openRoomDialog(null);
+    private void loadRoomTypes() {
+        ObservableList<RoomType> roomTypes = FXCollections.observableArrayList(RoomTypeDAO.getAllRoomTypes());
+        roomTypeTable.setItems(roomTypes);
     }
 
-    private void handleEditRoom(Room room) {
-        openRoomDialog(room);
+    private void loadRoomInstancesForType(RoomType roomType) {
+        roomInstanceLabel.setText("Daftar Kamar untuk Tipe: " + roomType.getName());
+        ObservableList<Room> rooms = FXCollections.observableArrayList(RoomDAO.getRoomsByTypeId(roomType.getId()));
+        roomInstanceTable.setItems(rooms);
     }
 
-    private void openRoomDialog(Room room) {
+    @FXML
+    private void handleAddNewRoomType(ActionEvent event) {
+        openRoomTypeDialog(null);
+    }
+
+    @FXML
+    private void handleEditRoomType(ActionEvent event) {
+        RoomType selectedType = roomTypeTable.getSelectionModel().getSelectedItem();
+        if (selectedType == null) {
+            AlertHelper.showWarning("Peringatan", "Pilih dulu sebuah Tipe Kamar dari tabel atas untuk diedit.");
+            return;
+        }
+        RoomType detailedRoomType = RoomTypeDAO.getRoomTypeWithFacilitiesById(selectedType.getId());
+        openRoomTypeDialog(detailedRoomType);
+    }
+
+    @FXML
+    private void handleDeleteRoomType(ActionEvent event) {
+        RoomType selectedType = roomTypeTable.getSelectionModel().getSelectedItem();
+        if (selectedType == null) {
+            AlertHelper.showWarning("Peringatan", "Pilih tipe kamar yang ingin dihapus.");
+            return;
+        }
+
+        Optional<ButtonType> result = AlertHelper.showConfirmation("Konfirmasi Hapus", "Yakin ingin menghapus tipe kamar '" + selectedType.getName() + "'? Ini akan gagal jika masih ada kamar yang menggunakan tipe ini.", ButtonType.OK, ButtonType.CANCEL);
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            boolean success = RoomTypeDAO.deleteRoomType(selectedType.getId());
+            if (success) {
+                AlertHelper.showInformation("Sukses", "Tipe kamar berhasil dihapus.");
+                loadRoomTypes();
+            } else {
+                AlertHelper.showError("Gagal", "Gagal menghapus tipe kamar. Pastikan tidak ada kamar fisik yang masih terhubung dengan tipe ini.");
+            }
+        }
+    }
+
+    @FXML
+    private void handleAddNewRoom(ActionEvent event) {
+        RoomType selectedType = roomTypeTable.getSelectionModel().getSelectedItem();
+        if (selectedType == null) {
+            AlertHelper.showWarning("Peringatan", "Pilih dulu Tipe Kamar di tabel atas sebelum menambah kamar fisik baru.");
+            return;
+        }
+        openRoomDialog(null, selectedType);
+    }
+
+    @FXML
+    private void handleEditRoom(ActionEvent event) {
+        Room selectedRoom = roomInstanceTable.getSelectionModel().getSelectedItem();
+        if (selectedRoom == null) {
+            AlertHelper.showWarning("Peringatan", "Pilih kamar yang ingin diedit di tabel bawah.");
+            return;
+        }
+        openRoomDialog(selectedRoom, selectedRoom.getRoomType());
+    }
+
+    @FXML
+    private void handleDeleteRoom(ActionEvent event) {
+        Room selectedRoom = roomInstanceTable.getSelectionModel().getSelectedItem();
+        if (selectedRoom == null) {
+            AlertHelper.showWarning("Peringatan", "Pilih kamar yang ingin dihapus.");
+            return;
+        }
+        Optional<ButtonType> result = AlertHelper.showConfirmation("Konfirmasi Hapus", "Yakin ingin menghapus kamar nomor " + selectedRoom.getRoomNumber() + "?", ButtonType.OK, ButtonType.CANCEL);
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            if (RoomDAO.deleteRoom(selectedRoom.getId())) {
+                AlertHelper.showInformation("Sukses", "Kamar berhasil dihapus.");
+                loadRoomInstancesForType(selectedRoom.getRoomType());
+            } else {
+                AlertHelper.showError("Gagal", "Gagal menghapus kamar.");
+            }
+        }
+    }
+
+    private void openRoomTypeDialog(RoomType roomType) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/admin/AddRoomTypeDialog.fxml"));
+            Parent root = loader.load();
+            AddRoomTypeDialogController controller = loader.getController();
+            if (roomType != null) {
+                controller.initData(roomType);
+            }
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle(roomType == null ? "Tambah Tipe Kamar Baru" : "Edit Tipe Kamar");
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.setScene(new Scene(root));
+            dialogStage.showAndWait();
+            loadRoomTypes();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openRoomDialog(Room room, RoomType contextRoomType) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/admin/AddRoomDialog.fxml"));
             Parent root = loader.load();
@@ -116,28 +192,11 @@ public class RoomManagementController {
             Stage dialogStage = new Stage();
             dialogStage.setTitle(room == null ? "Tambah Kamar Baru" : "Edit Kamar");
             dialogStage.initModality(Modality.APPLICATION_MODAL);
-            dialogStage.initOwner(roomsTable.getScene().getWindow());
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/com/hotelapp/styles/admin-style.css").toExternalForm());
-            dialogStage.setScene(scene);
+            dialogStage.setScene(new Scene(root));
             dialogStage.showAndWait();
-            loadRooms();
+            loadRoomInstancesForType(contextRoomType);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void handleDeleteRoom(Room room) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Konfirmasi Hapus");
-        alert.setHeaderText("Anda akan menghapus Kamar Nomor: " + room.getRoomNumber());
-        alert.setContentText("Apakah Anda yakin?");
-        alert.initOwner(roomsTable.getScene().getWindow());
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            if (RoomDAO.deleteRoom(room.getId())) {
-                loadRooms();
-            }
         }
     }
 }

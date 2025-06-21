@@ -35,7 +35,6 @@ public class AdminDashboardController {
 
     @FXML
     public void initialize() {
-        // Muat konten dashboard statistik sebagai default dan set tombolnya sebagai aktif
         loadContent("/com/hotelapp/fxml/admin/DashboardContent.fxml");
         setActiveButton(dashboardBtn);
         currentButton = dashboardBtn;
@@ -44,8 +43,6 @@ public class AdminDashboardController {
     @FXML
     private void handleMenuClick(ActionEvent event) {
         Button clickedButton = (Button) event.getSource();
-
-        // Jangan lakukan apa-apa jika tombol yang sama diklik lagi
         if (clickedButton == currentButton) {
             return;
         }
@@ -76,8 +73,6 @@ public class AdminDashboardController {
         try {
             Parent view = FXMLLoader.load(getClass().getResource(fxmlPath));
             contentPane.getChildren().setAll(view);
-
-            // *** EMPAT BARIS KRUSIAL INI AKAN MEMPERBAIKI MASALAH ***
             AnchorPane.setTopAnchor(view, 0.0);
             AnchorPane.setBottomAnchor(view, 0.0);
             AnchorPane.setLeftAnchor(view, 0.0);
