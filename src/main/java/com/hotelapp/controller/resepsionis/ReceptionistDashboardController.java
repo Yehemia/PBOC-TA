@@ -1,80 +1,96 @@
 package com.hotelapp.controller.resepsionis;
-import com.hotelapp.dao.ReservationDAO;
+
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
+
+import java.io.IOException;
 
 public class ReceptionistDashboardController {
 
-    @FXML private Label reservasiCount;
-    @FXML private Label checkInCount;
-    @FXML private Label checkOutCount;
-    @FXML private Button logoutBtn;
+    @FXML private BorderPane mainPane;
     @FXML private AnchorPane contentPane;
-    @FXML private Button checkInButton, checkOutButton, offlineReservationButton, penaltyButton, historyButton;
+    @FXML private Button checkInButton;
+    @FXML private Button checkOutButton;
+    @FXML private Button offlineReservationButton;
+    @FXML private Button penaltyButton;
+    @FXML private Button historyButton;
+    @FXML private Button logoutBtn;
 
+    private Button currentButton;
 
     @FXML
     public void initialize() {
-        loadStatistics();
+        loadContent("/com/hotelapp/fxml/resepsionis/CheckInView.fxml");
+        setActiveButton(checkInButton);
 
-        checkInButton.setOnAction(e -> loadContent("/com/hotelapp/fxml/resepsionis/CheckInView.fxml"));
-        checkOutButton.setOnAction(e -> loadContent("/com/hotelapp/fxml/resepsionis/CheckOutView.fxml"));
-        offlineReservationButton.setOnAction(e -> loadContent("/com/hotelapp/fxml/resepsionis/OfflineReservationView.fxml"));
-        penaltyButton.setOnAction(e -> loadContent("/com/hotelapp/fxml/resepsionis/PenaltyView.fxml"));
-        historyButton.setOnAction(e -> loadContent("/com/hotelapp/fxml/resepsionis/HistoryView.fxml") );
         logoutBtn.setOnAction(e -> performLogout());
+    }
+
+    @FXML
+    private void handleMenuClick(ActionEvent event) {
+        Button clickedButton = (Button) event.getSource();
+        if (clickedButton == currentButton) {
+            return;
+        }
+
+        String fxmlPath = "";
+        if (event.getSource() == checkInButton) {
+            fxmlPath = "/com/hotelapp/fxml/resepsionis/CheckInView.fxml";
+        } else if (event.getSource() == checkOutButton) {
+            fxmlPath = "/com/hotelapp/fxml/resepsionis/CheckOutView.fxml";
+        } else if (event.getSource() == offlineReservationButton) {
+            fxmlPath = "/com/hotelapp/fxml/resepsionis/OfflineReservationView.fxml";
+        } else if (event.getSource() == penaltyButton) {
+            fxmlPath = "/com/hotelapp/fxml/resepsionis/PenaltyView.fxml";
+        } else if (event.getSource() == historyButton) {
+            fxmlPath = "/com/hotelapp/fxml/resepsionis/HistoryView.fxml";
+        }
+
+        if (!fxmlPath.isEmpty()) {
+            loadContent(fxmlPath);
+            setActiveButton(clickedButton);
+        }
+    }
+
+    private void setActiveButton(Button button) {
+        if (currentButton != null) {
+            currentButton.getStyleClass().remove("nav-button-selected");
+        }
+        button.getStyleClass().add("nav-button-selected");
+        currentButton = button;
     }
 
     private void loadContent(String fxmlPath) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent view = loader.load();
+            Parent view = FXMLLoader.load(getClass().getResource(fxmlPath));
             contentPane.getChildren().setAll(view);
             AnchorPane.setTopAnchor(view, 0.0);
-            AnchorPane.setRightAnchor(view, 0.0);
             AnchorPane.setBottomAnchor(view, 0.0);
             AnchorPane.setLeftAnchor(view, 0.0);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            AnchorPane.setRightAnchor(view, 0.0);
+
+        } catch (Exception e) {
+            System.err.println("Gagal memuat FXML: " + fxmlPath);
+            e.printStackTrace();
         }
     }
 
-    @FXML
-    public void loadStatistics() {
-        Task<Void> task = new Task<>() {
-            @Override
-            protected Void call() throws Exception {
-                int reservasiHariIni = ReservationDAO.getJumlahReservasiHariIni();
-                int checkInHariIni = ReservationDAO.getJumlahCheckInHariIni();
-                int checkOutHariIni = ReservationDAO.getJumlahCheckOutHariIni();
-
-                Platform.runLater(() -> {
-                    reservasiCount.setText(String.valueOf(reservasiHariIni));
-                    checkInCount.setText(String.valueOf(checkInHariIni));
-                    checkOutCount.setText(String.valueOf(checkOutHariIni));
-                });
-                return null;
-            }
-        };
-        new Thread(task).start();
-    }
-
     private void performLogout() {
-        System.out.println("Logging out... ");
         try {
-            Parent loginRoot = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/Login.fxml"));
-            Stage stage = (Stage) logoutBtn.getScene().getWindow();
-            stage.setScene(new Scene(loginRoot));
-        } catch (Exception ex) {
+            Stage stage = (Stage) mainPane.getScene().getWindow();
+            Parent loginRoot = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/login.fxml"));
+            Scene scene = new Scene(loginRoot);
+            stage.setScene(scene);
+            stage.centerOnScreen();
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 }
-

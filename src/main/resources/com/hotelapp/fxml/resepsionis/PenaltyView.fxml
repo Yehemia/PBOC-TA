@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.resepsionis.PenaltyController">
+<VBox spacing="15.0" stylesheets="@../../styles/receptionist-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.resepsionis.PenaltyController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
     <children>
-        <VBox spacing="10" layoutX="20" layoutY="20">
-            <Label text="Manajemen Denda/Penalti" style="-fx-font-size: 18px;"/>
-            <!-- Tabel Penalty -->
-            <TableView fx:id="penaltyTable" prefWidth="720" prefHeight="300">
-                <columns>
-                    <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
-                    <TableColumn fx:id="reservationIdColumn" text="ID Reservasi" prefWidth="100"/>
-                    <TableColumn fx:id="reasonColumn" text="Alasan" prefWidth="300"/>
-                    <TableColumn fx:id="amountColumn" text="Jumlah" prefWidth="100"/>
-                    <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
-                </columns>
-            </TableView>
-
-            <!-- Baris aksinya -->
-            <HBox spacing="10">
-                <Button text="Tandai Dibayar" onAction="#markPenaltyPaid" prefWidth="150"/>
-                <Button text="Refresh Data" onAction="#refreshData" prefWidth="150"/>
-            </HBox>
-        </VBox>
+        <Label styleClass="chart-title" text="Manajemen Denda" />
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <children>
+                <Label text="Daftar semua denda yang tercatat." HBox.hgrow="ALWAYS" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button mnemonicParsing="false" onAction="#refreshData" styleClass="edit-button" text="Refresh Data" />
+                <Button mnemonicParsing="false" onAction="#markPenaltyPaid" styleClass="add-button" text="Tandai Lunas" />
+            </children>
+        </HBox>
+        <TableView fx:id="penaltyTable" styleClass="table-view" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="idColumn" prefWidth="75.0" text="ID Denda" />
+                <TableColumn fx:id="reservationIdColumn" prefWidth="120.0" text="ID Reservasi" />
+                <TableColumn fx:id="reasonColumn" prefWidth="300.0" text="Alasan" />
+                <TableColumn fx:id="amountColumn" prefWidth="150.0" text="Jumlah" />
+                <TableColumn fx:id="statusColumn" prefWidth="120.0" text="Status" />
+            </columns>
+        </TableView>
     </children>
-</AnchorPane>
+</VBox>

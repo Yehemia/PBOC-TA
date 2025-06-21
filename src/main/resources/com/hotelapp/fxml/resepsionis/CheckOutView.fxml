@@ -1,27 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.hotelapp.controller.resepsionis.CheckOutController">
-    <!-- Judul -->
-    <Label text="Daftar Tamu - Check-Out" layoutX="20" layoutY="20" style="-fx-font-size: 18px;"/>
-
-    <!-- Tabel Reservasi -->
-    <TableView fx:id="checkOutTable" layoutX="20" layoutY="60" prefWidth="760" prefHeight="350">
-        <columns>
-            <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
-            <TableColumn fx:id="nameColumn" text="Nama Tamu" prefWidth="200"/>
-            <TableColumn fx:id="roomColumn" text="Nomor Kamar" prefWidth="150"/>
-            <TableColumn fx:id="checkInTimeColumn" text="Waktu Check-In" prefWidth="150"/>
-            <TableColumn fx:id="statusColumn" text="Status" prefWidth="120"/>
-            <TableColumn fx:id="actionColumn" text="Aksi" prefWidth="120"/>
-        </columns>
-    </TableView>
-
-    <HBox spacing="10" layoutX="20" layoutY="500">
-        <Button text="Refresh" onAction="#refreshData"/>
-    </HBox>
-
-</AnchorPane>
+<VBox spacing="15.0" stylesheets="@../../styles/receptionist-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.resepsionis.CheckOutController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <Label styleClass="page-title" text="Manajemen Check-Out Tamu" />
+        <VBox styleClass="content-card" VBox.vgrow="ALWAYS">
+            <children>
+                <Label text="Daftar tamu yang sedang menginap dan siap untuk check-out.">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Label>
+                <TableView fx:id="checkOutTable" styleClass="table-view-light" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="idColumn" prefWidth="75.0" text="ID Booking" />
+                        <TableColumn fx:id="nameColumn" prefWidth="200.0" text="Nama Tamu" />
+                        <TableColumn fx:id="roomColumn" prefWidth="100.0" text="Kamar" />
+                        <TableColumn fx:id="checkInTimeColumn" prefWidth="180.0" text="Waktu Check-In" />
+                        <TableColumn fx:id="statusColumn" prefWidth="120.0" text="Status" />
+                        <TableColumn fx:id="actionColumn" prefWidth="120.0" text="Aksi" />
+                    </columns>
+                </TableView>
+            </children>
+        </VBox>
+    </children>
+</VBox>

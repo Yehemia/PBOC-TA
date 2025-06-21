@@ -2,7 +2,9 @@ package com.hotelapp.controller.resepsionis;
 
 import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.model.Reservation;
-import javafx.application.Platform;
+import com.hotelapp.service.BookingException;
+import com.hotelapp.service.ReservationService;
+import com.hotelapp.util.AlertHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -20,15 +22,12 @@ public class CheckInController {
     @FXML private TableColumn<Reservation, String> statusColumn;
     @FXML private TableColumn<Reservation, Void> actionColumn;
 
-    private ObservableList<Reservation> reservationList = FXCollections.observableArrayList();
-
-
+    private final ReservationService reservationService = new ReservationService();
 
     @FXML
     public void initialize() {
-        // Pastikan semua kolom memiliki pemetaan ke model Reservation
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("guestName")); // Mungkin perlu diubah ke nama lengkap
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("guestName"));
         roomColumn.setCellValueFactory(new PropertyValueFactory<>("roomId"));
         checkInColumn.setCellValueFactory(new PropertyValueFactory<>("checkIn"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -40,13 +39,12 @@ public class CheckInController {
     private void addActionButtons() {
         actionColumn.setCellFactory(col -> new TableCell<>() {
             private final Button checkInBtn = new Button("Check-In");
-
             {
                 checkInBtn.setOnAction(event -> {
                     Reservation reservation = getTableView().getItems().get(getIndex());
                     processCheckIn(reservation);
                 });
-                checkInBtn.setStyle("-fx-background-color: #28a745; -fx-text-fill: white;");
+                checkInBtn.getStyleClass().add("button-primary");
             }
 
             @Override
@@ -58,28 +56,19 @@ public class CheckInController {
     }
 
     private void processCheckIn(Reservation reservation) {
-        if (!reservation.getStatus().equalsIgnoreCase("pending")) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "Reservasi ini sudah diproses sebelumnya.");
-            alert.showAndWait();
-            return;
-        }
+        if (reservation == null) return;
 
-        boolean success = ReservationDAO.processCheckIn(reservation.getId());
-        if (success) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Check-In berhasil untuk kamar " + reservation.getRoomId());
-            alert.showAndWait();
-
-            // **Tambahkan pemanggilan refresh statistik**
-            ReceptionistDashboardController dashboardController = new ReceptionistDashboardController();
-            dashboardController.loadStatistics();
-
-            refreshData(); // Refresh daftar reservasi yang masih pending
-        } else {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Gagal melakukan Check-In.");
-            alert.showAndWait();
+        try {
+            reservationService.processCheckIn(reservation.getId());
+            AlertHelper.showInformation("Sukses", "Check-In berhasil untuk kamar " + reservation.getRoomId());
+            refreshData();
+        } catch (BookingException e) {
+            AlertHelper.showWarning("Proses Dibatalkan", e.getMessage());
+        } catch (Exception e) {
+            AlertHelper.showError("Error", "Gagal melakukan Check-In karena masalah server.");
+            e.printStackTrace();
         }
     }
-
 
     @FXML
     public void refreshData() {
@@ -93,4 +82,3 @@ public class CheckInController {
         new Thread(task).start();
     }
 }
-

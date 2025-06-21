@@ -3,17 +3,17 @@ package com.hotelapp.controller.resepsionis;
 import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.model.Penalty;
 import com.hotelapp.model.Reservation;
+import com.hotelapp.service.BookingException;
+import com.hotelapp.service.ReservationService;
+import com.hotelapp.util.AlertHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
-
 import java.util.Optional;
 
 public class CheckOutController {
@@ -26,14 +26,12 @@ public class CheckOutController {
     @FXML private TableColumn<Reservation, String> statusColumn;
     @FXML private TableColumn<Reservation, Void> actionColumn;
 
-    // Menyimpan data reservasi yang akan ditampilkan di TableView.
-    private ObservableList<Reservation> reservationList = FXCollections.observableArrayList();
+    private final ReservationService reservationService = new ReservationService();
 
     @FXML
     public void initialize() {
-        // Binding properti dari model Reservation ke TableView
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("userId"));      // Ganti menjadi "guestName" jika diperlukan.
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("guestName"));
         roomColumn.setCellValueFactory(new PropertyValueFactory<>("roomId"));
         checkInTimeColumn.setCellValueFactory(new PropertyValueFactory<>("checkInTime"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -42,21 +40,16 @@ public class CheckOutController {
         refreshData();
     }
 
-    /**
-     * Menambahkan tombol aksi "Check-Out" untuk setiap baris pada TableView.
-     */
     private void addActionButtons() {
-        actionColumn.setCellFactory(col -> new TableCell<Reservation, Void>() {
+        actionColumn.setCellFactory(col -> new TableCell<>() {
             private final Button checkOutBtn = new Button("Check-Out");
-
             {
-                checkOutBtn.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white;");
                 checkOutBtn.setOnAction(event -> {
                     Reservation reservation = getTableView().getItems().get(getIndex());
                     processCheckOut(reservation);
                 });
+                checkOutBtn.getStyleClass().add("button-danger");
             }
-
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
@@ -65,126 +58,77 @@ public class CheckOutController {
         });
     }
 
-    /**
-     * Proses check-out untuk reservasi yang dipilih.
-     * - Validasi bahwa status reservasi adalah "checked_in".
-     * - Tanyakan apakah akan menerapkan denda.
-     * - Jika ya, tampilkan dialog untuk input denda dan proses melalui DAO.
-     * - Lanjutkan proses check-out.
-     */
     private void processCheckOut(Reservation reservation) {
-        if (!reservation.getStatus().equalsIgnoreCase("checked_in")) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "Reservasi ini belum di-check-in!");
-            alert.showAndWait();
-            return;
-        }
+        if (reservation == null) return;
 
-        // Tanyakan apakah akan menambahkan denda
-        Alert confirmAlert = new Alert(
-                Alert.AlertType.CONFIRMATION,
-                "Apakah ada denda yang ingin diterapkan pada reservasi ini?",
-                ButtonType.YES,
-                ButtonType.NO
-        );
-        Optional<ButtonType> confirm = confirmAlert.showAndWait();
-        if (confirm.isPresent() && confirm.get() == ButtonType.YES) {
-            boolean penaltyApplied = handleAddPenalty(reservation);
-            if (!penaltyApplied) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Gagal menerapkan denda.");
-                alert.showAndWait();
-                return;
+        Optional<ButtonType> response = AlertHelper.showConfirmation("Konfirmasi Denda",
+                "Apakah ada denda yang ingin diterapkan pada reservasi ini?", ButtonType.YES, ButtonType.NO);
+        if (response.isPresent() && response.get() == ButtonType.YES) {
+            Optional<Penalty> penaltyResult = showPenaltyInputDialog();
+            if (penaltyResult.isPresent()) {
+                executeFinalCheckOut(reservation, penaltyResult.get());
+            } else {
+                AlertHelper.showInformation("Dibatalkan", "Proses check-out dibatalkan.");
             }
-        }
-
-        // Proses check-out reservasi
-        boolean success = ReservationDAO.processCheckOut(reservation.getId());
-        if (success) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                    "Check-Out berhasil untuk kamar " + reservation.getRoomId());
-            alert.showAndWait();
-            refreshData();
         } else {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Gagal melakukan Check-Out.");
-            alert.showAndWait();
+            executeFinalCheckOut(reservation, null);
         }
     }
 
-    /**
-     * Menampilkan dialog input denda dan menerapkan denda melalui DAO.
-     * Method internal yang menerima parameter Reservation.
-     */
-    private boolean handleAddPenalty(Reservation reservation) {
-        Dialog<Penalty> dialog = new Dialog<>();
-        dialog.setTitle("Tambah Denda untuk Reservasi " + reservation.getId());
-        dialog.setHeaderText("Masukkan detail denda:");
+    private void executeFinalCheckOut(Reservation reservation, Penalty penalty) {
+        try {
+            reservationService.processCheckOut(reservation.getId(), penalty);
+            AlertHelper.showInformation("Sukses", "Check-Out berhasil diproses.");
+            refreshData();
+        } catch (BookingException e) {
+            AlertHelper.showWarning("Gagal", e.getMessage());
+        } catch (Exception e) {
+            AlertHelper.showError("Error", "Gagal memproses check-out karena masalah server.");
+            e.printStackTrace();
+        }
+    }
 
-        // Tambahkan tombol "Tambahkan" dan Cancel.
+    private Optional<Penalty> showPenaltyInputDialog() {
+        Dialog<Penalty> dialog = new Dialog<>();
+        dialog.setTitle("Tambah Denda");
+        dialog.setHeaderText("Masukkan detail denda yang akan diterapkan.");
         ButtonType addButtonType = new ButtonType("Tambahkan", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
 
-        // Buat GridPane sebagai layout input.
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-
         TextField amountField = new TextField();
-        amountField.setPromptText("Jumlah denda");
+        amountField.setPromptText("Contoh: 50000");
         TextField reasonField = new TextField();
-        reasonField.setPromptText("Alasan denda");
-
+        reasonField.setPromptText("Contoh: Kunci kamar hilang");
         grid.add(new Label("Jumlah:"), 0, 0);
         grid.add(amountField, 1, 0);
         grid.add(new Label("Alasan:"), 0, 1);
         grid.add(reasonField, 1, 1);
-
         dialog.getDialogPane().setContent(grid);
 
-        // Hanya aktifkan tombol "Tambahkan" jika field jumlah tidak kosong.
-        Node addButton = dialog.getDialogPane().lookupButton(addButtonType);
-        addButton.setDisable(true);
+        dialog.getDialogPane().lookupButton(addButtonType).setDisable(true);
         amountField.textProperty().addListener((obs, oldVal, newVal) -> {
-            addButton.setDisable(newVal.trim().isEmpty());
+            dialog.getDialogPane().lookupButton(addButtonType).setDisable(newVal.trim().isEmpty());
         });
 
-        // Konversi input dialog menjadi objek Penalty.
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == addButtonType) {
                 try {
-                    double amount = Double.parseDouble(amountField.getText().trim());
-                    String reason = reasonField.getText().trim();
-                    // Status denda default misalnya "pending"
-                    return new Penalty(reservation.getId(), amount, reason, "pending");
-                } catch (NumberFormatException e) {
-                    return null;
-                }
+                    double amount = Double.parseDouble(amountField.getText());
+                    String reason = reasonField.getText().isBlank() ? "Denda keterlambatan/kerusakan" : reasonField.getText();
+                    return new Penalty(0, amount, reason, "pending");
+                } catch (NumberFormatException e) { return null; }
             }
             return null;
         });
-
-        Optional<Penalty> result = dialog.showAndWait();
-        if (result.isPresent() && result.get() != null) {
-            Penalty penalty = result.get();
-            // Pertama, simpan detail denda ke database via PenaltyDAO.
-            boolean penaltyRecorded = com.hotelapp.dao.PenaltyDAO.addPenalty(penalty);
-            if (!penaltyRecorded) {
-                System.err.println("Gagal menyimpan detail penalty ke tabel penalties");
-                return false;
-            }
-            // Kedua, update data reservasi (misalnya total_price dan status denda)
-            boolean reservationUpdated = ReservationDAO.applyPenalty(reservation.getId(), penalty.getAmount());
-            return reservationUpdated;
-        }
-        return false;
+        return dialog.showAndWait();
     }
 
-    /**
-     * Memuat ulang data reservasi untuk check-out.
-     * Proses pengambilan data dijalankan pada thread terpisah agar UI tidak terblokir.
-     */
     @FXML
     public void refreshData() {
-        Task<ObservableList<Reservation>> task = new Task<ObservableList<Reservation>>() {
+        Task<ObservableList<Reservation>> task = new Task<>() {
             @Override
             protected ObservableList<Reservation> call() throws Exception {
                 return FXCollections.observableArrayList(ReservationDAO.getReservationsForCheckOut());
