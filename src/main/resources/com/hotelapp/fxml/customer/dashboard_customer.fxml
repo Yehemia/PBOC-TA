@@ -1,28 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:id="mainBorderPane"
-            fx:controller="com.hotelapp.controller.customer.DashboardCustomerController">
-    <top>
-        <Label fx:id="welcomeLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Selamat Datang, Customer" />
-    </top>
+<?import javafx.scene.image.Image?>
+<BorderPane styleClass="main-bg" stylesheets="@../../styles/customer-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.customer.DashboardCustomerController">
     <left>
-        <VBox spacing="20" style="-fx-background-color: #2c3e50; -fx-padding: 10;">
+        <VBox prefWidth="300.0" spacing="15.0" styleClass="sidebar">
             <children>
-                <Label text="Menu" style="-fx-text-fill: white; -fx-font-size: 20;"/>
-                <Button fx:id="dashboardButton" text="Dashboard" maxWidth="200" style="-fx-background-color: transparent; -fx-text-fill: white;"/>
-                <Button fx:id="historyButton" text="History Booking" maxWidth="200" style="-fx-background-color: transparent; -fx-text-fill: white;"/>
-                <Button fx:id="profileButton" text="Profile" maxWidth="200" style="-fx-background-color: transparent; -fx-text-fill: white;"/>
-                <Button fx:id="logoutButton" text="Logout" maxWidth="200" style="-fx-background-color: transparent; -fx-text-fill: white;"/>
+                <VBox alignment="CENTER" spacing="10.0" styleClass="sidebar-header">
+                    <children>
+                        <ImageView fitHeight="130.0" fitWidth="150.0">
+                            <image>
+                                <Image url="@../../images/logo.png" />
+                            </image>
+                        </ImageView>
+                        <Label fx:id="welcomeLabel" alignment="CENTER" text="Selamat datang,..." textAlignment="CENTER" wrapText="true" />
+                    </children>
+                </VBox>
+                <VBox alignment="TOP_CENTER" spacing="15.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Button fx:id="dashboardButton" mnemonicParsing="false" onAction="#handleMenuClick" styleClass="sidebar-button" text="Daftar Kamar" />
+                        <Button fx:id="historyButton" mnemonicParsing="false" onAction="#handleMenuClick" styleClass="sidebar-button" text="History Booking" />
+                        <Button fx:id="profileButton" mnemonicParsing="false" onAction="#handleMenuClick" styleClass="sidebar-button" text="Profile" />
+                    </children>
+                    <VBox.margin>
+                        <Insets top="30.0" />
+                    </VBox.margin>
+                </VBox>
+                <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#logout" styleClass="sidebar-button" text="Logout">
+                    <VBox.margin>
+                        <Insets bottom="20.0" left="50.0" right="50.0" />
+                    </VBox.margin>
+                </Button>
             </children>
         </VBox>
     </left>
     <center>
-        <AnchorPane fx:id="contentPane"/>
+        <AnchorPane fx:id="contentPane" BorderPane.alignment="CENTER" />
     </center>
 </BorderPane>

@@ -1,120 +1,138 @@
 package com.hotelapp.controller.customer;
 
 import com.hotelapp.model.Room;
+import com.hotelapp.model.RoomType;
 import com.hotelapp.model.User;
 import com.hotelapp.util.Session;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import java.io.IOException;
 
 public class DashboardCustomerController {
 
+    @FXML private BorderPane mainPane;
+    @FXML private AnchorPane contentPane;
+    @FXML private ImageView logoImageView;
     @FXML private Label welcomeLabel;
     @FXML private Button dashboardButton;
     @FXML private Button historyButton;
     @FXML private Button profileButton;
     @FXML private Button logoutButton;
-
-    // Container center yang akan diisi secara dinamis
-    @FXML private AnchorPane contentPane;
+    private Button currentButton;
 
     @FXML
     public void initialize() {
-        System.out.println("Initializing DashboardCustomerController");
-
-        User currentUser = Session.getInstance().getCurrentUser();
-        welcomeLabel.setText(currentUser != null ? "Selamat datang, " + currentUser.getName() : "Selamat datang, Tamu");
-
-        dashboardButton.setOnAction(event -> loadDashboardContent());
-        historyButton.setOnAction(event -> loadHistoryContent());
-        profileButton.setOnAction(event -> loadProfileContent());
-        logoutButton.setOnAction(event -> logout());
-
-        // Tampilkan konten dashboard awal (misalnya, daftar kamar)
+        loadWelcomeMessage();
         loadDashboardContent();
+        setActiveButton(dashboardButton);
     }
 
-    // Memuat konten dashboard (daftar kamar) dari FXML terpisah
+    private void loadWelcomeMessage() {
+        User currentUser = Session.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            welcomeLabel.setText("Selamat datang,\n" + currentUser.getName());
+        } else {
+            welcomeLabel.setText("Selamat Datang!");
+        }
+    }
+
+    @FXML
+    private void handleMenuClick(ActionEvent event) {
+        Button clickedButton = (Button) event.getSource();
+        if (clickedButton == currentButton) return;
+
+        setActiveButton(clickedButton);
+
+        if (clickedButton == dashboardButton) {
+            loadDashboardContent();
+        } else if (clickedButton == historyButton) {
+            loadContent("/com/hotelapp/fxml/customer/history.fxml");
+        } else if (clickedButton == profileButton) {
+            loadContent("/com/hotelapp/fxml/customer/profile.fxml");
+        }
+    }
+
     private void loadDashboardContent() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/DashboardContent.fxml"));
             Parent dashboardContent = loader.load();
-            // Dapatkan controller dari dashboardContent.fxml
             DashboardContentController contentController = loader.getController();
-            // Set dashboard controller (this) ke controller konten
             contentController.setDashboardCustomerController(this);
-
-            contentPane.getChildren().setAll(dashboardContent);
-            AnchorPane.setTopAnchor(dashboardContent, 0.0);
-            AnchorPane.setRightAnchor(dashboardContent, 0.0);
-            AnchorPane.setBottomAnchor(dashboardContent, 0.0);
-            AnchorPane.setLeftAnchor(dashboardContent, 0.0);
+            setPaneContent(dashboardContent);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
-    // Metode untuk memuat tampilan history booking (sesuaikan jika sudah ada FXML untuk History)
-    private void loadHistoryContent() {
+    private void loadContent(String fxmlPath) {
         try {
-            Parent historyContent = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/customer/history.fxml"));
-            contentPane.getChildren().setAll(historyContent);
-            AnchorPane.setTopAnchor(historyContent, 0.0);
-            AnchorPane.setRightAnchor(historyContent, 0.0);
-            AnchorPane.setBottomAnchor(historyContent, 0.0);
-            AnchorPane.setLeftAnchor(historyContent, 0.0);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            Parent view = FXMLLoader.load(getClass().getResource(fxmlPath));
+            setPaneContent(view);
+        } catch (Exception e) {
+            System.err.println("Gagal memuat FXML: " + fxmlPath);
+            e.printStackTrace();
         }
     }
 
-    // Metode untuk memuat tampilan profil (sesuaikan jika sudah ada FXML untuk Profile)
-    private void loadProfileContent() {
-        try {
-            Parent profileContent = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/customer/profile.fxml"));
-            contentPane.getChildren().setAll(profileContent);
-            AnchorPane.setTopAnchor(profileContent, 0.0);
-            AnchorPane.setRightAnchor(profileContent, 0.0);
-            AnchorPane.setBottomAnchor(profileContent, 0.0);
-            AnchorPane.setLeftAnchor(profileContent, 0.0);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+    private void setPaneContent(Parent content) {
+        contentPane.getChildren().setAll(content);
+        AnchorPane.setTopAnchor(content, 0.0);
+        AnchorPane.setBottomAnchor(content, 0.0);
+        AnchorPane.setLeftAnchor(content, 0.0);
+        AnchorPane.setRightAnchor(content, 0.0);
     }
 
-    // Untuk logout, kita ganti keseluruhan scene ke halaman login
-    private void logout() {
+    public void openBooking(RoomType selectedRoomType) {
         try {
-            // Bersihkan sesi
-            Session.getInstance().setCurrentUser(null);
-            Parent loginRoot = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/login.fxml"));
-            Stage stage = (Stage) logoutButton.getScene().getWindow();
-            stage.setScene(new Scene(loginRoot));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    // Method openBooking yang dapat dipanggil dari RoomCell melalui DashboardContentController
-    public void openBooking(Room selectedRoom) {
-        try {
-            System.out.println("✅ Navigasi ke booking.fxml dengan kamar: " + selectedRoom.getRoomNumber());
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/booking.fxml"));
             Parent root = loader.load();
             BookingController bookingController = loader.getController();
-            bookingController.setRoom(selectedRoom);
+            bookingController.setRoomType(selectedRoomType);
 
             Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Form Pemesanan");
             stage.setScene(new Scene(root));
-            stage.show();
+            stage.setResizable(false);
+            stage.showAndWait();
         } catch (IOException e) {
-            System.err.println("❌ Gagal memuat booking.fxml: " + e.getMessage());
+            System.err.println("Gagal memuat booking.fxml: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void setActiveButton(Button button) {
+        if (currentButton != null) {
+            currentButton.getStyleClass().remove("sidebar-button-selected");
+        }
+
+        button.getStyleClass().add("sidebar-button-selected");
+        currentButton = button;
+    }
+
+    @FXML
+    public void logout() {
+        try {
+            Session.getInstance().clearSession();
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            Parent loginRoot = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/login.fxml"));
+            Scene scene = new Scene(loginRoot);
+            stage.setScene(scene);
+            stage.centerOnScreen();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 }

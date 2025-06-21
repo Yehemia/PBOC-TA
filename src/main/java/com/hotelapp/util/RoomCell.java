@@ -2,16 +2,17 @@ package com.hotelapp.util;
 
 import com.hotelapp.controller.customer.DashboardCustomerController;
 import com.hotelapp.controller.customer.RoomCellController;
-import com.hotelapp.model.Room;
+import com.hotelapp.model.RoomType; // <-- DIUBAH dari Room ke RoomType
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListCell;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox; // <-- Diubah dari HBox ke VBox sesuai FXML kartu baru kita
 
 import java.io.IOException;
 
-public class RoomCell extends ListCell<Room> {
+// 1. Kelas sekarang bekerja dengan objek RoomType
+public class RoomCell extends ListCell<RoomType> {
     private FXMLLoader loader;
-    private HBox root;
+    private VBox root; // Menggunakan VBox sebagai root dari RoomCell.fxml
     private RoomCellController controller;
     private DashboardCustomerController dashboardController;
 
@@ -19,31 +20,30 @@ public class RoomCell extends ListCell<Room> {
         this.dashboardController = dashboardController;
     }
 
-    protected void updateItem(Room room, boolean empty) {
-        super.updateItem(room, empty);
-        try {
-            if (empty || room == null) {
-                setGraphic(null);
-            } else {
-                if (loader == null) {
-                    loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/RoomCell.fxml"));
-                    try {
-                        root = loader.load();
-                        controller = loader.getController();
-                    } catch (IOException e) {
-                        System.err.println("❌ Failed to load RoomCell.fxml: " + e.getMessage());
-                        return;
-                    }
-                }
+    // 2. Metode updateItem sekarang menerima objek RoomType
+    @Override
+    protected void updateItem(RoomType roomType, boolean empty) {
+        super.updateItem(roomType, empty);
 
-                if (controller != null) {
-                    controller.setRoomData(room, dashboardController);
-                    setGraphic(root);
+        if (empty || roomType == null) {
+            setText(null);
+            setGraphic(null);
+        } else {
+            if (loader == null) {
+                loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/RoomCell.fxml"));
+                try {
+                    root = loader.load();
+                    controller = loader.getController();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-        } catch (Exception e) {
-            System.err.println("❌ Error in RoomCell.updateItem(): " + e.getMessage());
+
+            if (controller != null) {
+                // 3. Memanggil metode baru yang benar di RoomCellController
+                controller.setRoomTypeData(roomType, dashboardController);
+                setGraphic(root);
+            }
         }
     }
-
 }

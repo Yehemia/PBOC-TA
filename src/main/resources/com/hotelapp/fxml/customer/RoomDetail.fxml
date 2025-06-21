@@ -1,21 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="10" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.customer.RoomDetailController" style="-fx-padding: 20;">
-    <!-- Gambar besar kamar -->
-    <ImageView fx:id="roomImage" fitWidth="300" fitHeight="200" />
+<BorderPane prefHeight="650.0" prefWidth="600.0" styleClass="detail-pane" stylesheets="@../../styles/room-detail-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.customer.RoomDetailController">
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="detail-scroll-pane">
+            <content>
+                <VBox>
+                    <children>
+                        <ImageView fx:id="roomImage" fitHeight="300.0" pickOnBounds="true" preserveRatio="true" />
+                        <VBox spacing="5.0" styleClass="detail-content-box">
+                            <children>
+                                <Label fx:id="roomTypeLabel" styleClass="detail-title" text="Tipe Kamar" />
+                                <Label fx:id="roomNumberLabel" styleClass="detail-subtitle" text="Kamar Nomor..." />
 
-    <!-- Informasi kamar -->
-    <Label fx:id="roomNumberLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Nomor Kamar:" />
-    <Label fx:id="roomTypeLabel" style="-fx-font-size: 16px;" text="Tipe: " />
-    <Label fx:id="priceLabel" style="-fx-font-size: 16px;" text="Harga: " />
-    <Label fx:id="roomDescLabel" style="-fx-font-size: 14px;" text="Deskripsi:" wrapText="true" />
+                                <Label styleClass="detail-section-title" text="Highlights" />
+                                <FlowPane fx:id="highlightsPane" hgap="10.0" vgap="10.0" />
 
-    <!-- Tombol booking dan tutup -->
-    <Button fx:id="bookingButton" text="Pesan Kamar" style="-fx-background-color: #28a745; -fx-text-fill: white;" onAction="#onBookingButtonAction" />
-    <Button fx:id="closeButton" text="Tutup" onAction="#closeWindow" />
-</VBox>
+                                <Label styleClass="detail-section-title" text="Deskripsi" />
+                                <Label fx:id="descriptionLabel" styleClass="detail-description" text="Deskripsi..." wrapText="true" />
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <BorderPane styleClass="detail-footer">
+            <left>
+                <VBox>
+                    <children>
+                        <Label fx:id="priceLabel" styleClass="detail-price-text" text="Rp..." />
+                        <Label styleClass="detail-price-subtext" text="per malam" />
+                    </children>
+                </VBox>
+            </left>
+            <right>
+                <Button fx:id="bookingButton" mnemonicParsing="false" onAction="#onBookingButtonAction" styleClass="detail-book-button" text="Pesan Tipe Ini" />
+            </right>
+        </BorderPane>
+    </bottom>
+</BorderPane>

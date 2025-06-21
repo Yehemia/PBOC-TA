@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+.root {
+    -fx-font-family: "Poppins", sans-serif;
+}
+.main-bg {
+    -fx-background-color: #F4F7FC; /* Latar utama yang terang */
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+    -fx-background-color: #2C3E50; /* Biru Malam */
+    -fx-background-radius: 0 35 35 0;
+}
+.sidebar-header {
+    -fx-padding: 30 20;
+}
+.sidebar-header .label {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+    -fx-text-fill: white;
+}
+.sidebar-button {
+    -fx-background-color: #E0E0E0;
+    -fx-text-fill: #2C3E50;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-background-radius: 25;
+    -fx-pref-height: 50;
+    -fx-pref-width: 200;
+    -fx-cursor: hand;
+}
+.sidebar-button:hover { -fx-background-color: white; }
+.sidebar-button-selected {
+    -fx-background-color: #3498DB;
+    -fx-text-fill: white;
+}
+
+/* --- KONTEN UTAMA --- */
+.content-top-bar {
+    -fx-padding: 15 30;
+    -fx-alignment: center-left;
+}
+.search-bar {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-prompt-text-fill: #95a5a6;
+    -fx-font-size: 13px;
+    -fx-padding: 5 15;
+    -fx-pref-height: 40;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);
+}
+.profile-icon {
+    -fx-icon-color: #2C3E50;
+    -fx-icon-size: 28;
+    -fx-cursor: hand;
+}
+.content-scroll-pane { -fx-background-color: transparent; }
+.flow-pane-rooms { -fx-padding: 0 30 30 30; }
+
+/* --- KARTU KAMAR (Desain Terang) --- */
+.room-card-customer {
+    -fx-background-color: white;
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 5);
+    -fx-pref-width: 280px;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+    -fx-min-height: 320px;
+}
+.room-card-customer:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 25, 0, 0, 8);
+    -fx-border-color: #5D5FEF;
+}
+.room-card-image-wrapper {
+    -fx-background-radius: 10px;
+    -fx-background-color: black;
+}
+.room-card-image-wrapper .image-view { -fx-background-radius: 10px; }
+.room-card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1E1E1E;
+}
+.room-card-details {
+    -fx-font-size: 12px;
+    -fx-text-fill: #757575;
+}
+.room-card-price {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2C3E50;
+}
+.room-card-button, .room-card-button-detail {
+    -fx-font-weight: 600;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-padding: 8px 12px;
+}
+.room-card-button {
+    -fx-background-color: #3F6373;
+    -fx-text-fill: white;
+}
+.room-card-button:hover { -fx-background-color: #507A8B; }
+.room-card-button-detail {
+    -fx-background-color: #E8E8FF;
+    -fx-text-fill: #5D5FEF;
+}
+.room-card-button-detail:hover { -fx-background-color: #D6D6FF; }
+
+/* --- Style untuk History Table (Light Theme) --- */
+.history-table .column-header-background {
+    -fx-background-color: #F4F7FC; /* Warna latar header terang */
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 0 0 2 0; /* Garis bawah tebal untuk header */
+}
+.history-table .column-header .label {
+    -fx-text-fill: #2C3E50; /* Teks header gelap */
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-padding: 15px;
+}
+.history-table .table-cell {
+    -fx-padding: 15px;
+    -fx-font-size: 13px;
+    -fx-border-color: #ECF0F1; /* Garis bawah tipis antar baris */
+    -fx-border-width: 0 0 1 0;
+}
+.history-table .table-row-cell:odd{
+    -fx-background-color: #FFFFFF;
+}
+.history-table .table-row-cell:even{
+    -fx-background-color: #F8F9FA;
+}

@@ -1,6 +1,9 @@
 package com.hotelapp.controller.customer;
 
+import com.hotelapp.dao.RoomDAO;
 import com.hotelapp.model.Room;
+import com.hotelapp.model.RoomType;
+import com.hotelapp.util.AlertHelper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,103 +12,107 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.net.URL;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class RoomCellController {
 
     @FXML private ImageView roomImage;
-    @FXML private Label roomNumberLabel;
     @FXML private Label roomTypeLabel;
     @FXML private Label priceLabel;
+    @FXML private Label availabilityLabel;
+    @FXML private Button detailButton; // <-- TAMBAHKAN DEKLARASI INI
     @FXML private Button bookButton;
 
-    private Room room;
+    private RoomType roomType;
     private DashboardCustomerController dashboardController;
-    /**
-     * Metode untuk mengatur data kamar ke tampilan UI
-     * @param room objek Room yang akan ditampilkan
-     */
-    public void setRoomData(Room room, DashboardCustomerController dashboardController) {
-        this.room = room;
+
+    public void setRoomTypeData(RoomType roomType, DashboardCustomerController dashboardController) {
+        this.roomType = roomType;
         this.dashboardController = dashboardController;
 
-        roomNumberLabel.setText("Nomor: " + room.getRoomNumber());
-        roomTypeLabel.setText("Tipe: " + room.getRoomType());
-        priceLabel.setText("Harga: $" + room.getPrice());
+        roomTypeLabel.setText(roomType.getName());
+
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+        priceLabel.setText(currencyFormat.format(roomType.getPrice()) + " / malam");
+
+        availabilityLabel.setText(roomType.getAvailableRoomCount() + " kamar tersedia");
+        if (roomType.getAvailableRoomCount() <= 3) {
+            availabilityLabel.setStyle("-fx-text-fill: #E67E22;");
+        } else {
+            availabilityLabel.setStyle("-fx-text-fill: #27AE60;");
+        }
 
         try {
-            // Debug: Cetak path gambar sebelum memuat
-            System.out.println("Original image URL: " + room.getImageUrl());
-
-            // Format path yang benar
-            String imagePath = room.getImageUrl().startsWith("/")
-                    ? room.getImageUrl()
-                    : "/com/hotelapp/images/" + room.getImageUrl();
-
-            System.out.println("Final image path: " + imagePath);
-
-            URL imageUrl = getClass().getResource(imagePath);
-            if (imageUrl == null) {
-                System.err.println("Image not found: " + imagePath);
+            String imageUrlPath = roomType.getImageUrl();
+            if (imageUrlPath != null && !imageUrlPath.isBlank()) {
+                String imagePath = imageUrlPath.startsWith("/") ? imageUrlPath : "/com/hotelapp/images/" + imageUrlPath;
+                Image img = new Image(getClass().getResource(imagePath).toExternalForm());
+                roomImage.setImage(img);
+            } else {
                 loadDefaultImage();
-                return;
             }
-
-            Image img = new Image(imageUrl.toExternalForm());
-            roomImage.setImage(img);
         } catch (Exception e) {
-            System.err.println("Error loading image: " + e.getMessage());
             loadDefaultImage();
         }
 
-        detailButton.setOnAction(event -> {
-            System.out.println("Membuka detail kamar untuk: " + room.getRoomNumber());
-            openRoomDetail(room);
-        });
+        // --- TAMBAHKAN AKSI UNTUK TOMBOL DETAIL DI SINI ---
+        detailButton.setOnAction(event -> openRoomDetail(roomType));
 
         bookButton.setOnAction(event -> {
-            System.out.println("✅ Tombol 'Pesan Sekarang' ditekan!");
-            if (dashboardController != null) {
-                System.out.println("✅ Navigasi ke booking.fxml dengan kamar: " + room.getRoomNumber());
-                dashboardController.openBooking(room);
-            } else {
-                System.err.println("❌ Gagal mendapatkan DashboardCustomerController!");
+            if (this.dashboardController != null) {
+                this.dashboardController.openBooking(this.roomType);
             }
         });
     }
-    private void openRoomDetail(Room room) {
+
+    /**
+     * Metode baru untuk membuka halaman detail.
+     * Ia akan mencari satu contoh kamar yang tersedia dari tipe ini untuk ditampilkan.
+     */
+    private void openRoomDetail(RoomType roomType) {
         try {
+            // --- PERBAIKAN DI SINI: Panggil metode DAO baru yang aman ---
+            Room sampleRoom = RoomDAO.findSampleAvailableRoomByType(roomType.getId());
+
+            // Jika tidak ada kamar yang 'available', mungkin kita bisa ambil kamar manapun
+            // dari tipe itu hanya untuk menampilkan detail tipe kamarnya.
+            if (sampleRoom == null) {
+                // Ini memerlukan metode DAO lain, untuk sekarang kita beri pesan saja.
+                AlertHelper.showInformation("Info", "Saat ini tidak ada kamar tersedia untuk tipe ini, namun detail tipe kamar tetap ditampilkan.");
+                // Kita buat "dummy" room object dengan nomor 0
+                sampleRoom = new Room(0, 0, "N/A", roomType);
+            }
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/RoomDetail.fxml"));
             Parent detailRoot = loader.load();
+
             RoomDetailController detailController = loader.getController();
-            detailController.setRoom(room);
+            detailController.setRoom(sampleRoom); // Kirim objek Room yang sudah lengkap
             detailController.setDashboardController(this.dashboardController);
+
             Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Detail Tipe Kamar - " + roomType.getName());
             stage.setScene(new Scene(detailRoot));
-            stage.setTitle("Detail Kamar");
-            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
             stage.showAndWait();
         } catch (Exception e) {
-            System.err.println("Gagal memuat detail kamar: " + e.getMessage());
+            System.err.println("Gagal memuat halaman detail kamar.");
+            e.printStackTrace();
         }
     }
 
-    @FXML private Button detailButton;
     private void loadDefaultImage() {
         try {
-            String defaultPath = "/com/hotelapp/images/default_room.jpeg";
-            URL defaultUrl = getClass().getResource(defaultPath);
-            if (defaultUrl == null) {
-                System.err.println("Default image not found: " + defaultPath);
-                return;
-            }
-            roomImage.setImage(new Image(defaultUrl.toExternalForm()));
+            String defaultPath = "/com/hotelapp/images/default_room.png";
+            Image defaultImg = new Image(getClass().getResource(defaultPath).toExternalForm());
+            roomImage.setImage(defaultImg);
         } catch (Exception e) {
-            System.err.println("Failed to load default image: " + e.getMessage());
+            System.err.println("Gagal memuat gambar default.");
         }
     }
-
 }
-

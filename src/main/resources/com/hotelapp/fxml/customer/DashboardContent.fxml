@@ -1,8 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.customer.DashboardContentController">
-    <ListView fx:id="roomList" layoutX="10" layoutY="10" prefWidth="580" prefHeight="380"/>
-</AnchorPane>
+<StackPane stylesheets="@../../styles/customer-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.customer.DashboardContentController">
+    <children>
+        <BorderPane>
+            <top>
+                <HBox styleClass="content-top-bar">
+                    <children>
+                        <TextField promptText="Cari kamar..." styleClass="search-bar" HBox.hgrow="ALWAYS" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <FontIcon iconLiteral="fas-user-circle" />
+                    </children>
+                </HBox>
+            </top>
+            <center>
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll-pane" BorderPane.alignment="CENTER">
+                    <content>
+                        <FlowPane fx:id="roomFlowPane" hgap="25" styleClass="flow-pane-rooms" vgap="25" />
+                    </content>
+                </ScrollPane>
+            </center>
+        </BorderPane>
+
+        <ProgressIndicator fx:id="loadingIndicator" maxHeight="60.0" maxWidth="60.0" visible="false" />
+
+    </children>
+</StackPane>
