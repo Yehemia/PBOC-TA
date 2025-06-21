@@ -3,6 +3,7 @@ package com.hotelapp.controller.login;
 import com.hotelapp.dao.UserDAO;
 import com.hotelapp.model.User;
 import com.hotelapp.service.VerificationService;
+import com.hotelapp.util.AlertHelper;
 import com.hotelapp.util.EmailUtil;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -32,14 +33,12 @@ public class RegisterController {
         String email = emailField.getText();
         String password = passwordField.getText();
 
-        // VALIDASI BARU: Cek apakah ada field yang kosong atau hanya berisi spasi
         if (username.isBlank() || name.isBlank() || email.isBlank() || password.isBlank()) {
-            showAlert(Alert.AlertType.WARNING, "Form Tidak Lengkap", "Semua field wajib diisi!");
-            return; // Hentikan eksekusi jika ada field yang kosong
+            AlertHelper.showWarning( "Form Tidak Lengkap", "Semua field wajib diisi!");
+            return;
         }
 
-        // Registrasi user dengan role "PENDING"
-        boolean success = UserDAO.registerUser(name, email, username, password, "PENDING");
+        boolean success = UserDAO.registerUser(username, name, email, password, "PENDING");
 
         if (success) {
             User user = UserDAO.getUserByUsername(username);
@@ -49,13 +48,12 @@ public class RegisterController {
                     new Thread(() -> EmailUtil.sendVerificationEmail(user.getEmail(), token)).start();
                 } catch (SQLException e) {
                     e.printStackTrace();
-                    showAlert(Alert.AlertType.ERROR, "Kesalahan Database", "Gagal membuat token verifikasi.");
+                    AlertHelper.showError("Kesalahan Database", "Gagal membuat token verifikasi.");
                 }
                 showVerificationDialog(user);
             }
         } else {
-            // DIUBAH: Tampilkan alert jika registrasi gagal
-            showAlert(Alert.AlertType.ERROR, "Registrasi Gagal", "Username atau Email mungkin sudah terdaftar. Silakan gunakan yang lain.");
+            AlertHelper.showError("Registrasi Gagal", "Username atau Email mungkin sudah terdaftar. Silakan gunakan yang lain.");
         }
     }
 
@@ -69,21 +67,18 @@ public class RegisterController {
             Stage dialogStage = new Stage();
             dialogStage.setTitle("Verifikasi Akun");
             dialogStage.initModality(Modality.APPLICATION_MODAL);
-            // Inisialisasi owner stage agar dialog modal muncul di atas jendela utama
             dialogStage.initOwner((Stage) usernameField.getScene().getWindow());
 
             Scene scene = new Scene(root);
-            // Terapkan CSS ke dialog verifikasi
+
             URL cssUrl = getClass().getResource("/styles/verify-style.css");
             if (cssUrl != null) {
                 scene.getStylesheets().add(cssUrl.toExternalForm());
             }
 
             dialogStage.setScene(scene);
-            dialogStage.setResizable(false); // Dialog verifikasi sebaiknya tidak bisa di-resize
-            dialogStage.showAndWait(); // Gunakan showAndWait agar jendela utama tidak bisa diklik
-
-            // Setelah dialog ditutup, kembali ke halaman login
+            dialogStage.setResizable(false);
+            dialogStage.showAndWait();
             handleShowLogin(null);
 
         } catch (IOException e) {
@@ -94,7 +89,6 @@ public class RegisterController {
     @FXML
     public void handleShowLogin(ActionEvent event) {
         try {
-            // Ambil stage saat ini dari komponen mana pun
             Stage stage = (Stage) (event != null ? ((Hyperlink) event.getSource()).getScene().getWindow() : usernameField.getScene().getWindow());
             Parent root = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/login.fxml"));
             Scene newScene = new Scene(root, stage.getWidth(), stage.getHeight());
@@ -109,12 +103,4 @@ public class RegisterController {
         }
     }
 
-    // Metode bantuan untuk menampilkan alert
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 }

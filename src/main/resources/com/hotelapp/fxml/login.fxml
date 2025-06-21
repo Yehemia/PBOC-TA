@@ -12,13 +12,9 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<!-- KESALAHAN 1: Hapus prefHeight dan prefWidth dari sini -->
 <StackPane fx:id="rootPane"  prefWidth="1200.0" prefHeight="720.0"  styleClass="main-bg" stylesheets="@../styles/login-style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.login.LoginController">
     <children>
         <Region styleClass="bottom-arc" StackPane.alignment="BOTTOM_CENTER" />
-
-        <!-- Wadah utama untuk konten. Pusatkan dan beri batasan! -->
-        <!-- KESALAHAN 2 & 3: Hapus prefHeight dan maxHeight yang tidak perlu. Cukup maxWidth. -->
         <VBox alignment="CENTER" maxWidth="350.0" spacing="15.0" StackPane.alignment="CENTER">
             <children>
                 <ImageView fitHeight="192.0" fitWidth="270.0" pickOnBounds="true" preserveRatio="true">
@@ -26,18 +22,13 @@
                         <Image url="@../images/logo.png" />
                     </image>
                 </ImageView>
-
-                <!-- KESALAHAN 4: VBox ini tidak perlu prefHeight. Biarkan isinya yang menentukan tingginya. -->
                 <VBox alignment="TOP_LEFT" spacing="10.0" styleClass="form-card">
                     <children>
                         <Label styleClass="form-label" text="Username" />
-                        <!-- Biarkan TextField mengambil lebar dari parent-nya yang sudah dibatasi -->
-                        <TextField fx:id="usernameField" promptText="enter username" styleClass="form-input" />
+                        <TextField fx:id="usernameField" promptText="username" styleClass="form-input" />
 
-                        <Label styleClass="form-label" text="password" />
-                        <PasswordField fx:id="passwordField" promptText="enter password" styleClass="form-input" />
-
-                        <!-- KESALAHAN 5: prefWidth pada tombol tidak perlu jika ingin memenuhi VBox. Gunakan maxWidth. -->
+                        <Label styleClass="form-label" text="Password" />
+                        <PasswordField fx:id="passwordField" promptText="password" styleClass="form-input" />
                         <Button fx:id="loginButton" maxWidth="Infinity" onAction="#handleLogin" prefHeight="40.0" styleClass="sign-in-button" text="Sign In" />
 
                         <VBox alignment="CENTER" spacing="5.0">
