@@ -8,13 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PenaltyDAO {
-
-    // Menambahkan penalty baru ke dalam tabel penalties.
-    public static boolean addPenalty(Penalty penalty) {
+    public static boolean addPenalty(Penalty penalty, Connection con) throws SQLException {
         String sql = "INSERT INTO penalties (reservation_id, amount, reason, penalty_status, created_at) VALUES (?, ?, ?, ?, NOW())";
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+        try (PreparedStatement ps = con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, penalty.getReservationId());
             ps.setDouble(2, penalty.getAmount());
             ps.setString(3, penalty.getReason());
@@ -29,8 +25,6 @@ public class PenaltyDAO {
                 }
                 return true;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return false;
     }
@@ -63,20 +57,47 @@ public class PenaltyDAO {
         return penalties;
     }
 
-    // Metode untuk memperbarui status penalty, misalnya dari "pending" menjadi "paid"
-    public static boolean updatePenaltyStatus(int penaltyId, String newStatus) {
-        String sql = "UPDATE penalties SET penalty_status = ? WHERE id = ?";
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+    public static Penalty getPenaltyById(int penaltyId, Connection conn) throws SQLException {
+        String sql = "SELECT * FROM penalties WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, penaltyId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Penalty penalty = new Penalty();
+                    penalty.setId(rs.getInt("id"));
+                    penalty.setReservationId(rs.getInt("reservation_id"));
+                    penalty.setAmount(rs.getDouble("amount"));
+                    penalty.setReason(rs.getString("reason"));
+                    penalty.setPenaltyStatus(rs.getString("penalty_status"));
+                    return penalty;
+                }
+            }
+        }
+        return null;
+    }
 
-            ps.setString(1, newStatus);
-            ps.setInt(2, penaltyId);
-            int affectedRows = ps.executeUpdate();
-            return affectedRows > 0;
+    public static double getTotalPaidPenalties() {
+        String sql = "SELECT SUM(amount) FROM penalties WHERE penalty_status = 'paid'";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return 0.0;
+    }
+
+    public static boolean updatePenaltyStatus(int penaltyId, String newStatus, Connection conn) throws SQLException {
+        String sql = "UPDATE penalties SET penalty_status = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setInt(2, penaltyId);
+            return ps.executeUpdate() > 0;
+        }
     }
 
 }

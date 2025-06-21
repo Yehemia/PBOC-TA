@@ -216,17 +216,18 @@ public class ReservationDAO {
 
     public static Map<String, Integer> getRoomTypeReservationCount() {
         Map<String, Integer> roomTypeCounts = new HashMap<>();
-        String sql = "SELECT r.room_type_id, COUNT(res.id) AS reservation_count " +
+        String sql = "SELECT rt.name, COUNT(res.id) AS reservation_count " +
                 "FROM reservations res " +
                 "JOIN rooms r ON res.room_id = r.id " +
-                "GROUP BY r.room_type_id";
+                "JOIN room_types rt ON r.room_type_id = rt.id " +
+                "GROUP BY rt.name";
 
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                String roomType = rs.getString("room_type_id");
+                String roomType = rs.getString("name");
                 int count = rs.getInt("reservation_count");
                 roomTypeCounts.put(roomType, count);
             }

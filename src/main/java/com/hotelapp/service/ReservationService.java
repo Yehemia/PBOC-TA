@@ -3,10 +3,7 @@ package com.hotelapp.service;
 import com.hotelapp.dao.PenaltyDAO;
 import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.dao.RoomDAO;
-import com.hotelapp.model.Penalty;
-import com.hotelapp.model.Reservation;
-import com.hotelapp.model.Room;
-import com.hotelapp.model.User;
+import com.hotelapp.model.*;
 import com.hotelapp.util.Database;
 
 import java.sql.Connection;
@@ -16,45 +13,34 @@ import java.time.temporal.ChronoUnit;
 
 public class ReservationService {
 
-    public Reservation createBooking(User customer, Room room, LocalDate checkIn, LocalDate checkOut, String paymentMethod)
+    public Reservation createBooking(User customer, RoomType roomType, LocalDate checkIn, LocalDate checkOut, String paymentMethod)
             throws SQLException, BookingException {
-        if (checkIn == null || checkOut == null || paymentMethod == null) {
-            throw new BookingException("Semua field wajib diisi.");
-        }
-        if (checkOut.isBefore(checkIn) || checkOut.isEqual(checkIn)) {
-            throw new BookingException("Tanggal Check-Out harus setelah tanggal Check-In.");
-        }
 
         long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
-        if (nights <= 0) {
-            throw new BookingException("Durasi menginap tidak valid.");
-        }
+        double totalPrice = roomType.getPrice() * nights;
 
-        double totalPrice = room.getRoomType().getPrice() * nights;
-        Reservation reservation = new Reservation(
-                customer.getId(),
-                room.getId(),
-                checkIn,
-                checkOut,
-                paymentMethod,
-                "online",
-                "pending",
-                totalPrice,
-                customer.getName()
-        );
         Connection conn = null;
         try {
             conn = Database.getConnection();
             conn.setAutoCommit(false);
+            Room availableRoom = RoomDAO.findFirstAvailableRoom(roomType.getId(), conn);
+            if (availableRoom == null) {
+                throw new BookingException("Maaf, semua kamar tipe " + roomType.getName() + " sudah penuh dipesan.");
+            }
+            RoomDAO.updateRoomStatus(availableRoom.getId(), "booked", conn);
+            Reservation reservation = new Reservation(
+                    customer.getId(),
+                    availableRoom.getId(),
+                    checkIn, checkOut, paymentMethod, "online", "pending",
+                    totalPrice, customer.getName()
+            );
             ReservationDAO.createReservation(reservation, conn);
-            RoomDAO.updateRoomStatus(room.getId(), "booked", conn);
-
             conn.commit();
-            System.out.println("✅ Booking berhasil dibuat & status kamar diupdate, ID: " + reservation.getId());
-            return reservation;}
-        catch (SQLException e) {
+            return reservation;
+
+        } catch (SQLException | BookingException e) {
             if (conn != null) conn.rollback();
-            throw new SQLException("Gagal menyimpan reservasi ke database.", e);
+            throw e;
         } finally {
             if (conn != null) {
                 conn.setAutoCommit(true);
@@ -63,44 +49,35 @@ public class ReservationService {
         }
     }
 
-    public Reservation createOfflineBooking(Room room, String guestName, LocalDate checkIn, LocalDate checkOut, String paymentMethod)
-            throws SQLException, BookingException {
-
-        if (guestName == null || guestName.isBlank()) {
-            throw new BookingException("Nama tamu wajib diisi.");
-        }
-        if (room == null) {
-            throw new BookingException("Kamar harus dipilih.");
-        }
-
+    public Reservation createOfflineBooking(RoomType roomType, String guestName, LocalDate checkIn, LocalDate checkOut, String paymentMethod) throws SQLException, BookingException {
         long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
-        double totalPrice = room.getRoomType().getPrice() * nights;
-
-        Reservation reservation = new Reservation(
-                0,
-                room.getId(),
-                checkIn,
-                checkOut,
-                paymentMethod,
-                "offline",
-                "pending",
-                totalPrice,
-                guestName
-        );
+        double totalPrice = roomType.getPrice() * nights;
 
         Connection conn = null;
         try {
             conn = Database.getConnection();
             conn.setAutoCommit(false);
+
+            Room availableRoom = RoomDAO.findFirstAvailableRoom(roomType.getId(), conn);
+            if (availableRoom == null) {
+                throw new BookingException("Maaf, semua kamar tipe " + roomType.getName() + " sudah penuh.");
+            }
+
+            RoomDAO.updateRoomStatus(availableRoom.getId(), "booked", conn);
+            Reservation reservation = new Reservation(
+                    0,
+                    availableRoom.getId(),
+                    checkIn, checkOut, paymentMethod, "offline", "pending",
+                    totalPrice, guestName
+            );
             ReservationDAO.createReservation(reservation, conn);
-            RoomDAO.updateRoomStatus(room.getId(), "booked", conn);
 
             conn.commit();
-            System.out.println("✅ Booking offline berhasil dibuat & status kamar diupdate, ID: " + reservation.getId());
-            return reservation;}
-        catch (SQLException e) {
+            return reservation;
+
+        } catch (SQLException | BookingException e) {
             if (conn != null) conn.rollback();
-            throw new SQLException("Gagal menyimpan reservasi offline ke database.", e);
+            throw e;
         } finally {
             if (conn != null) {
                 conn.setAutoCommit(true);
