@@ -12,19 +12,21 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class HistoryBookingController {
+
     @FXML private TableView<Reservation> historyTable;
     @FXML private TableColumn<Reservation, Integer> idColumn;
+    @FXML private TableColumn<Reservation, Integer> roomNumberColumn;
+    @FXML private TableColumn<Reservation, String> roomTypeColumn;
     @FXML private TableColumn<Reservation, LocalDate> checkInColumn;
     @FXML private TableColumn<Reservation, LocalDate> checkOutColumn;
-    @FXML private TableColumn<Reservation, String> statusColumn;
 
     @FXML
     public void initialize() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        roomNumberColumn.setCellValueFactory(new PropertyValueFactory<>("roomNumber"));
+        roomTypeColumn.setCellValueFactory(new PropertyValueFactory<>("roomTypeName"));
         checkInColumn.setCellValueFactory(new PropertyValueFactory<>("checkIn"));
         checkOutColumn.setCellValueFactory(new PropertyValueFactory<>("checkOut"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-
         loadHistory();
     }
 
@@ -36,4 +38,3 @@ public class HistoryBookingController {
         }
     }
 }
-

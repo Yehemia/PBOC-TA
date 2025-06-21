@@ -133,7 +133,7 @@ public class PDFGenerator {
 
         cell.addElement(new Paragraph("Metode Pembayaran", FONT_SECTION_TITLE));
         cell.addElement(createDetailRow("Metode", reservation.getPaymentMethod() != null ? reservation.getPaymentMethod().toUpperCase() : "N/A", false));
-        cell.addElement(createDetailRow("Status Pembayaran", "LUNAS", true)); // Argumen ketiga 'true' untuk status
+        cell.addElement(createDetailRow("Status Pembayaran", "LUNAS", true));
 
         table.addCell(cell);
         return table;

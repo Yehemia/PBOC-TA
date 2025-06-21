@@ -1,8 +1,7 @@
 package com.hotelapp.controller.customer;
 
-import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.model.Reservation;
-import com.hotelapp.model.Room;
+import com.hotelapp.model.RoomType;
 import com.hotelapp.model.User;
 import com.hotelapp.service.BookingException;
 import com.hotelapp.service.ReservationService;
@@ -15,82 +14,51 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-import net.synedra.validatorfx.Validator;
-
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+
 
 public class BookingController {
 
+    @FXML private Label roomInfoLabel;
     @FXML private DatePicker checkInPicker;
     @FXML private DatePicker checkOutPicker;
     @FXML private ComboBox<String> paymentMethodComboBox;
     @FXML private Button confirmBookingButton;
-    private Room selectedRoom;
-    private final Validator validator = new Validator();
-    private ReservationService reservationService = new ReservationService();
-    @FXML private Label roomInfoLabel;
 
-
-
+    private RoomType selectedRoomType;
+    private final ReservationService reservationService = new ReservationService();
 
     @FXML
     public void initialize() {
-        paymentMethodComboBox.setItems(FXCollections.observableArrayList("online", "pay_later"));
-        confirmBookingButton.setOnAction(event -> processBooking());
+        paymentMethodComboBox.setItems(FXCollections.observableArrayList("online"));
         setupValidation();
     }
 
-    public void setRoom(Room room) {
-        this.selectedRoom = room;
-        roomInfoLabel.setText("untuk Kamar " + room.getRoomType().getName() + " - " + room.getRoomNumber());
+    public void setRoomType(RoomType roomType) {
+        this.selectedRoomType = roomType;
+        roomInfoLabel.setText("Pemesanan untuk Tipe Kamar: " + roomType.getName());
     }
 
     private void setupValidation() {
-        BooleanBinding isFormInvalid = Bindings.createBooleanBinding(() -> {
-                    LocalDate checkIn = checkInPicker.getValue();
-                    LocalDate checkOut = checkOutPicker.getValue();
-                    String paymentMethod = paymentMethodComboBox.getValue();
-
-                    if (checkIn == null) return true;
-                    if (checkOut == null) return true;
-                    if (paymentMethod == null) return true;
-                    if (!checkOut.isAfter(checkIn)) return true;
-                    return false;
-
-                },
-
-                checkInPicker.valueProperty(),
-                checkOutPicker.valueProperty(),
-                paymentMethodComboBox.valueProperty());
-
-        confirmBookingButton.disableProperty().bind(isFormInvalid);
+        BooleanBinding isInvalid = Bindings.createBooleanBinding(() ->
+                        checkInPicker.getValue() == null ||
+                                checkOutPicker.getValue() == null ||
+                                paymentMethodComboBox.getValue() == null ||
+                                !checkOutPicker.getValue().isAfter(checkInPicker.getValue()),
+                checkInPicker.valueProperty(), checkOutPicker.valueProperty(), paymentMethodComboBox.valueProperty()
+        );
+        confirmBookingButton.disableProperty().bind(isInvalid);
     }
 
-    private void navigateToPayment(Reservation reservation) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/payment.fxml"));
-            Parent root = loader.load();
-
-            PaymentController paymentController = loader.getController();
-            paymentController.setReservation(reservation);
-
-            Stage stage = (Stage) confirmBookingButton.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("❌ Gagal memuat halaman pembayaran: " + e.getMessage());
-        }
-    }
-
+    @FXML
     public void processBooking() {
-        LocalDate checkInDate = checkInPicker.getValue();
-        LocalDate checkOutDate = checkOutPicker.getValue();
-        String paymentMethod = paymentMethodComboBox.getValue();
         User currentUser = Session.getInstance().getCurrentUser();
         if (currentUser == null) {
             AlertHelper.showError("Login Dibutuhkan", "Anda harus login untuk melakukan pemesanan.");
@@ -99,14 +67,34 @@ public class BookingController {
 
         try {
             Reservation newReservation = reservationService.createBooking(
-                    currentUser, selectedRoom, checkInPicker.getValue(),
+                    currentUser, selectedRoomType, checkInPicker.getValue(),
                     checkOutPicker.getValue(), paymentMethodComboBox.getValue()
             );
+            ((Stage) confirmBookingButton.getScene().getWindow()).close();
             navigateToPayment(newReservation);
+
         } catch (BookingException e) {
             AlertHelper.showWarning("Booking Gagal", e.getMessage());
         } catch (SQLException e) {
             AlertHelper.showError("Error Database", "Gagal menyimpan pemesanan.");
+            e.printStackTrace();
+        }
+    }
+
+    private void navigateToPayment(Reservation reservation) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/payment.fxml"));
+            Parent root = loader.load();
+            PaymentController paymentController = loader.getController();
+            paymentController.setReservation(reservation);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Pembayaran");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+        } catch (IOException e) {
+            System.err.println("Gagal memuat halaman pembayaran: " + e.getMessage());
             e.printStackTrace();
         }
     }

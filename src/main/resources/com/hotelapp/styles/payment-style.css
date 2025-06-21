@@ -1,0 +1,77 @@
+/* --- payment-style.css --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+.payment-root {
+    -fx-background-color: rgba(0, 0, 0, 0.4); /* Latar belakang semi-transparan */
+    -fx-font-family: "Poppins", sans-serif;
+}
+
+.payment-card {
+    -fx-background-color: white;
+    -fx-background-radius: 20px;
+    -fx-padding: 30px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 0, 5);
+}
+
+.payment-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2C3E50;
+}
+
+.summary-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #34495E;
+    -fx-border-color: #ECF0F1;
+    -fx-border-width: 0 0 1 0; /* Garis bawah */
+    -fx-padding: 0 0 10px 0;
+}
+
+.summary-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.summary-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #2C3E50;
+}
+
+.total-amount-label {
+    -fx-font-size: 28px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #E67E22; /* Oranye untuk harga total */
+}
+
+.qr-code-wrapper {
+    -fx-padding: 10px;
+    -fx-border-color: #ECF0F1;
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+}
+
+.instruction-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #7f8c8d;
+    -fx-text-alignment: center;
+}
+
+.timer-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #C0392B; /* Merah untuk timer */
+}
+
+.confirm-button {
+    -fx-background-color: #27AE60;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px 20px;
+    -fx-cursor: hand;
+}
+.confirm-button:hover {
+    -fx-background-color: derive(#27AE60, -10%);
+}

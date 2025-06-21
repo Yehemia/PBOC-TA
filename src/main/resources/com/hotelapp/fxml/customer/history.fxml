@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.hotelapp.controller.customer.HistoryBookingController">
-    <center>
-        <TableView fx:id="historyTable">
+<VBox spacing="15.0" stylesheets="@../../styles/customer-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.customer.HistoryBookingController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+    <children>
+        <Label style="-fx-font-size: 24px; -fx-font-weight: 700; -fx-text-fill: #2C3E50;" text="Riwayat Booking Anda" />
+        <Label style="-fx-text-fill: #7f8c8d;" text="Berikut adalah daftar semua pemesanan yang pernah Anda lakukan." />
+
+        <TableView fx:id="historyTable" styleClass="history-table" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="idColumn" text="ID" />
-                <TableColumn fx:id="checkInColumn" text="Check-In" />
-                <TableColumn fx:id="checkOutColumn" text="Check-Out" />
-                <TableColumn fx:id="statusColumn" text="Status" />
+                <TableColumn fx:id="idColumn" prefWidth="100.0" text="ID Booking" />
+                <TableColumn fx:id="roomNumberColumn" prefWidth="120.0" text="Nomor Kamar" />
+                <TableColumn fx:id="roomTypeColumn" prefWidth="180.0" text="Tipe Kamar" />
+                <TableColumn fx:id="checkInColumn" prefWidth="150.0" text="Check-In" />
+                <TableColumn fx:id="checkOutColumn" prefWidth="150.0" text="Check-Out" />
             </columns>
         </TableView>
-    </center>
-</BorderPane>
+    </children>
+</VBox>
