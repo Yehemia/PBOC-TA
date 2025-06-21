@@ -38,7 +38,8 @@ public class ReservationDAO {
 
     public static List<Reservation> getReservationsByUserId(int userId) {
         List<Reservation> reservations = new ArrayList<>();
-        String sql = "SELECT res.id, res.check_in, res.check_out, res.status, " +
+        // PERBAIKAN 1: Tambahkan "res.room_id" di dalam SELECT
+        String sql = "SELECT res.id, res.room_id, res.check_in, res.check_out, res.status, " +
                 "r.room_number, rt.name as room_type_name " +
                 "FROM reservations res " +
                 "JOIN rooms r ON res.room_id = r.id " +
@@ -50,8 +51,10 @@ public class ReservationDAO {
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
+                // PERBAIKAN 2: Panggil konstruktor yang menyertakan roomId
                 Reservation reservation = new Reservation(
                         rs.getInt("id"),
+                        rs.getInt("room_id"),
                         rs.getDate("check_in").toLocalDate(),
                         rs.getDate("check_out").toLocalDate(),
                         rs.getString("status"),
@@ -198,7 +201,7 @@ public class ReservationDAO {
     }
 
     public static double getTotalRevenue() {
-        String sql = "SELECT SUM(total_price) FROM reservations WHERE payment_status = 'paid'";
+        String sql = "SELECT SUM(total_price) FROM reservations WHERE payment_status = 'pai d' AND status != 'cancelled'";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -272,5 +275,14 @@ public class ReservationDAO {
             }
         }
         return null;
+    }
+
+    public static void updateStatus(int reservationId, String newStatus, Connection conn) throws SQLException {
+        String sql = "UPDATE reservations SET status = ? WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setInt(2, reservationId);
+            ps.executeUpdate();
+        }
     }
 }

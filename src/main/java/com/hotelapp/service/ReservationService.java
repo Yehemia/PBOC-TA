@@ -180,6 +180,41 @@ public class ReservationService {
             }
         }
     }
+
+    public void cancelReservation(Reservation reservation) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = Database.getConnection();
+            conn.setAutoCommit(false); // Memulai transaksi
+
+            // 1. Ubah status reservasi menjadi "cancelled"
+            ReservationDAO.updateStatus(reservation.getId(), "cancelled", conn);
+
+            // 2. Ubah status kamar kembali menjadi "available"
+            RoomDAO.updateRoomStatus(reservation.getRoomId(), "available", conn);
+
+            conn.commit(); // Commit transaksi jika semua berhasil
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Rollback jika terjadi error
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            throw e; // Lemparkan exception agar bisa ditangani oleh controller
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }
 
 

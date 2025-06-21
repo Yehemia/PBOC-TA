@@ -21,6 +21,7 @@
                 <TableColumn fx:id="roomTypeColumn" prefWidth="180.0" text="Tipe Kamar" />
                 <TableColumn fx:id="checkInColumn" prefWidth="150.0" text="Check-In" />
                 <TableColumn fx:id="checkOutColumn" prefWidth="150.0" text="Check-Out" />
+                <TableColumn fx:id="statusColumn" prefWidth="100.0" text="Status" />
             </columns>
         </TableView>
     </children>

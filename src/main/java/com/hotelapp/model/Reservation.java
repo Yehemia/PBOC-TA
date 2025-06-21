@@ -20,6 +20,11 @@ public class Reservation {
     private String penaltyStatus;
     private String paymentStatus;
     private String guestName;
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
     private String roomTypeName;
     private int roomNumber;
 
@@ -82,6 +87,16 @@ public class Reservation {
 
     public Reservation(int id, LocalDate checkIn, LocalDate checkOut, String status, String roomTypeName, int roomNumber) {
         this.id = id;
+        this.checkIn = checkIn;
+        this.checkOut = checkOut;
+        this.status = status;
+        this.roomTypeName = roomTypeName;
+        this.roomNumber = roomNumber;
+    }
+
+    public Reservation(int id, int roomId, LocalDate checkIn, LocalDate checkOut, String status, String roomTypeName, int roomNumber) {
+        this.id = id;
+        this.roomId = roomId;
         this.checkIn = checkIn;
         this.checkOut = checkOut;
         this.status = status;
