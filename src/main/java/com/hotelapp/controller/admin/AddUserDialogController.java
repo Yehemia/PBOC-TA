@@ -57,7 +57,6 @@ public class AddUserDialogController {
             }
             success = UserDAO.registerUser(username, name, email, password, role);
         } else {
-            // Mode Edit User
             userToEdit.setUsername(username);
             userToEdit.setName(name);
             userToEdit.setEmail(email);

@@ -2,17 +2,16 @@ package com.hotelapp.util;
 
 import com.hotelapp.controller.customer.DashboardCustomerController;
 import com.hotelapp.controller.customer.RoomCellController;
-import com.hotelapp.model.RoomType; // <-- DIUBAH dari Room ke RoomType
+import com.hotelapp.model.RoomType;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ListCell;
-import javafx.scene.layout.VBox; // <-- Diubah dari HBox ke VBox sesuai FXML kartu baru kita
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 
-// 1. Kelas sekarang bekerja dengan objek RoomType
 public class RoomCell extends ListCell<RoomType> {
     private FXMLLoader loader;
-    private VBox root; // Menggunakan VBox sebagai root dari RoomCell.fxml
+    private VBox root;
     private RoomCellController controller;
     private DashboardCustomerController dashboardController;
 
@@ -20,7 +19,6 @@ public class RoomCell extends ListCell<RoomType> {
         this.dashboardController = dashboardController;
     }
 
-    // 2. Metode updateItem sekarang menerima objek RoomType
     @Override
     protected void updateItem(RoomType roomType, boolean empty) {
         super.updateItem(roomType, empty);
@@ -40,7 +38,6 @@ public class RoomCell extends ListCell<RoomType> {
             }
 
             if (controller != null) {
-                // 3. Memanggil metode baru yang benar di RoomCellController
                 controller.setRoomTypeData(roomType, dashboardController);
                 setGraphic(root);
             }

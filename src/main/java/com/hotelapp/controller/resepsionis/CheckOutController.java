@@ -19,7 +19,7 @@ import java.util.Optional;
 public class CheckOutController {
 
     @FXML private TableView<Reservation> checkOutTable;
-    @FXML private TableColumn<Reservation, Integer> idColumn;
+    @FXML private TableColumn<Reservation, String> idColumn;
     @FXML private TableColumn<Reservation, String> nameColumn;
     @FXML private TableColumn<Reservation, Integer> roomColumn;
     @FXML private TableColumn<Reservation, String> checkInTimeColumn;
@@ -30,7 +30,8 @@ public class CheckOutController {
 
     @FXML
     public void initialize() {
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idColumn.setText("Kode Booking");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("bookingCode"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("guestName"));
         roomColumn.setCellValueFactory(new PropertyValueFactory<>("roomId"));
         checkInTimeColumn.setCellValueFactory(new PropertyValueFactory<>("checkInTime"));

@@ -25,6 +25,9 @@ public class PenaltyService {
             if (!"pending".equalsIgnoreCase(penalty.getPenaltyStatus())) {
                 throw new BookingException("Denda ini sudah lunas atau statusnya tidak valid.");
             }
+            if (penalty != null) {
+                ReservationDAO.updatePenaltyStatus(penalty.getReservationId(), "paid", conn);
+            }
             if (paidAmount < penalty.getAmount()) {
                 throw new BookingException("Jumlah pembayaran kurang dari total denda.");
             }

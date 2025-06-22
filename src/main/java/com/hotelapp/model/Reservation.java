@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit;
 
 public class Reservation {
     private int id;
+    private String bookingCode;
     private int userId;
     private int roomId;
     private LocalDate checkIn;
@@ -21,9 +22,6 @@ public class Reservation {
     private String paymentStatus;
     private String guestName;
 
-    public void setTotalPrice(double totalPrice) {
-        this.totalPrice = totalPrice;
-    }
 
     private String roomTypeName;
     private int roomNumber;
@@ -109,6 +107,14 @@ public class Reservation {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getBookingCode() {
+        return bookingCode;
+    }
+
+    public void setBookingCode(String bookingCode) {
+        this.bookingCode = bookingCode;
     }
 
     public int getUserId() {
@@ -211,6 +217,9 @@ public class Reservation {
         this.guestName = guestName;
     }
 
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
     public LocalDateTime getExpectedCheckOutTime() {
         return this.checkOut.atTime(LocalTime.NOON);
     }

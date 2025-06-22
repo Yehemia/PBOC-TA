@@ -17,6 +17,8 @@ module com.hotelapp {
     requires org.kordamp.ikonli.core;
     requires jbcrypt;
     requires java.desktop;
+    requires org.json;
+    requires java.net.http;
     uses org.kordamp.ikonli.IkonProvider;
 
     opens com.hotelapp.images to javafx.graphics;

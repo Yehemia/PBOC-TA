@@ -9,19 +9,20 @@ import java.util.*;
 public class ReservationDAO {
 
     public static boolean createReservation(Reservation reservation, Connection con) throws SQLException {
-        String sql = "INSERT INTO reservations (user_id, room_id, check_in, check_out, payment_method, booking_type, status, total_price, created_at, guest_name) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
+        String sql = "INSERT INTO reservations (booking_code, user_id, room_id, check_in, check_out, payment_method, booking_type, status, total_price, created_at, guest_name) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)";
 
         try (PreparedStatement ps = con.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
-            ps.setInt(1, reservation.getUserId());
-            ps.setInt(2, reservation.getRoomId());
-            ps.setDate(3, java.sql.Date.valueOf(reservation.getCheckIn()));
-            ps.setDate(4, java.sql.Date.valueOf(reservation.getCheckOut()));
-            ps.setString(5, reservation.getPaymentMethod());
-            ps.setString(6, reservation.getBookingType());
-            ps.setString(7, reservation.getStatus());
-            ps.setDouble(8, reservation.getTotalPrice());
-            ps.setString(9, reservation.getGuestName());
+            ps.setString(1, reservation.getBookingCode());
+            ps.setInt(2, reservation.getUserId());
+            ps.setInt(3, reservation.getRoomId());
+            ps.setDate(4, java.sql.Date.valueOf(reservation.getCheckIn()));
+            ps.setDate(5, java.sql.Date.valueOf(reservation.getCheckOut()));
+            ps.setString(6, reservation.getPaymentMethod());
+            ps.setString(7, reservation.getBookingType());
+            ps.setString(8, reservation.getStatus());
+            ps.setDouble(9, reservation.getTotalPrice());
+            ps.setString(10, reservation.getGuestName());
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -38,8 +39,8 @@ public class ReservationDAO {
 
     public static List<Reservation> getReservationsByUserId(int userId) {
         List<Reservation> reservations = new ArrayList<>();
-        // PERBAIKAN 1: Tambahkan "res.room_id" di dalam SELECT
-        String sql = "SELECT res.id, res.room_id, res.check_in, res.check_out, res.status, " +
+        // PERBARUI QUERY: Tambahkan res.booking_code
+        String sql = "SELECT res.id, res.booking_code, res.room_id, res.check_in, res.check_out, res.status, " +
                 "r.room_number, rt.name as room_type_name " +
                 "FROM reservations res " +
                 "JOIN rooms r ON res.room_id = r.id " +
@@ -51,7 +52,6 @@ public class ReservationDAO {
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                // PERBAIKAN 2: Panggil konstruktor yang menyertakan roomId
                 Reservation reservation = new Reservation(
                         rs.getInt("id"),
                         rs.getInt("room_id"),
@@ -61,6 +61,8 @@ public class ReservationDAO {
                         rs.getString("room_type_name"),
                         rs.getInt("room_number")
                 );
+                // Ambil dan set kode booking
+                reservation.setBookingCode(rs.getString("booking_code"));
                 reservations.add(reservation);
             }
         } catch (Exception e) {
@@ -87,12 +89,18 @@ public class ReservationDAO {
 
     public static List<Reservation> getAllReservations() {
         List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT * FROM reservations";
+        String sql = "SELECT res.*, r.room_number " +
+                "FROM reservations res " +
+                "JOIN rooms r ON res.room_id = r.id " +
+                "ORDER BY res.id DESC";
+
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(mapReservation(rs));
+                Reservation reservation = mapReservation(rs);
+                reservation.setRoomNumber(rs.getInt("room_number"));
+                list.add(reservation);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,6 +129,79 @@ public class ReservationDAO {
     public static int getJumlahCheckOutHariIni() {
         String sql = "SELECT COUNT(*) FROM reservations WHERE status = 'checked_out' AND DATE(check_out_time) = CURDATE()";
         return getCount(sql);
+    }
+
+    public static int getReservationCount(String searchTerm, java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM reservations res WHERE (res.guest_name LIKE ? OR res.booking_code LIKE ?)");
+
+        if (startDate != null && endDate != null) {
+            sql.append(" AND res.check_in BETWEEN ? AND ?");
+        }
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            String searchPattern = "%" + searchTerm + "%";
+            ps.setString(paramIndex++, searchPattern);
+            ps.setString(paramIndex++, searchPattern);
+
+            if (startDate != null && endDate != null) {
+                ps.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+                ps.setDate(paramIndex++, java.sql.Date.valueOf(endDate));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static List<Reservation> getReservationsByPage(int pageIndex, int rowsPerPage, String searchTerm, java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        List<Reservation> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT res.*, r.room_number " +
+                        "FROM reservations res " +
+                        "JOIN rooms r ON res.room_id = r.id " +
+                        "WHERE (res.guest_name LIKE ? OR res.booking_code LIKE ?)"
+        );
+
+        if (startDate != null && endDate != null) {
+            sql.append(" AND res.check_in BETWEEN ? AND ?");
+        }
+
+        sql.append(" ORDER BY res.id DESC LIMIT ? OFFSET ?");
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            String searchPattern = "%" + searchTerm + "%";
+            ps.setString(paramIndex++, searchPattern);
+            ps.setString(paramIndex++, searchPattern);
+
+            if (startDate != null && endDate != null) {
+                ps.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+                ps.setDate(paramIndex++, java.sql.Date.valueOf(endDate));
+            }
+
+            ps.setInt(paramIndex++, rowsPerPage);
+            ps.setInt(paramIndex, pageIndex * rowsPerPage);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Reservation reservation = mapReservation(rs);
+                reservation.setRoomNumber(rs.getInt("room_number"));
+                list.add(reservation);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     private static int getCount(String sql) {
@@ -182,7 +263,7 @@ public class ReservationDAO {
     }
 
     private static Reservation mapReservation(ResultSet rs) throws SQLException {
-        return new Reservation(
+        Reservation reservation = new Reservation(
                 rs.getInt("id"),
                 rs.getInt("user_id"),
                 rs.getInt("room_id"),
@@ -198,10 +279,13 @@ public class ReservationDAO {
                 rs.getString("payment_status"),
                 rs.getString("guest_name")
         );
+        // Tambahkan baris ini
+        reservation.setBookingCode(rs.getString("booking_code"));
+        return reservation;
     }
 
     public static double getTotalRevenue() {
-        String sql = "SELECT SUM(total_price) FROM reservations WHERE payment_status = 'pai d' AND status != 'cancelled'";
+        String sql = "SELECT SUM(total_price) FROM reservations WHERE payment_status = 'paid' AND status != 'cancelled'";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

@@ -82,12 +82,12 @@ public class PDFGenerator {
             cell.addElement(logoPlaceholder);
         }
 
-        Paragraph p1 = new Paragraph("Thank you for booking with Kenangan Inn.", FONT_THANKYOU);
+        Paragraph p1 = new Paragraph("Thankyou for booking with Kenangan Inn", FONT_THANKYOU);
         p1.setAlignment(Element.ALIGN_CENTER);
         p1.setSpacingAfter(10f);
         cell.addElement(p1);
 
-        Paragraph p2 = new Paragraph("Terima kasih banyak sudah memilih Kenangan Inn untuk menginap! Kami senang bisa jadi bagian dari perjalanan Anda, dan semoga pengalaman menginapnya nyaman dan menyenangkan.", FONT_THANKYOU_BODY);
+        Paragraph p2 = new Paragraph("Terima kasih banyak sudah memilih Kengan Inn untuk menginap! Kami senang bisa jadi bagian dari perjalanan Anda, dan semoga pengalaman menginapnya nyaman dan menyenangkan.", FONT_THANKYOU_BODY);
         p2.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(p2);
 
@@ -106,12 +106,10 @@ public class PDFGenerator {
         cell.addElement(new Paragraph("BUKTI PEMESANAN KAMAR HOTEL", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16)));
         cell.addElement(new Paragraph("\n"));
 
-        String guestNameForPdf = customer != null ? customer.getName() : reservation.getGuestName();
-        String emailForPdf = customer != null ? customer.getEmail() : "[tidak tersedia]";
-        cell.addElement(createDetailRow("BOOKING ID", "INV-" + reservation.getId(), false));
+        cell.addElement(createDetailRow("BOOKING ID",  reservation.getBookingCode(), false));
         cell.addElement(createDetailRow("Tanggal Pemesanan", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM uuuu", new Locale("id", "ID"))), false));
-        cell.addElement(createDetailRow("Nama Tamu", guestNameForPdf, false));
-        cell.addElement(createDetailRow("Email", emailForPdf, false));
+        cell.addElement(createDetailRow("Nama Tamu", customer != null ? customer.getName() : reservation.getGuestName(), false));
+        cell.addElement(createDetailRow("Email", customer != null ? customer.getEmail() : "[tidak tersedia]", false));
 
         cell.addElement(new Chunk(new LineSeparator(0.5f, 100, BaseColor.LIGHT_GRAY, Element.ALIGN_CENTER, -5)));
 
@@ -133,7 +131,7 @@ public class PDFGenerator {
 
         cell.addElement(new Paragraph("Metode Pembayaran", FONT_SECTION_TITLE));
         cell.addElement(createDetailRow("Metode", reservation.getPaymentMethod() != null ? reservation.getPaymentMethod().toUpperCase() : "N/A", false));
-        cell.addElement(createDetailRow("Status Pembayaran", "LUNAS", true));
+        cell.addElement(createDetailRow("Status Pembayaran", "LUNAS", true)); // Argumen ketiga 'true' untuk status
 
         table.addCell(cell);
         return table;

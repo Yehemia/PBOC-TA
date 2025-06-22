@@ -24,7 +24,7 @@ import java.util.Optional;
 public class HistoryBookingController {
 
     @FXML private TableView<Reservation> historyTable;
-    @FXML private TableColumn<Reservation, Integer> idColumn;
+    @FXML private TableColumn<Reservation, String> idColumn;
     @FXML private TableColumn<Reservation, Integer> roomNumberColumn;
     @FXML private TableColumn<Reservation, String> roomTypeColumn;
     @FXML private TableColumn<Reservation, LocalDate> checkInColumn;
@@ -42,7 +42,8 @@ public class HistoryBookingController {
     }
 
     private void setupTableColumns() {
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("bookingCode"));
+        idColumn.setText("Kode Booking");
         roomNumberColumn.setCellValueFactory(new PropertyValueFactory<>("roomNumber"));
         roomTypeColumn.setCellValueFactory(new PropertyValueFactory<>("roomTypeName"));
         checkInColumn.setCellValueFactory(new PropertyValueFactory<>("checkIn"));
@@ -69,11 +70,7 @@ public class HistoryBookingController {
             {
                 btn.setOnAction((ActionEvent event) -> {
                     Reservation reservationData = getTableView().getItems().get(getIndex());
-
-                    // --- PERUBAHAN UTAMA ADA DI SINI ---
                     String message = "Apakah Anda yakin ingin membatalkan pesanan ini?";
-
-                    // Jika statusnya "paid", tambahkan pesan tambahan tentang refund manual.
                     if ("paid".equalsIgnoreCase(reservationData.getPaymentStatus())) {
                         message += "\n\nKarena pesanan ini sudah dibayar, proses pengembalian dana (refund) akan dilakukan secara manual oleh staf kami dalam 1-3 hari kerja.";
                     }

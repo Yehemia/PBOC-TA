@@ -1,6 +1,6 @@
 /* --- Style Sidebar --- */
 .sidebar {
-    -fx-background-color: -fx-card-bg; /* Warna sama dengan kartu agar serasi */
+    -fx-background-color: -fx-card-bg;
 }
 
 .sidebar-title {
@@ -214,6 +214,15 @@
     -fx-border-radius: 4px;
     -fx-background-radius: 4px;
 }
+.form-input.text-area .content {
+    -fx-background-color: -fx-main-bg;
+}
+
+/* Rule ini untuk memastikan warna teks placeholder juga konsisten */
+.form-input .prompt-text {
+    -fx-fill: -fx-text-secondary;
+    -fx-opacity: 0.7;
+}
 
 .edit-button {
     -fx-background-color: -fx-accent-orange;
@@ -321,5 +330,59 @@
 .split-pane > .split-pane-divider {
     -fx-background-color: #3A3F58; /* Menggunakan warna border yang sudah ada di tema */
     -fx-padding: 1px; /* Membuat garisnya lebih tipis */
+}
+
+.dialog-pane {
+    -fx-background-color: -fx-card-bg;
+}
+
+.dialog-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* Membuat ComboBox sesuai tema gelap */
+.combo-box {
+    -fx-background-color: -fx-main-bg;
+    -fx-border-color: #3A3F58;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+.combo-box .list-cell {
+    -fx-background-color: -fx-main-bg;
+    -fx-text-fill: -fx-text-secondary;
+}
+.combo-box .list-cell:hover {
+    -fx-background-color: #3A3F58;
+    -fx-text-fill: -fx-text-primary;
+}
+.combo-box .arrow {
+    -fx-background-color: -fx-accent-purple;
+}
+
+/* Membuat CheckListView sesuai tema gelap */
+.check-list-view {
+    -fx-background-color: -fx-main-bg;
+    -fx-border-color: #3A3F58;
+    -fx-border-radius: 4px;
+}
+.check-list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-secondary;
+}
+.check-list-view .list-cell:filled:hover {
+    -fx-background-color: #3A3F58;
+}
+.check-list-view .list-cell:filled:selected {
+    -fx-background-color: -fx-accent-purple;
+    -fx-text-fill: white;
+}
+.check-list-view .check-box-box {
+    -fx-background-color: transparent;
+    -fx-border-color: -fx-text-secondary;
+}
+.check-list-view .check-box:selected .mark {
+    -fx-background-color: white;
 }
 

@@ -5,6 +5,7 @@ import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.dao.RoomDAO;
 import com.hotelapp.model.*;
 import com.hotelapp.util.Database;
+import com.hotelapp.util.GeneratorUtil;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,12 +29,14 @@ public class ReservationService {
                 throw new BookingException("Maaf, semua kamar tipe " + roomType.getName() + " sudah penuh dipesan.");
             }
             RoomDAO.updateRoomStatus(availableRoom.getId(), "booked", conn);
+            String bookingCode = GeneratorUtil.generateBookingCode();
             Reservation reservation = new Reservation(
                     customer.getId(),
                     availableRoom.getId(),
                     checkIn, checkOut, paymentMethod, "online", "pending",
                     totalPrice, customer.getName()
             );
+            reservation.setBookingCode(bookingCode);
             ReservationDAO.createReservation(reservation, conn);
             conn.commit();
             return reservation;
@@ -64,12 +67,14 @@ public class ReservationService {
             }
 
             RoomDAO.updateRoomStatus(availableRoom.getId(), "booked", conn);
+            String bookingCode = GeneratorUtil.generateBookingCode();
             Reservation reservation = new Reservation(
                     0,
                     availableRoom.getId(),
                     checkIn, checkOut, paymentMethod, "offline", "pending",
                     totalPrice, guestName
             );
+            reservation.setBookingCode(bookingCode);
             ReservationDAO.createReservation(reservation, conn);
 
             conn.commit();
@@ -185,26 +190,23 @@ public class ReservationService {
         Connection conn = null;
         try {
             conn = Database.getConnection();
-            conn.setAutoCommit(false); // Memulai transaksi
+            conn.setAutoCommit(false);
 
-            // 1. Ubah status reservasi menjadi "cancelled"
             ReservationDAO.updateStatus(reservation.getId(), "cancelled", conn);
-
-            // 2. Ubah status kamar kembali menjadi "available"
             RoomDAO.updateRoomStatus(reservation.getRoomId(), "available", conn);
 
-            conn.commit(); // Commit transaksi jika semua berhasil
+            conn.commit();
 
         } catch (SQLException e) {
             if (conn != null) {
                 try {
-                    conn.rollback(); // Rollback jika terjadi error
+                    conn.rollback();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
             }
             e.printStackTrace();
-            throw e; // Lemparkan exception agar bisa ditangani oleh controller
+            throw e;
         } finally {
             if (conn != null) {
                 try {

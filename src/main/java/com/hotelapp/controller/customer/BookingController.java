@@ -14,14 +14,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 
 public class BookingController {
@@ -38,7 +36,7 @@ public class BookingController {
     @FXML
     public void initialize() {
         paymentMethodComboBox.setItems(FXCollections.observableArrayList("online"));
-        setupValidation();
+        setupValidationAndDatePickers();
     }
 
     public void setRoomType(RoomType roomType) {
@@ -46,7 +44,36 @@ public class BookingController {
         roomInfoLabel.setText("Pemesanan untuk Tipe Kamar: " + roomType.getName());
     }
 
-    private void setupValidation() {
+    private void setupValidationAndDatePickers() {
+        final LocalDate today = LocalDate.now();
+
+        checkInPicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isBefore(today));
+            }
+        });
+
+        checkOutPicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                LocalDate checkInDate = checkInPicker.getValue();
+                if (checkInDate == null) {
+                    setDisable(empty || date.isBefore(today.plusDays(1)));
+                } else {
+                    setDisable(empty || !date.isAfter(checkInDate));
+                }
+            }
+        });
+
+        checkInPicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && checkOutPicker.getValue() != null && !checkOutPicker.getValue().isAfter(newVal)) {
+                checkOutPicker.setValue(null);
+            }
+        });
+
         BooleanBinding isInvalid = Bindings.createBooleanBinding(() ->
                         checkInPicker.getValue() == null ||
                                 checkOutPicker.getValue() == null ||
@@ -85,17 +112,19 @@ public class BookingController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/payment.fxml"));
             Parent root = loader.load();
+
             PaymentController paymentController = loader.getController();
             paymentController.setReservation(reservation);
 
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Pembayaran");
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
+            Stage paymentStage = new Stage();
+            paymentStage.setTitle("Pembayaran");
+            paymentStage.initModality(Modality.APPLICATION_MODAL);
+            Scene scene = new Scene(root);
+            paymentStage.setScene(scene);
+            paymentStage.show();
         } catch (IOException e) {
-            System.err.println("Gagal memuat halaman pembayaran: " + e.getMessage());
             e.printStackTrace();
+            AlertHelper.showError("Gagal", "Tidak dapat membuka halaman pembayaran.");
         }
     }
 }

@@ -15,7 +15,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 public class CheckInController {
 
     @FXML private TableView<Reservation> checkInTable;
-    @FXML private TableColumn<Reservation, Integer> idColumn;
+    @FXML private TableColumn<Reservation, String> idColumn;
     @FXML private TableColumn<Reservation, String> nameColumn;
     @FXML private TableColumn<Reservation, Integer> roomColumn;
     @FXML private TableColumn<Reservation, String> checkInColumn;
@@ -26,7 +26,8 @@ public class CheckInController {
 
     @FXML
     public void initialize() {
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("bookingCode"));
+        idColumn.setText("Kode Booking");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("guestName"));
         roomColumn.setCellValueFactory(new PropertyValueFactory<>("roomId"));
         checkInColumn.setCellValueFactory(new PropertyValueFactory<>("checkIn"));
