@@ -19,13 +19,17 @@ public class RoomTypeService {
                 RoomTypeDAO.updateRoomType(roomType, con);
                 RoomTypeDAO.clearFacilitiesForRoomType(roomType.getId(), con);
                 for (Facility facility : facilities) {
-                    RoomTypeDAO.linkFacilityToRoomType(roomType.getId(), facility.getId(), con);
+                    if (facility != null) {
+                        RoomTypeDAO.linkFacilityToRoomType(roomType.getId(), facility.getId(), con);
+                    }
                 }
             } else {
                 int newRoomTypeId = RoomTypeDAO.createRoomType(roomType, con);
                 if (newRoomTypeId == -1) throw new SQLException("Gagal membuat RoomType baru.");
                 for (Facility facility : facilities) {
-                    RoomTypeDAO.linkFacilityToRoomType(newRoomTypeId, facility.getId(), con);
+                    if (facility != null) {
+                        RoomTypeDAO.linkFacilityToRoomType(newRoomTypeId, facility.getId(), con);
+                    }
                 }
             }
 

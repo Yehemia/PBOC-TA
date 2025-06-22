@@ -42,14 +42,14 @@ public class RoomDetailController {
         if (roomType == null) return;
 
         try {
-            String imageUrlPath = roomType.getImageUrl();
-            if (imageUrlPath != null && !imageUrlPath.isBlank()) {
-                String imagePath = imageUrlPath.startsWith("/") ? imageUrlPath : "/com/hotelapp/images/" + imageUrlPath;
-                Image img = new Image(getClass().getResource(imagePath).toExternalForm());
-                roomImage.setImage(img);
-            }
+
+            String imageUrl = roomType.getImageUrl();
+            if (imageUrl != null && !imageUrl.isBlank()) {
+                Image img = new Image(imageUrl, true);
+                roomImage.setImage(img);}
+
         } catch (Exception e) {
-            System.err.println("Gagal memuat gambar detail untuk: " + roomType.getImageUrl());
+            e.printStackTrace();
         }
 
         roomTypeLabel.setText(roomType.getName());

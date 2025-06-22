@@ -46,15 +46,15 @@ public class RoomCellController {
         }
 
         try {
-            String imageUrlPath = roomType.getImageUrl();
-            if (imageUrlPath != null && !imageUrlPath.isBlank()) {
-                String imagePath = imageUrlPath.startsWith("/") ? imageUrlPath : "/com/hotelapp/images/" + imageUrlPath;
-                Image img = new Image(getClass().getResource(imagePath).toExternalForm());
+            String imageUrl = roomType.getImageUrl();
+            if (imageUrl != null && !imageUrl.isBlank()) {
+                Image img = new Image(imageUrl, true);
                 roomImage.setImage(img);
             } else {
                 loadDefaultImage();
             }
         } catch (Exception e) {
+            e.printStackTrace();
             loadDefaultImage();
         }
 

@@ -250,22 +250,15 @@ public class UserDAO {
         String sqlUpdate = "UPDATE users SET password = ? WHERE id = ?";
 
         try (Connection conn = Database.getConnection()) {
-            // 1. Ambil hash password saat ini dari database
             try (PreparedStatement psUser = conn.prepareStatement(sqlUser)) {
                 psUser.setInt(1, userId);
                 ResultSet rs = psUser.executeQuery();
 
                 if (rs.next()) {
                     String currentHashedPassword = rs.getString("password");
-
-                    // 2. Verifikasi apakah password lama yang dimasukkan cocok
-                    //    PERBAIKAN DI SINI: Menggunakan verifyPassword, bukan checkPassword
                     if (PasswordUtil.verifyPassword(oldPassword, currentHashedPassword)) {
-
-                        // 3. Jika cocok, hash password baru
                         String newHashedPassword = PasswordUtil.hashPassword(newPassword);
 
-                        // 4. Update password di database dengan hash yang baru
                         try (PreparedStatement psUpdate = conn.prepareStatement(sqlUpdate)) {
                             psUpdate.setString(1, newHashedPassword);
                             psUpdate.setInt(2, userId);
@@ -278,7 +271,7 @@ public class UserDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace(); // Sebaiknya gunakan logger
+            e.printStackTrace();
         }
         return false;
     }

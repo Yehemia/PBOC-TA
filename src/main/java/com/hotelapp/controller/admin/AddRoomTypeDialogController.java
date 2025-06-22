@@ -9,26 +9,44 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 import org.controlsfx.control.CheckListView;
-import java.sql.SQLException;
+import org.json.JSONObject;
+
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 public class AddRoomTypeDialogController {
 
     @FXML private Label titleLabel;
-    @FXML private TextField nameField, priceField, maxGuestsField, bedInfoField, imageUrlField;
+    @FXML private TextField nameField, priceField, maxGuestsField, bedInfoField;
     @FXML private TextArea descriptionArea;
     @FXML private CheckListView<Facility> facilitiesListView;
     @FXML private Button saveButton;
+    @FXML private Label imageNameLabel;
 
     private RoomType roomTypeToEdit = null;
     private final RoomTypeService roomTypeService = new RoomTypeService();
+    private File selectedImageFile;
 
     @FXML
     public void initialize() {
-        ObservableList<Facility> allFacilities = FXCollections.observableArrayList(FacilityDAO.getAllFacilities());
-        facilitiesListView.setItems(allFacilities);
+        List<Facility> allFacilities = FacilityDAO.getAllFacilities();
+        if (allFacilities != null) {
+            facilitiesListView.setItems(FXCollections.observableArrayList(allFacilities));
+        }
     }
 
     public void initData(RoomType roomType) {
@@ -41,9 +59,34 @@ public class AddRoomTypeDialogController {
         descriptionArea.setText(roomType.getDescription());
         maxGuestsField.setText(String.valueOf(roomType.getMaxGuests()));
         bedInfoField.setText(roomType.getBedInfo());
-        imageUrlField.setText(roomType.getImageUrl());
-        for (Facility facility : roomType.getFacilities()) {
-            facilitiesListView.getCheckModel().check(facility);
+
+        if (roomType.getImageUrl() != null && !roomType.getImageUrl().isEmpty()) {
+            try {
+                URI uri = new URI(roomType.getImageUrl());
+                String path = uri.getPath();
+                imageNameLabel.setText(path.substring(path.lastIndexOf('/') + 1));
+            } catch (Exception e) {
+                imageNameLabel.setText(roomType.getImageUrl());
+            }
+        }
+        if (roomType.getFacilities() != null) {
+            for (Facility facility : roomType.getFacilities()) {
+                facilitiesListView.getCheckModel().check(facility);
+            }
+        }
+    }
+
+    @FXML
+    private void handleChooseImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Pilih Gambar Kamar");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg")
+        );
+        File file = fileChooser.showOpenDialog(saveButton.getScene().getWindow());
+        if (file != null) {
+            selectedImageFile = file;
+            imageNameLabel.setText(selectedImageFile.getName());
         }
     }
 
@@ -54,38 +97,101 @@ public class AddRoomTypeDialogController {
             return;
         }
 
-        try {
-            String name = nameField.getText();
-            double price = Double.parseDouble(priceField.getText());
-            int maxGuests = Integer.parseInt(maxGuestsField.getText());
-            String description = descriptionArea.getText();
-            String bedInfo = bedInfoField.getText();
-            String imageUrl = imageUrlField.getText();
-
-
-            if (roomTypeToEdit == null) {
-                roomTypeToEdit = new RoomType(0, name, price, description, maxGuests, bedInfo, imageUrl);
-            } else {
-                roomTypeToEdit.setName(name);
-                roomTypeToEdit.setPrice(price);
+        String imageUrlForDatabase = null;
+        if (selectedImageFile != null) {
+            try {
+                imageUrlForDatabase = uploadImageToServer(selectedImageFile);
+                if (imageUrlForDatabase == null) {
+                    AlertHelper.showError("Upload Gagal", "Gagal meng-upload gambar. URL dari server kosong.");
+                    return;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                AlertHelper.showError("Upload Error", "Terjadi kesalahan saat meng-upload gambar: " + e.getMessage());
+                return;
             }
-            ObservableList<Facility> selectedFacilities = facilitiesListView.getCheckModel().getCheckedItems();
+        } else if (roomTypeToEdit != null) {
+            imageUrlForDatabase = roomTypeToEdit.getImageUrl();
+        }
 
-            roomTypeService.saveRoomType(roomTypeToEdit, selectedFacilities);
+        try {
+            RoomType roomTypeToSave = (roomTypeToEdit == null) ? new RoomType(0, null, 0, null, 0, null, null) : roomTypeToEdit;
+
+            roomTypeToSave.setName(nameField.getText());
+            roomTypeToSave.setPrice(Double.parseDouble(priceField.getText()));
+            roomTypeToSave.setDescription(descriptionArea.getText());
+            roomTypeToSave.setMaxGuests(Integer.parseInt(maxGuestsField.getText()));
+            roomTypeToSave.setBedInfo(bedInfoField.getText());
+            roomTypeToSave.setImageUrl(imageUrlForDatabase);
+
+            ObservableList<Facility> selectedFacilities = facilitiesListView.getCheckModel().getCheckedItems();
+            roomTypeService.saveRoomType(roomTypeToSave, selectedFacilities);
 
             AlertHelper.showInformation("Sukses", "Data Tipe Kamar berhasil disimpan.");
             closeStage();
 
         } catch (NumberFormatException e) {
             AlertHelper.showError("Format Salah", "Harga dan Kapasitas Tamu harus berupa angka.");
-        } catch (SQLException e) {
+        } catch (Exception e) {
             AlertHelper.showError("Database Error", "Gagal menyimpan data ke database. Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    //untuk mengirim file ke script PHP di server
+    private String uploadImageToServer(File imageFile) throws IOException, InterruptedException {
+        String uploadUrl = "https://agaress.xyz/upload_handler.php";
+
+        HttpClient client = HttpClient.newHttpClient();
+        String boundary = "Boundary-" + System.currentTimeMillis();
+
+        //request multipart
+        Path path = imageFile.toPath();
+        String mimeType = Files.probeContentType(path);
+        byte[] fileBytes = Files.readAllBytes(path);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(uploadUrl))
+                .header("Content-Type", "multipart/form-data;boundary=" + boundary)
+                .POST(ofMimeMultipartData(imageFile.getName(), mimeType, fileBytes, boundary))
+                .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            JSONObject jsonResponse = new JSONObject(response.body());
+            if ("success".equals(jsonResponse.optString("status"))) {
+                return jsonResponse.optString("url");
+            } else {
+                System.err.println("Server mengembalikan error: " + jsonResponse.optString("message"));
+            }
+        } else {
+            System.err.println("Gagal upload, status code: " + response.statusCode());
+        }
+        return null;
+    }
+
+    private HttpRequest.BodyPublisher ofMimeMultipartData(String fileName, String mimeType, byte[] fileBytes, String boundary) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        String CRLF = "\r\n";
+        String twoHyphens = "--";
+        baos.write((twoHyphens + boundary + CRLF).getBytes(StandardCharsets.UTF_8));
+        baos.write(("Content-Disposition: form-data; name=\"imageFile\"; filename=\"" + fileName + "\"" + CRLF)
+                .getBytes(StandardCharsets.UTF_8));
+        baos.write(("Content-Type: " + mimeType + CRLF).getBytes(StandardCharsets.UTF_8));
+        baos.write(CRLF.getBytes(StandardCharsets.UTF_8));
+        baos.write(fileBytes);
+        baos.write(CRLF.getBytes(StandardCharsets.UTF_8));
+        baos.write((twoHyphens + boundary + twoHyphens + CRLF).getBytes(StandardCharsets.UTF_8));
+
+        return HttpRequest.BodyPublishers.ofByteArray(baos.toByteArray());
+    }
+
+
     @FXML
-    private void handleCancel() { closeStage(); }
+    private void handleCancel() {
+        closeStage();
+    }
 
     private void closeStage() {
         ((Stage) saveButton.getScene().getWindow()).close();

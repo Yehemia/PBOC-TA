@@ -25,7 +25,6 @@ public class RoomTypeDAO {
                         rs.getString("description"), rs.getInt("max_guests"),
                         rs.getString("bed_info"), rs.getString("image_url")
                 );
-                // Simpan jumlah kamar tersedia ke properti baru di model
                 roomType.setAvailableRoomCount(rs.getInt("available_rooms_count"));
                 roomTypes.add(roomType);
             }
@@ -117,7 +116,7 @@ public class RoomTypeDAO {
     }
 
     public static void clearFacilitiesForRoomType(int roomTypeId, Connection con) throws SQLException {
-        String sql = "DELETE FROM db_hotel_room_type_facilities WHERE room_type_id = ?";
+        String sql = "DELETE FROM room_type_facilities WHERE room_type_id = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, roomTypeId);
             ps.executeUpdate();
