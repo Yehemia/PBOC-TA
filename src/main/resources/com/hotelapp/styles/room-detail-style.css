@@ -1,73 +1,87 @@
-/* --- room-detail-style.css --- */
+/* --- room-detail-style.css (Versi Perbaikan) --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* --- Root Pane --- */
 .detail-pane {
     -fx-background-color: white;
+    -fx-font-family: "Poppins", sans-serif;
 }
 
+/* --- Scroll Pane --- */
 .detail-scroll-pane {
     -fx-background-color: transparent;
     -fx-background: transparent;
     -fx-hbar-policy: never; /* Sembunyikan scrollbar horizontal */
 }
 
-/* Kotak untuk menampung konten teks */
+/* --- Kontainer untuk Teks (Memberi Jarak dari Tepi) --- */
 .detail-content-box {
     -fx-padding: 20px 30px;
 }
 
-/* Judul utama (misal: Deluxe Room) */
+/* --- Judul Utama (Nama Tipe Kamar) --- */
 .detail-title {
-    -fx-font-family: "Poppins", sans-serif;
     -fx-font-size: 28px;
     -fx-font-weight: 700;
+    -fx-text-fill: #2C3E50;
 }
 
-/* Sub-judul (misal: Kamar Nomor 101) */
+/* --- Sub-judul (Teks Ketersediaan Kamar) --- */
 .detail-subtitle {
-    -fx-font-family: "Poppins", sans-serif;
     -fx-font-size: 14px;
-    -fx-text-fill: #757575;
+    -fx-font-weight: 500;
+    -fx-text-fill: #566573;
 }
 
-/* Judul per-bagian (misal: Highlights, Deskripsi) */
+/* --- Judul per Bagian (Fasilitas, Deskripsi) --- */
 .detail-section-title {
     -fx-font-family: "Poppins", sans-serif;
-    -fx-font-size: 20px;
+    -fx-font-size: 18px;
     -fx-font-weight: 600;
+    -fx-text-fill: #34495E;
     -fx-padding: 25px 0 10px 0; /* Jarak atas dan bawah */
 }
 
-/* "Chip" untuk setiap fasilitas */
+/* --- Chip/Kotak untuk Setiap Fasilitas --- */
 .highlight-chip {
-    -fx-background-color: #ECF0F1;
+    -fx-background-color: #2858a8;
     -fx-padding: 8px 15px;
     -fx-background-radius: 20px;
+    -fx-border-color: #EAECEE;
+    -fx-border-width: 1px;
+    -fx-border-radius: 20px;
     -fx-font-size: 13px;
     -fx-font-weight: 500;
-}
-.highlight-chip .ikonli-font-icon {
-    -fx-icon-size: 16;
-    -fx-icon-color: #34495E;
+    -fx-text-fill: #34495E;
 }
 
-/* Teks deskripsi */
+/* --- Style untuk IKON di dalam Chip Fasilitas --- */
+.highlight-chip .ikonli-font-icon {
+    -fx-icon-size: 16;
+    -fx-icon-color: #3498DB; /* Warna biru agar ikon menonjol */
+}
+
+/* --- Teks Deskripsi Kamar --- */
 .detail-description {
-    -fx-font-family: "Poppins", sans-serif;
     -fx-font-size: 14px;
-    -fx-text-fill: #34495E;
+    -fx-text-fill: #566573;
     -fx-line-spacing: 5px; /* Jarak antar baris agar mudah dibaca */
 }
 
-/* Footer yang menempel di bawah */
+/* --- Footer Bawah (Harga & Tombol) --- */
 .detail-footer {
     -fx-background-color: white;
-    -fx-padding: 15px 30px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 0, -5, 0, 10); /* Bayangan di atas */
+    -fx-padding: 20px 30px;
+    /* Efek bayangan tipis di atas footer */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, -2);
 }
 
 .detail-price-text {
-    -fx-font-size: 18px;
+    -fx-font-size: 22px;
     -fx-font-weight: 700;
+    -fx-text-fill: #2C3E50;
 }
+
 .detail-price-subtext {
     -fx-font-size: 13px;
     -fx-text-fill: #757575;
@@ -76,12 +90,18 @@
 .detail-book-button {
     -fx-background-color: #27AE60; /* Hijau cerah untuk tombol aksi utama */
     -fx-text-fill: white;
-    -fx-font-size: 16px;
-    -fx-font-weight: 700;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
     -fx-background-radius: 10px;
-    -fx-padding: 15px 30px;
+    -fx-padding: 15px 25px;
     -fx-cursor: hand;
 }
+
 .detail-book-button:hover {
     -fx-background-color: derive(#27AE60, -10%);
+}
+
+.detail-book-button .ikonli-font-icon {
+    -fx-icon-color: white;
+    -fx-icon-size: 16;
 }

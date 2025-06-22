@@ -24,7 +24,7 @@
                     <children>
                         <HBox styleClass="search-box" HBox.hgrow="ALWAYS">
                             <children>
-                                <FontIcon iconLiteral="fas-search" />
+                                <FontIcon iconLiteral="fas-search"  />
                                 <TextField fx:id="searchField" prefHeight="40.0" promptText="Cari berdasarkan ID Reservasi atau Nama..." HBox.hgrow="ALWAYS" />
                             </children>
                         </HBox>

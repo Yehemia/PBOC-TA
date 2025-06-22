@@ -20,20 +20,19 @@ public class RoomDetailController {
 
     @FXML private ImageView roomImage;
     @FXML private Label roomTypeLabel;
-    @FXML private Label availabilityLabel; // Diubah dari roomNumberLabel
+    @FXML private Label availabilityLabel;
     @FXML private Label priceLabel;
     @FXML private Label descriptionLabel;
     @FXML private FlowPane highlightsPane;
     @FXML private Button bookingButton;
 
-    private RoomType roomType; // Sekarang menyimpan RoomType
+    private RoomType roomType;
     private DashboardCustomerController dashboardController;
 
     public void setDashboardController(DashboardCustomerController dashboardController) {
         this.dashboardController = dashboardController;
     }
 
-    // Metode ini sekarang menerima RoomType, bukan Room
     public void setRoomType(RoomType roomType) {
         this.roomType = roomType;
         updateUI();
@@ -42,7 +41,6 @@ public class RoomDetailController {
     private void updateUI() {
         if (roomType == null) return;
 
-        // Set Gambar, Judul, Deskripsi, dan Harga dari RoomType
         try {
             String imageUrlPath = roomType.getImageUrl();
             if (imageUrlPath != null && !imageUrlPath.isBlank()) {
@@ -50,7 +48,9 @@ public class RoomDetailController {
                 Image img = new Image(getClass().getResource(imagePath).toExternalForm());
                 roomImage.setImage(img);
             }
-        } catch (Exception e) { System.err.println("Gagal memuat gambar detail."); }
+        } catch (Exception e) {
+            System.err.println("Gagal memuat gambar detail untuk: " + roomType.getImageUrl());
+        }
 
         roomTypeLabel.setText(roomType.getName());
         descriptionLabel.setText(roomType.getDescription());
@@ -58,25 +58,23 @@ public class RoomDetailController {
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
         priceLabel.setText(currencyFormat.format(roomType.getPrice()));
 
-        // PERUBAHAN: Menampilkan jumlah kamar tersedia
         availabilityLabel.setText(roomType.getAvailableRoomCount() + " kamar tersedia");
 
-        // PERUBAHAN: Menampilkan fasilitas dari database secara dinamis dengan ikon
         highlightsPane.getChildren().clear();
-        if (roomType.getFacilities() != null) {
+        if (roomType.getFacilities() != null && !roomType.getFacilities().isEmpty()) {
             for (Facility facility : roomType.getFacilities()) {
                 highlightsPane.getChildren().add(createHighlightChip(facility.getName(), facility.getIconLiteral()));
             }
+        } else {
+            highlightsPane.getChildren().add(new Label("Tidak ada data fasilitas."));
         }
     }
 
-    // Metode bantuan untuk membuat "chip" fasilitas dengan ikon
     private HBox createHighlightChip(String text, String iconLiteral) {
-        HBox chip = new HBox(10);
+        HBox chip = new HBox(8);
         chip.setAlignment(Pos.CENTER);
         chip.getStyleClass().add("highlight-chip");
 
-        // Bagian ini yang membuat ikon
         if (iconLiteral != null && !iconLiteral.isBlank()) {
             FontIcon icon = new FontIcon(iconLiteral);
             chip.getChildren().add(icon);

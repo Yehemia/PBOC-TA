@@ -10,7 +10,6 @@ import java.util.List;
 public class RoomTypeDAO {
     public static List<RoomType> getRoomTypesWithAvailability() {
         List<RoomType> roomTypes = new ArrayList<>();
-        // Query ini menggabungkan tipe kamar dengan jumlah kamar yang berstatus 'available'
         String sql = "SELECT rt.*, COUNT(r.id) as available_rooms_count " +
                 "FROM room_types rt " +
                 "LEFT JOIN rooms r ON rt.id = r.room_type_id AND r.status = 'available' " +
@@ -37,7 +36,8 @@ public class RoomTypeDAO {
     }
 
     public static RoomType getRoomTypeWithFacilitiesById(int roomTypeId) {
-        String sql = "SELECT rt.*, f.id as facility_id, f.name as facility_name, f.icon_literal as facility_icon " +
+        String sql = "SELECT rt.*, f.id as facility_id, f.name as facility_name, f.icon_literal as facility_icon, " +
+                "(SELECT COUNT(*) FROM rooms r WHERE r.room_type_id = rt.id AND r.status = 'available') AS available_rooms_count " +
                 "FROM room_types rt " +
                 "LEFT JOIN room_type_facilities rtf ON rt.id = rtf.room_type_id " +
                 "LEFT JOIN facilities f ON rtf.facility_id = f.id " +
@@ -54,6 +54,7 @@ public class RoomTypeDAO {
                             rs.getString("description"), rs.getInt("max_guests"),
                             rs.getString("bed_info"), rs.getString("image_url")
                     );
+                    roomType.setAvailableRoomCount(rs.getInt("available_rooms_count"));
                 }
                 if (rs.getString("facility_name") != null) {
                     roomType.getFacilities().add(new Facility(
@@ -64,6 +65,7 @@ public class RoomTypeDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return roomType;
     }
+
     public static List<RoomType> getAllRoomTypes() {
         List<RoomType> roomTypes = new ArrayList<>();
         String sql = "SELECT * FROM room_types";
@@ -158,17 +160,14 @@ public class RoomTypeDAO {
     }
 
     public static List<RoomType> findRoomTypesByFacilities(List<Integer> facilityIds) {
-        // Jika tidak ada filter yang dipilih, kembalikan semua tipe kamar (atau bisa juga list kosong)
         if (facilityIds == null || facilityIds.isEmpty()) {
-            return getAllRoomTypes(); // Menggunakan metode yang sudah ada
+            return getAllRoomTypes();
         }
 
         List<RoomType> roomTypes = new ArrayList<>();
-        // Query ini akan mencari room_type_id yang memiliki semua facility_id yang kita berikan.
-        String sql = "SELECT rt.* FROM db_hotel_room_types rt " +
-                "JOIN db_hotel_room_type_facilities rtf ON rt.id = rtf.room_type_id " +
+        String sql = "SELECT rt.* FROM room_types rt " +
+                "JOIN room_type_facilities rtf ON rt.id = rtf.room_type_id " +
                 "WHERE rtf.facility_id IN (" +
-                // Membuat placeholder (?,?,?) sejumlah fasilitas yang dipilih
                 String.join(",", java.util.Collections.nCopies(facilityIds.size(), "?")) +
                 ") " +
                 "GROUP BY rt.id " +
@@ -176,25 +175,19 @@ public class RoomTypeDAO {
 
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
-
-            // Isi placeholder IN (?, ?, ?)
             int index = 1;
             for (Integer facilityId : facilityIds) {
                 ps.setInt(index++, facilityId);
             }
-            // Isi placeholder untuk HAVING COUNT(...)
             ps.setInt(index, facilityIds.size());
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    // Kita buat objek RoomType dasar dari hasil query
                     RoomType roomType = new RoomType(
                             rs.getInt("id"), rs.getString("name"), rs.getDouble("price"),
                             rs.getString("description"), rs.getInt("max_guests"),
                             rs.getString("bed_info"), rs.getString("image_url")
                     );
-                    // Untuk kelengkapan, kita bisa muat ulang fasilitasnya (opsional)
-                    // RoomType detailedRoomType = getRoomTypeWithFacilitiesById(roomType.getId());
                     roomTypes.add(roomType);
                 }
             }

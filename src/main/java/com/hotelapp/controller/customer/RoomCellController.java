@@ -1,9 +1,8 @@
 package com.hotelapp.controller.customer;
 
-import com.hotelapp.dao.RoomDAO;
-import com.hotelapp.model.Room;
+
+import com.hotelapp.dao.RoomTypeDAO;
 import com.hotelapp.model.RoomType;
-import com.hotelapp.util.AlertHelper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,7 +14,6 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -25,7 +23,7 @@ public class RoomCellController {
     @FXML private Label roomTypeLabel;
     @FXML private Label priceLabel;
     @FXML private Label availabilityLabel;
-    @FXML private Button detailButton; // <-- TAMBAHKAN DEKLARASI INI
+    @FXML private Button detailButton;
     @FXML private Button bookButton;
 
     private RoomType roomType;
@@ -72,20 +70,19 @@ public class RoomCellController {
 
     private void openRoomDetail(RoomType roomType) {
         try {
-            // Kita tidak perlu lagi mencari 'sampleRoom'
+            RoomType detailedRoomType = RoomTypeDAO.getRoomTypeWithFacilitiesById(roomType.getId());
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/RoomDetail.fxml"));
             Parent detailRoot = loader.load();
-
             RoomDetailController detailController = loader.getController();
-            // Langsung kirim objek RoomType ke detail controller
-            detailController.setRoomType(roomType);
-            detailController.setDashboardController(this.dashboardController);
 
+            detailController.setRoomType(detailedRoomType);
+            detailController.setDashboardController(this.dashboardController);
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Detail Tipe Kamar - " + roomType.getName());
+            stage.setTitle("Detail Tipe Kamar - " + detailedRoomType.getName());
             stage.setScene(new Scene(detailRoot));
             stage.showAndWait();
+
         } catch (Exception e) {
             System.err.println("Gagal memuat halaman detail kamar.");
             e.printStackTrace();

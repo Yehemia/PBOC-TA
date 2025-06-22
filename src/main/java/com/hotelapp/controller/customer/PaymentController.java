@@ -18,6 +18,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -108,7 +109,6 @@ public class PaymentController {
 
         try {
             reservationService.confirmPayment(reservation.getId());
-            AlertHelper.showInformation("Sukses", "Pembayaran telah dikonfirmasi! Invoice akan dikirim ke email Anda.");
             confirmPaymentButton.setText("Pembayaran Berhasil!");
             confirmPaymentButton.setDisable(true);
 
