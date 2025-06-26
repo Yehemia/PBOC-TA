@@ -39,7 +39,6 @@ public class ReservationDAO {
 
     public static List<Reservation> getReservationsByUserId(int userId) {
         List<Reservation> reservations = new ArrayList<>();
-        // PERBARUI QUERY: Tambahkan res.booking_code
         String sql = "SELECT res.id, res.booking_code, res.room_id, res.check_in, res.check_out, res.status, " +
                 "r.room_number, rt.name as room_type_name " +
                 "FROM reservations res " +
