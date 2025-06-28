@@ -35,6 +35,13 @@ public class DashboardContentController {
     @FXML private LineChart<String, Number> revenueChart;
     @FXML private PieChart roomTypePieChart;
     @FXML private VBox legendContainer;
+    private final List<Color> colorPalette = Arrays.asList(
+            Color.web("#5499C7"), // Biru
+            Color.web("#A455F1"), // Ungu
+            Color.web("#F9A458"), // Oranye
+            Color.web("#E74C3C"), // Merah
+            Color.web("#34CAA5")  // Hijau
+    );
 
     @FXML
     public void initialize() {
@@ -58,27 +65,28 @@ public class DashboardContentController {
     }
 
     private void loadRoomTypeData() {
-        Task<ObservableList<PieChart.Data>> task = new Task<>() {
+        Task<Map<String, Integer>> task = new Task<>() {
             @Override
-            protected ObservableList<PieChart.Data> call() throws Exception {
-                Map<String, Integer> roomTypeData = ReservationDAO.getRoomTypeReservationCount();
-                ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
-                roomTypeData.forEach((roomType, count) -> {
-                    pieChartData.add(new PieChart.Data(roomType, count));
-                });
-                return pieChartData;
+            protected Map<String, Integer> call() throws Exception {
+                return ReservationDAO.getRoomTypeReservationCount();
             }
         };
 
         task.setOnSucceeded(e -> {
-            ObservableList<PieChart.Data> pieChartData = task.getValue();
-            if (pieChartData == null || pieChartData.isEmpty()) {
+            Map<String, Integer> roomTypeData = task.getValue();
+            if (roomTypeData == null || roomTypeData.isEmpty()) {
                 roomTypePieChart.setData(FXCollections.observableArrayList());
                 legendContainer.getChildren().clear();
                 return;
             }
+
+            ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+            roomTypeData.entrySet().stream()
+                    .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                    .forEach(entry -> pieChartData.add(new PieChart.Data(entry.getKey(), entry.getValue())));
+
             roomTypePieChart.setData(pieChartData);
-            buildCustomLegend(pieChartData);
+            applyColorsAndBuildLegend(pieChartData);
         });
 
         task.setOnFailed(e -> {
@@ -86,6 +94,25 @@ public class DashboardContentController {
         });
 
         new Thread(task).start();
+    }
+
+    private void applyColorsAndBuildLegend(ObservableList<PieChart.Data> pieChartData) {
+        legendContainer.getChildren().clear();
+        double total = pieChartData.stream().mapToDouble(PieChart.Data::getPieValue).sum();
+
+        int colorIndex = 0;
+        for (PieChart.Data data : pieChartData) {
+            Color color = colorPalette.get(colorIndex % colorPalette.size());
+            String webColor = toWebColor(color);
+
+            data.getNode().setStyle("-fx-pie-color: " + webColor + ";");
+            double percentage = (data.getPieValue() / total) * 100;
+            String legendLabelText = String.format("%s (%.1f%%)", data.getName(), percentage);
+            int count = (int) data.getPieValue();
+            legendContainer.getChildren().add(createLegendItem(legendLabelText, count, color));
+
+            colorIndex++;
+        }
     }
 
     private void buildCustomLegend(ObservableList<PieChart.Data> pieChartData) {
@@ -161,13 +188,18 @@ public class DashboardContentController {
         BorderPane legendItem = new BorderPane();
         HBox nameBox = new HBox(10);
         nameBox.setAlignment(Pos.CENTER_LEFT);
+
         Circle dot = new Circle(5, color);
         dot.getStyleClass().add("legend-dot");
+
         Label nameLabel = new Label(name);
         nameLabel.getStyleClass().add("legend-name");
+
         nameBox.getChildren().addAll(dot, nameLabel);
+
         Label valueLabel = new Label(String.valueOf(value));
         valueLabel.getStyleClass().add("legend-value");
+
         legendItem.setLeft(nameBox);
         legendItem.setRight(valueLabel);
         return legendItem;
@@ -175,6 +207,9 @@ public class DashboardContentController {
 
     private String toWebColor(Color color) {
         return String.format("#%02X%02X%02X",
-                (int) (color.getRed() * 255), (int) (color.getGreen() * 255), (int) (color.getBlue() * 255));
+                (int) (color.getRed() * 255),
+                (int) (color.getGreen() * 255),
+                (int) (color.getBlue() * 255));
     }
+
 }

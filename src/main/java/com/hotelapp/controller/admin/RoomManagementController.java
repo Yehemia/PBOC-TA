@@ -7,6 +7,7 @@ import com.hotelapp.model.RoomType;
 import com.hotelapp.util.AlertHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +20,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -33,17 +35,22 @@ public class RoomManagementController {
     @FXML private TableColumn<Room, Integer> roomNumberColumn;
     @FXML private TableColumn<Room, String> roomStatusColumn;
     @FXML private Label roomInstanceLabel;
+    @FXML private ProgressIndicator instanceLoadingIndicator; // WAJIB: Tambahkan fx:id ini di FXML Anda
 
     @FXML
     public void initialize() {
+        if (instanceLoadingIndicator != null) {
+            instanceLoadingIndicator.setVisible(false);
+        }
+
         setupRoomTypeTable();
         setupRoomInstanceTable();
-
         loadRoomTypes();
+
         roomTypeTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldSelection, newSelection) -> {
                     if (newSelection != null) {
-                        loadRoomInstancesForType(newSelection);
+                        loadRoomInstancesInBackground(newSelection);
                     } else {
                         roomInstanceTable.getItems().clear();
                         roomInstanceLabel.setText("Daftar Kamar Fisik (Pilih Tipe Kamar di Atas)");
@@ -57,7 +64,6 @@ public class RoomManagementController {
         typePriceColumn.setCellValueFactory(new PropertyValueFactory<>("price"));
         typeGuestsColumn.setCellValueFactory(new PropertyValueFactory<>("maxGuests"));
         typeBedInfoColumn.setCellValueFactory(new PropertyValueFactory<>("bedInfo"));
-
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
         typePriceColumn.setCellFactory(tc -> new TableCell<>() {
             @Override
@@ -74,14 +80,53 @@ public class RoomManagementController {
     }
 
     private void loadRoomTypes() {
-        ObservableList<RoomType> roomTypes = FXCollections.observableArrayList(RoomTypeDAO.getAllRoomTypes());
-        roomTypeTable.setItems(roomTypes);
+        Task<List<RoomType>> loadTypesTask = new Task<>() {
+            @Override
+            protected List<RoomType> call() {
+                return RoomTypeDAO.getAllRoomTypes();
+            }
+        };
+        loadTypesTask.setOnSucceeded(e -> roomTypeTable.setItems(FXCollections.observableArrayList(loadTypesTask.getValue())));
+        loadTypesTask.setOnFailed(e -> {
+            e.getSource().getException().printStackTrace();
+            AlertHelper.showError("Gagal Memuat", "Tidak dapat mengambil data tipe kamar.");
+        });
+        new Thread(loadTypesTask).start();
     }
 
-    private void loadRoomInstancesForType(RoomType roomType) {
-        roomInstanceLabel.setText("Daftar Kamar untuk Tipe: " + roomType.getName());
-        ObservableList<Room> rooms = FXCollections.observableArrayList(RoomDAO.getRoomsByTypeId(roomType.getId()));
-        roomInstanceTable.setItems(rooms);
+    private void loadRoomInstancesInBackground(RoomType roomType) {
+        roomInstanceLabel.setText("Memuat kamar untuk tipe: " + roomType.getName() + "...");
+        roomInstanceTable.setItems(FXCollections.emptyObservableList()); // Kosongkan tabel
+        if (instanceLoadingIndicator != null) {
+            instanceLoadingIndicator.setVisible(true);
+        }
+
+        Task<ObservableList<Room>> loadRoomsTask = new Task<>() {
+            @Override
+            protected ObservableList<Room> call() {
+                List<Room> rooms = RoomDAO.getRoomsByTypeId(roomType.getId());
+                return FXCollections.observableArrayList(rooms);
+            }
+        };
+
+        loadRoomsTask.setOnSucceeded(e -> {
+            roomInstanceTable.setItems(loadRoomsTask.getValue());
+            roomInstanceLabel.setText("Daftar Kamar untuk Tipe: " + roomType.getName());
+            if (instanceLoadingIndicator != null) {
+                instanceLoadingIndicator.setVisible(false);
+            }
+        });
+
+        loadRoomsTask.setOnFailed(e -> {
+            e.getSource().getException().printStackTrace();
+            roomInstanceLabel.setText("Gagal memuat data kamar.");
+            if (instanceLoadingIndicator != null) {
+                instanceLoadingIndicator.setVisible(false);
+            }
+            AlertHelper.showError("Error", "Terjadi kesalahan saat mengambil data kamar.");
+        });
+
+        new Thread(loadRoomsTask).start();
     }
 
     @FXML
@@ -111,12 +156,11 @@ public class RoomManagementController {
                 "Yakin ingin menonaktifkan tipe kamar '" + selectedType.getName() + "'? Tipe ini tidak akan bisa digunakan untuk reservasi baru.",
                 ButtonType.OK, ButtonType.CANCEL);
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            boolean success = RoomTypeDAO.deleteRoomType(selectedType.getId());
-            if (success) {
+            if (RoomTypeDAO.deleteRoomType(selectedType.getId())) {
                 AlertHelper.showInformation("Sukses", "Tipe kamar berhasil dinonaktifkan.");
                 loadRoomTypes();
             } else {
-                AlertHelper.showError("Gagal", "Gagal menonaktifkan tipe kamar. Pastikan tidak ada kamar fisik yang masih terhubung dengan tipe ini.");
+                AlertHelper.showError("Gagal", "Gagal menonaktifkan tipe kamar.");
             }
         }
     }
@@ -154,7 +198,7 @@ public class RoomManagementController {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             if (RoomDAO.deleteRoom(selectedRoom.getId())) {
                 AlertHelper.showInformation("Sukses", "Kamar berhasil dinonaktifkan.");
-                loadRoomInstancesForType(selectedRoom.getRoomType());
+                loadRoomInstancesInBackground(selectedRoom.getRoomType());
             } else {
                 AlertHelper.showError("Gagal", "Gagal menonaktifkan kamar.");
             }
@@ -190,14 +234,12 @@ public class RoomManagementController {
             } else {
                 controller.initData(contextRoomType);
             }
-
             Stage dialogStage = new Stage();
             dialogStage.setTitle(room == null ? "Tambah Kamar Baru untuk Tipe: " + contextRoomType.getName() : "Edit Kamar");
             dialogStage.initModality(Modality.APPLICATION_MODAL);
             dialogStage.setScene(new Scene(root));
             dialogStage.showAndWait();
-            loadRoomInstancesForType(contextRoomType);
-
+            loadRoomInstancesInBackground(contextRoomType);
         } catch (IOException e) {
             e.printStackTrace();
         }
