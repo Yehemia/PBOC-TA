@@ -63,11 +63,7 @@ public class RoomManagementController {
             @Override
             protected void updateItem(Double price, boolean empty) {
                 super.updateItem(price, empty);
-                if (empty || price == null) {
-                    setText(null);
-                } else {
-                    setText(currencyFormat.format(price));
-                }
+                setText(empty || price == null ? null : currencyFormat.format(price));
             }
         });
     }
@@ -111,18 +107,16 @@ public class RoomManagementController {
             AlertHelper.showWarning("Peringatan", "Pilih tipe kamar yang ingin dinonaktifkan.");
             return;
         }
-
         Optional<ButtonType> result = AlertHelper.showConfirmation("Konfirmasi Nonaktifkan",
                 "Yakin ingin menonaktifkan tipe kamar '" + selectedType.getName() + "'? Tipe ini tidak akan bisa digunakan untuk reservasi baru.",
                 ButtonType.OK, ButtonType.CANCEL);
-
         if (result.isPresent() && result.get() == ButtonType.OK) {
             boolean success = RoomTypeDAO.deleteRoomType(selectedType.getId());
             if (success) {
                 AlertHelper.showInformation("Sukses", "Tipe kamar berhasil dinonaktifkan.");
                 loadRoomTypes();
             } else {
-                AlertHelper.showError("Gagal", "Gagal menonaktifkan tipe kamar.");
+                AlertHelper.showError("Gagal", "Gagal menonaktifkan tipe kamar. Pastikan tidak ada kamar fisik yang masih terhubung dengan tipe ini.");
             }
         }
     }
@@ -154,11 +148,9 @@ public class RoomManagementController {
             AlertHelper.showWarning("Peringatan", "Pilih kamar yang ingin dinonaktifkan.");
             return;
         }
-
         Optional<ButtonType> result = AlertHelper.showConfirmation("Konfirmasi Nonaktifkan",
                 "Yakin ingin menonaktifkan kamar nomor " + selectedRoom.getRoomNumber() + "? Kamar ini tidak akan bisa dipesan lagi.",
                 ButtonType.OK, ButtonType.CANCEL);
-
         if (result.isPresent() && result.get() == ButtonType.OK) {
             if (RoomDAO.deleteRoom(selectedRoom.getId())) {
                 AlertHelper.showInformation("Sukses", "Kamar berhasil dinonaktifkan.");
@@ -195,13 +187,17 @@ public class RoomManagementController {
             AddRoomDialogController controller = loader.getController();
             if (room != null) {
                 controller.initData(room);
+            } else {
+                controller.initData(contextRoomType);
             }
+
             Stage dialogStage = new Stage();
-            dialogStage.setTitle(room == null ? "Tambah Kamar Baru" : "Edit Kamar");
+            dialogStage.setTitle(room == null ? "Tambah Kamar Baru untuk Tipe: " + contextRoomType.getName() : "Edit Kamar");
             dialogStage.initModality(Modality.APPLICATION_MODAL);
             dialogStage.setScene(new Scene(root));
             dialogStage.showAndWait();
             loadRoomInstancesForType(contextRoomType);
+
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -2,6 +2,8 @@ package com.hotelapp.controller.admin;
 
 import com.hotelapp.dao.UserDAO;
 import com.hotelapp.model.User;
+import com.hotelapp.util.AlertHelper;
+import com.hotelapp.util.Session; // Pastikan import ini ditambahkan
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -30,6 +32,7 @@ public class UserManagementController {
     @FXML private TableColumn<User, String> nameColumn;
     @FXML private TableColumn<User, String> emailColumn;
     @FXML private TableColumn<User, String> roleColumn;
+    @FXML private TableColumn<User, String> accountStatusColumn;
     @FXML private TableColumn<User, Void> actionColumn;
 
     @FXML
@@ -39,7 +42,6 @@ public class UserManagementController {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             filterUsers(newValue);
         });
-
         loadUsers();
     }
 
@@ -54,10 +56,8 @@ public class UserManagementController {
                 }
             }
         };
-
         task.setOnSucceeded(event -> usersTable.setItems(task.getValue()));
         task.setOnFailed(event -> event.getSource().getException().printStackTrace());
-
         new Thread(task).start();
     }
 
@@ -67,6 +67,7 @@ public class UserManagementController {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
+        accountStatusColumn.setCellValueFactory(new PropertyValueFactory<>("accountStatus"));
         addActionButtonsToTable();
     }
 
@@ -85,7 +86,13 @@ public class UserManagementController {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty ? null : pane);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    User user = getTableView().getItems().get(getIndex());
+                    deleteBtn.setVisible("active".equalsIgnoreCase(user.getAccountStatus()));
+                    setGraphic(pane);
+                }
             }
         });
     }
@@ -125,15 +132,44 @@ public class UserManagementController {
     }
 
     private void handleDeleteUser(User user) {
+        // jika user sudah tidak aktif, tidk akan diproses
+        if ("inactive".equalsIgnoreCase(user.getAccountStatus())) {
+            AlertHelper.showInformation("Informasi", "User ini sudah berstatus tidak aktif.");
+            return;
+        }
+
+        // tidak mengizinkan admin menonaktifkan akunnya sendiri
+        User currentUser = Session.getInstance().getCurrentUser();
+        if (currentUser != null && currentUser.getId() == user.getId()) {
+            AlertHelper.showError("Aksi Ditolak", "Anda tidak dapat menonaktifkan akun Anda sendiri.");
+            return;
+        }
+
+        // menonaktifkan admin dan memastikan bukan admin terakhir
+        if ("admin".equalsIgnoreCase(user.getRole())) {
+            long activeAdminCount = usersTable.getItems().stream()
+                    .filter(u -> "admin".equalsIgnoreCase(u.getRole()) && "active".equalsIgnoreCase(u.getAccountStatus()))
+                    .count();
+
+            if (activeAdminCount <= 1) {
+                AlertHelper.showError("Aksi Ditolak", "Tidak dapat menonaktifkan satu-satunya akun admin yang aktif.");
+                return;
+            }
+        }
+
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Konfirmasi Hapus");
-        alert.setHeaderText("Anda akan menghapus user: " + user.getName());
-        alert.setContentText("Apakah Anda yakin?");
+        alert.setTitle("Konfirmasi Nonaktifkan User");
+        alert.setHeaderText("Anda akan menonaktifkan user: " + user.getName() + " (Peran: " + user.getRole() + ")");
+        alert.setContentText("User ini tidak akan bisa login atau melakukan transaksi lagi. Lanjutkan?");
         alert.initOwner(usersTable.getScene().getWindow());
+
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             if (UserDAO.deleteUser(user.getId())) {
+                AlertHelper.showInformation("Sukses", "User berhasil dinonaktifkan.");
                 loadUsers();
+            } else {
+                AlertHelper.showError("Gagal", "Terjadi kesalahan saat menonaktifkan user.");
             }
         }
     }

@@ -2,6 +2,7 @@ package com.hotelapp.controller.admin;
 
 import com.hotelapp.dao.UserDAO;
 import com.hotelapp.model.User;
+import com.hotelapp.util.AlertHelper;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -33,6 +34,9 @@ public class AddUserDialogController {
 
         passwordField.setPromptText("Kosongkan jika tidak ingin diubah");
         passwordField.setDisable(true);
+        passwordField.setManaged(false);
+        passwordField.setVisible(false);
+
         saveButton.setText("Update User");
     }
 
@@ -44,7 +48,7 @@ public class AddUserDialogController {
         String role = roleComboBox.getValue();
 
         if (username.isEmpty() || name.isEmpty() || email.isEmpty() || role == null) {
-            showAlert(Alert.AlertType.ERROR, "Error", "Semua field (kecuali password) harus diisi.");
+            AlertHelper.showWarning("Input Tidak Lengkap", "Semua field (kecuali password) wajib diisi.");
             return;
         }
 
@@ -52,7 +56,7 @@ public class AddUserDialogController {
         if (userToEdit == null) {
             String password = passwordField.getText();
             if (password.isEmpty()) {
-                showAlert(Alert.AlertType.ERROR, "Error", "Password harus diisi untuk user baru.");
+                AlertHelper.showWarning("Input Tidak Lengkap", "Password wajib diisi untuk user baru.");
                 return;
             }
             success = UserDAO.registerUser(username, name, email, password, role);
@@ -65,10 +69,10 @@ public class AddUserDialogController {
         }
 
         if (success) {
-            showAlert(Alert.AlertType.INFORMATION, "Sukses", "Data user berhasil disimpan.");
+            AlertHelper.showInformation("Sukses", "Data user berhasil disimpan.");
             closeStage();
         } else {
-            showAlert(Alert.AlertType.ERROR, "Error", "Gagal menyimpan data. Username atau email mungkin sudah ada.");
+            AlertHelper.showError("Gagal", "Gagal menyimpan data. Username atau email mungkin sudah terdaftar.");
         }
     }
 
@@ -80,13 +84,5 @@ public class AddUserDialogController {
     private void closeStage() {
         Stage stage = (Stage) saveButton.getScene().getWindow();
         stage.close();
-    }
-
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }

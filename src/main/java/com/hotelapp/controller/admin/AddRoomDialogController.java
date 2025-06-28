@@ -40,7 +40,7 @@ public class AddRoomDialogController {
             public RoomType fromString(String string) { return null; }
         });
     }
-
+    
     public void initData(Room room) {
         this.roomToEdit = room;
         roomNumberField.setText(String.valueOf(room.getRoomNumber()));
@@ -48,6 +48,14 @@ public class AddRoomDialogController {
         roomTypeComboBox.setValue(room.getRoomType());
         saveButton.setText("Update");
     }
+
+    public void initData(RoomType preselectedRoomType) {
+        this.roomToEdit = null;
+        roomTypeComboBox.setValue(preselectedRoomType);
+        roomTypeComboBox.setDisable(true);
+        saveButton.setText("Simpan");
+    }
+
 
     @FXML
     private void handleSave(ActionEvent event) {
