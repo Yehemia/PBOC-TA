@@ -15,8 +15,10 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DateCell;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -27,7 +29,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -42,6 +44,7 @@ public class OfflineReservationController {
     @FXML private ComboBox<String> paymentMethodComboBox;
     @FXML private Button submitButton;
     @FXML private FlowPane roomFlowPane;
+
     private RoomType selectedRoomType;
     private final ReservationService reservationService = new ReservationService();
 
@@ -49,8 +52,47 @@ public class OfflineReservationController {
     public void initialize() {
         ObservableList<String> paymentOptions = FXCollections.observableArrayList("cash", "online");
         paymentMethodComboBox.setItems(paymentOptions);
-        submitButton.setOnAction(e -> handleSubmit());
+
+        setupValidationAndListeners();
         loadAvailableRoomTypes();
+    }
+
+    private void setupValidationAndListeners() {
+        submitButton.setDisable(true);
+
+        final LocalDate today = LocalDate.now();
+
+        checkInDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isBefore(today));
+            }
+        });
+
+        checkOutDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                LocalDate checkInDate = checkInDatePicker.getValue();
+                if (checkInDate == null) {
+                    setDisable(empty || date.isBefore(today.plusDays(1)));
+                } else {
+                    setDisable(empty || !date.isAfter(checkInDate));
+                }
+            }
+        });
+
+        checkInDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && checkOutDatePicker.getValue() != null && !checkOutDatePicker.getValue().isAfter(newVal)) {
+                checkOutDatePicker.setValue(null);
+            }
+            validateForm();
+        });
+
+        nameField.textProperty().addListener((obs, oldVal, newVal) -> validateForm());
+        checkOutDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> validateForm());
+        paymentMethodComboBox.valueProperty().addListener((obs, oldVal, newVal) -> validateForm());
     }
 
     private void loadAvailableRoomTypes() {
@@ -102,11 +144,28 @@ public class OfflineReservationController {
             clearSelectedStyle();
             card.setStyle("-fx-background-color: #EAF2F8; -fx-border-color: #3498DB; -fx-border-width: 2; -fx-background-radius: 8px; -fx-border-radius: 8px;");
             selectedRoomType = roomType;
+            validateForm(); // Panggil validasi setelah memilih kamar
         });
 
         card.setCursor(Cursor.HAND);
         card.getChildren().addAll(roomTypeNameLabel, availabilityLabel, priceLabel);
         return card;
+    }
+
+    private void validateForm() {
+        boolean isNameEmpty = nameField.getText().trim().isEmpty();
+        boolean isRoomNotSelected = selectedRoomType == null;
+        boolean isCheckInEmpty = checkInDatePicker.getValue() == null;
+        boolean isCheckOutEmpty = checkOutDatePicker.getValue() == null;
+        boolean isPaymentEmpty = paymentMethodComboBox.getValue() == null;
+
+        boolean isDateInvalid = false;
+        if (!isCheckInEmpty && !isCheckOutEmpty) {
+            isDateInvalid = !checkOutDatePicker.getValue().isAfter(checkInDatePicker.getValue());
+        }
+
+        boolean isFormInvalid = isNameEmpty || isRoomNotSelected || isCheckInEmpty || isCheckOutEmpty || isPaymentEmpty || isDateInvalid;
+        submitButton.setDisable(isFormInvalid);
     }
 
     private void clearSelectedStyle() {
@@ -179,6 +238,7 @@ public class OfflineReservationController {
         paymentMethodComboBox.getSelectionModel().clearSelection();
         selectedRoomType = null;
         clearSelectedStyle();
+        submitButton.setDisable(true);
     }
 
     private void showQRCodePaymentScene(Reservation reservation) {

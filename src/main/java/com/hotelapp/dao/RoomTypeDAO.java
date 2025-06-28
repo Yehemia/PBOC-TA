@@ -67,7 +67,7 @@ public class RoomTypeDAO {
 
     public static List<RoomType> getAllRoomTypes() {
         List<RoomType> roomTypes = new ArrayList<>();
-        String sql = "SELECT * FROM room_types";
+        String sql = "SELECT * FROM room_types WHERE status = 'active'";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -132,7 +132,7 @@ public class RoomTypeDAO {
         }
     }
     public static boolean deleteRoomType(int roomTypeId) {
-        String sql = "DELETE FROM room_types WHERE id = ?";
+        String sql = "UPDATE room_types SET status = 'inactive' WHERE id = ?";
         try (Connection con = Database.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, roomTypeId);
             return ps.executeUpdate() > 0;

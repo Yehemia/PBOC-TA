@@ -11,9 +11,11 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+
 import java.util.Optional;
 
 public class CheckOutController {
@@ -69,12 +71,13 @@ public class CheckOutController {
             if (penaltyResult.isPresent()) {
                 executeFinalCheckOut(reservation, penaltyResult.get());
             } else {
-                AlertHelper.showInformation("Dibatalkan", "Proses check-out dibatalkan.");
+                AlertHelper.showInformation("Dibatalkan", "Proses check-out dibatalkan oleh pengguna.");
             }
-        } else {
+        } else if (response.isPresent() && response.get() == ButtonType.NO) {
             executeFinalCheckOut(reservation, null);
         }
     }
+
 
     private void executeFinalCheckOut(Reservation reservation, Penalty penalty) {
         try {
@@ -93,39 +96,56 @@ public class CheckOutController {
         Dialog<Penalty> dialog = new Dialog<>();
         dialog.setTitle("Tambah Denda");
         dialog.setHeaderText("Masukkan detail denda yang akan diterapkan.");
+
         ButtonType addButtonType = new ButtonType("Tambahkan", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
         TextField amountField = new TextField();
         amountField.setPromptText("Contoh: 50000");
-        TextField reasonField = new TextField();
-        reasonField.setPromptText("Contoh: Kunci kamar hilang");
-        grid.add(new Label("Jumlah:"), 0, 0);
+        TextArea reasonField = new TextArea();
+        reasonField.setPromptText("Contoh: Kunci kamar hilang atau kerusakan properti.");
+        reasonField.setWrapText(true);
+
+        grid.add(new Label("Jumlah (Rp):"), 0, 0);
         grid.add(amountField, 1, 0);
         grid.add(new Label("Alasan:"), 0, 1);
         grid.add(reasonField, 1, 1);
+
         dialog.getDialogPane().setContent(grid);
 
-        dialog.getDialogPane().lookupButton(addButtonType).setDisable(true);
-        amountField.textProperty().addListener((obs, oldVal, newVal) -> {
-            dialog.getDialogPane().lookupButton(addButtonType).setDisable(newVal.trim().isEmpty());
+        Node addButton = dialog.getDialogPane().lookupButton(addButtonType);
+        addButton.setDisable(true);
+
+        amountField.textProperty().addListener((observable, oldValue, newValue) -> {
+            boolean isNumeric = newValue.matches("\\d*");
+            boolean isValid = isNumeric && !newValue.trim().isEmpty();
+            addButton.setDisable(!isValid);
+            if (!isNumeric) {
+                amountField.setText(oldValue);
+            }
         });
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == addButtonType) {
                 try {
                     double amount = Double.parseDouble(amountField.getText());
-                    String reason = reasonField.getText().isBlank() ? "Denda keterlambatan/kerusakan" : reasonField.getText();
+                    String reason = reasonField.getText().isBlank() ? "Denda keterlambatan/kerusakan" : reasonField.getText().trim();
                     return new Penalty(0, amount, reason, "pending");
-                } catch (NumberFormatException e) { return null; }
+                } catch (NumberFormatException e) {
+                    return null;
+                }
             }
             return null;
         });
+
         return dialog.showAndWait();
     }
+
 
     @FXML
     public void refreshData() {

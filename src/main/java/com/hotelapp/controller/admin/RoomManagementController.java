@@ -108,18 +108,21 @@ public class RoomManagementController {
     private void handleDeleteRoomType(ActionEvent event) {
         RoomType selectedType = roomTypeTable.getSelectionModel().getSelectedItem();
         if (selectedType == null) {
-            AlertHelper.showWarning("Peringatan", "Pilih tipe kamar yang ingin dihapus.");
+            AlertHelper.showWarning("Peringatan", "Pilih tipe kamar yang ingin dinonaktifkan.");
             return;
         }
 
-        Optional<ButtonType> result = AlertHelper.showConfirmation("Konfirmasi Hapus", "Yakin ingin menghapus tipe kamar '" + selectedType.getName() + "'? Ini akan gagal jika masih ada kamar yang menggunakan tipe ini.", ButtonType.OK, ButtonType.CANCEL);
+        Optional<ButtonType> result = AlertHelper.showConfirmation("Konfirmasi Nonaktifkan",
+                "Yakin ingin menonaktifkan tipe kamar '" + selectedType.getName() + "'? Tipe ini tidak akan bisa digunakan untuk reservasi baru.",
+                ButtonType.OK, ButtonType.CANCEL);
+
         if (result.isPresent() && result.get() == ButtonType.OK) {
             boolean success = RoomTypeDAO.deleteRoomType(selectedType.getId());
             if (success) {
-                AlertHelper.showInformation("Sukses", "Tipe kamar berhasil dihapus.");
+                AlertHelper.showInformation("Sukses", "Tipe kamar berhasil dinonaktifkan.");
                 loadRoomTypes();
             } else {
-                AlertHelper.showError("Gagal", "Gagal menghapus tipe kamar. Pastikan tidak ada kamar fisik yang masih terhubung dengan tipe ini.");
+                AlertHelper.showError("Gagal", "Gagal menonaktifkan tipe kamar.");
             }
         }
     }
@@ -148,16 +151,20 @@ public class RoomManagementController {
     private void handleDeleteRoom(ActionEvent event) {
         Room selectedRoom = roomInstanceTable.getSelectionModel().getSelectedItem();
         if (selectedRoom == null) {
-            AlertHelper.showWarning("Peringatan", "Pilih kamar yang ingin dihapus.");
+            AlertHelper.showWarning("Peringatan", "Pilih kamar yang ingin dinonaktifkan.");
             return;
         }
-        Optional<ButtonType> result = AlertHelper.showConfirmation("Konfirmasi Hapus", "Yakin ingin menghapus kamar nomor " + selectedRoom.getRoomNumber() + "?", ButtonType.OK, ButtonType.CANCEL);
+
+        Optional<ButtonType> result = AlertHelper.showConfirmation("Konfirmasi Nonaktifkan",
+                "Yakin ingin menonaktifkan kamar nomor " + selectedRoom.getRoomNumber() + "? Kamar ini tidak akan bisa dipesan lagi.",
+                ButtonType.OK, ButtonType.CANCEL);
+
         if (result.isPresent() && result.get() == ButtonType.OK) {
             if (RoomDAO.deleteRoom(selectedRoom.getId())) {
-                AlertHelper.showInformation("Sukses", "Kamar berhasil dihapus.");
+                AlertHelper.showInformation("Sukses", "Kamar berhasil dinonaktifkan.");
                 loadRoomInstancesForType(selectedRoom.getRoomType());
             } else {
-                AlertHelper.showError("Gagal", "Gagal menghapus kamar.");
+                AlertHelper.showError("Gagal", "Gagal menonaktifkan kamar.");
             }
         }
     }

@@ -65,9 +65,17 @@ public class AddRoomDialogController {
             boolean success;
 
             if (roomToEdit == null) {
+                if (RoomDAO.roomNumberExists(roomNumber)) {
+                    AlertHelper.showError("Gagal", "Nomor kamar " + roomNumber + " sudah ada.");
+                    return;
+                }
                 Room newRoom = new Room(0, roomNumber, selectedStatus, selectedRoomType);
                 success = RoomDAO.createRoom(newRoom);
             } else {
+                if (roomNumber != roomToEdit.getRoomNumber() && RoomDAO.roomNumberExists(roomNumber)) {
+                    AlertHelper.showError("Gagal", "Nomor kamar " + roomNumber + " sudah digunakan oleh kamar lain.");
+                    return;
+                }
                 roomToEdit.setRoomNumber(roomNumber);
                 roomToEdit.setStatus(selectedStatus);
                 roomToEdit.setRoomType(selectedRoomType);
@@ -78,10 +86,10 @@ public class AddRoomDialogController {
                 AlertHelper.showInformation("Sukses", "Data kamar berhasil disimpan.");
                 closeStage();
             } else {
-                AlertHelper.showError("Gagal", "Gagal menyimpan data. Nomor kamar mungkin sudah ada.");
+                AlertHelper.showError("Gagal", "Gagal menyimpan data ke database.");
             }
         } catch (NumberFormatException e) {
-            AlertHelper.showError("Error Format", "Nomor kamar harus berupa angka.");
+            AlertHelper.showError("Format Salah", "Input untuk 'Nomor Kamar' harus berupa angka.");
         }
     }
 

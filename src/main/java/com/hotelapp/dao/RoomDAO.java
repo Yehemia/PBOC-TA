@@ -38,7 +38,7 @@ public class RoomDAO {
     }
 
     public static Room findFirstAvailableRoom(int roomTypeId, Connection conn) throws SQLException {
-        String sql = "SELECT * FROM rooms WHERE room_type_id = ? AND status = 'available' LIMIT 1 FOR UPDATE";
+        String sql = "SELECT * FROM rooms WHERE room_type_id = ? AND status = 'available' AND is_active = TRUE LIMIT 1 FOR UPDATE";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, roomTypeId);
             ResultSet rs = ps.executeQuery();
@@ -117,7 +117,7 @@ public class RoomDAO {
 
     public static List<Room> getRoomsByTypeId(int typeId) {
         List<Room> rooms = new ArrayList<>();
-        String sql = "SELECT * FROM rooms WHERE room_type_id = ?";
+        String sql = "SELECT * FROM rooms WHERE room_type_id = ? AND is_active = TRUE";
         try (Connection con = Database.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, typeId);
             ResultSet rs = ps.executeQuery();
@@ -165,7 +165,7 @@ public class RoomDAO {
     }
 
     public static boolean deleteRoom(int roomId) {
-        String sql = "DELETE FROM rooms WHERE id = ?";
+        String sql = "UPDATE rooms SET is_active = FALSE WHERE id = ?";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, roomId);

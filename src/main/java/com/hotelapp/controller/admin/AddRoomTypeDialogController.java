@@ -14,7 +14,6 @@ import javafx.stage.Stage;
 import org.controlsfx.control.CheckListView;
 import org.json.JSONObject;
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +24,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 public class AddRoomTypeDialogController {
@@ -92,35 +90,38 @@ public class AddRoomTypeDialogController {
 
     @FXML
     private void handleSave() {
-        if (nameField.getText().isBlank() || priceField.getText().isBlank()) {
-            AlertHelper.showWarning("Input Tidak Lengkap", "Nama dan Harga Tipe Kamar wajib diisi.");
+        if (nameField.getText().isBlank() || priceField.getText().isBlank() || maxGuestsField.getText().isBlank()) {
+            AlertHelper.showWarning("Input Tidak Lengkap", "Nama, Harga, dan Kapasitas Tamu wajib diisi.");
             return;
         }
 
-        String imageUrlForDatabase = null;
-        if (selectedImageFile != null) {
-            try {
-                imageUrlForDatabase = uploadImageToServer(selectedImageFile);
-                if (imageUrlForDatabase == null) {
-                    AlertHelper.showError("Upload Gagal", "Gagal meng-upload gambar. URL dari server kosong.");
+        try {
+            double price = Double.parseDouble(priceField.getText());
+            int maxGuests = Integer.parseInt(maxGuestsField.getText());
+
+            String imageUrlForDatabase = null;
+            if (selectedImageFile != null) {
+                try {
+                    imageUrlForDatabase = uploadImageToServer(selectedImageFile);
+                    if (imageUrlForDatabase == null) {
+                        AlertHelper.showError("Upload Gagal", "Gagal meng-upload gambar. URL dari server kosong.");
+                        return;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    AlertHelper.showError("Upload Error", "Terjadi kesalahan saat meng-upload gambar: " + e.getMessage());
                     return;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                AlertHelper.showError("Upload Error", "Terjadi kesalahan saat meng-upload gambar: " + e.getMessage());
-                return;
+            } else if (roomTypeToEdit != null) {
+                imageUrlForDatabase = roomTypeToEdit.getImageUrl();
             }
-        } else if (roomTypeToEdit != null) {
-            imageUrlForDatabase = roomTypeToEdit.getImageUrl();
-        }
 
-        try {
             RoomType roomTypeToSave = (roomTypeToEdit == null) ? new RoomType(0, null, 0, null, 0, null, null) : roomTypeToEdit;
 
             roomTypeToSave.setName(nameField.getText());
-            roomTypeToSave.setPrice(Double.parseDouble(priceField.getText()));
+            roomTypeToSave.setPrice(price);
             roomTypeToSave.setDescription(descriptionArea.getText());
-            roomTypeToSave.setMaxGuests(Integer.parseInt(maxGuestsField.getText()));
+            roomTypeToSave.setMaxGuests(maxGuests);
             roomTypeToSave.setBedInfo(bedInfoField.getText());
             roomTypeToSave.setImageUrl(imageUrlForDatabase);
 
@@ -131,33 +132,26 @@ public class AddRoomTypeDialogController {
             closeStage();
 
         } catch (NumberFormatException e) {
-            AlertHelper.showError("Format Salah", "Harga dan Kapasitas Tamu harus berupa angka.");
+            AlertHelper.showError("Format Salah", "Input untuk 'Harga' dan 'Kapasitas Tamu' harus berupa angka.");
         } catch (Exception e) {
             AlertHelper.showError("Database Error", "Gagal menyimpan data ke database. Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    //untuk mengirim file ke script PHP di server
     private String uploadImageToServer(File imageFile) throws IOException, InterruptedException {
         String uploadUrl = "https://agaress.xyz/upload_handler.php";
-
         HttpClient client = HttpClient.newHttpClient();
         String boundary = "Boundary-" + System.currentTimeMillis();
-
-        //request multipart
         Path path = imageFile.toPath();
         String mimeType = Files.probeContentType(path);
         byte[] fileBytes = Files.readAllBytes(path);
-
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(uploadUrl))
                 .header("Content-Type", "multipart/form-data;boundary=" + boundary)
                 .POST(ofMimeMultipartData(imageFile.getName(), mimeType, fileBytes, boundary))
                 .build();
-
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
         if (response.statusCode() == 200) {
             JSONObject jsonResponse = new JSONObject(response.body());
             if ("success".equals(jsonResponse.optString("status"))) {
@@ -183,10 +177,8 @@ public class AddRoomTypeDialogController {
         baos.write(fileBytes);
         baos.write(CRLF.getBytes(StandardCharsets.UTF_8));
         baos.write((twoHyphens + boundary + twoHyphens + CRLF).getBytes(StandardCharsets.UTF_8));
-
         return HttpRequest.BodyPublishers.ofByteArray(baos.toByteArray());
     }
-
 
     @FXML
     private void handleCancel() {

@@ -135,8 +135,16 @@ public class VerifyController {
             UserDAO.updateRole(user.getId(), "customer");
             VerificationService.markAllTokensUsed(user.getId());
             if (countdown != null) countdown.stop();
-            msgLabel.setText("Verifikasi sukses! Anda akan dialihkan...");
+            msgLabel.setText("Verifikasi sukses! Anda akan dialihkan ke halaman login...");
             msgLabel.setTextFill(javafx.scene.paint.Color.GREEN);
+            for (TextField field : fields) {
+                field.setDisable(true);
+            }
+            resendLink.setDisable(true);
+            ((Button) event.getSource()).setDisable(true);
+            PauseTransition pause = new PauseTransition(Duration.seconds(2));
+            pause.setOnFinished(e -> redirectToLogin());
+            pause.play();
         } else {
             msgLabel.setText("Kode salah.");
             msgLabel.setTextFill(javafx.scene.paint.Color.RED);
@@ -169,19 +177,16 @@ public class VerifyController {
         pause.play();
     }
 
-    private void redirectWithAnimation() {
+    private void redirectToLogin() {
         try {
             Stage stage = (Stage) field1.getScene().getWindow();
-            Parent dashboardRoot = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/customer/dashboard_customer.fxml"));
-            Scene scene = new Scene(dashboardRoot, stage.getWidth(), stage.getHeight());
-
-            FadeTransition fade = new FadeTransition(Duration.seconds(1), dashboardRoot);
-            fade.setFromValue(0);
-            fade.setToValue(1);
-            fade.setOnFinished(event -> stage.setScene(scene));
-            fade.play();
+            Parent root = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/login.fxml"));
+            Scene newScene = new Scene(root);
+            stage.setScene(newScene);
+            stage.centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
+            msgLabel.setText("Gagal memuat halaman login.");
         }
     }
 }
