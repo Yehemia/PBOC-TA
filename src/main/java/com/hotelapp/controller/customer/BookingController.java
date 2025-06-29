@@ -102,9 +102,20 @@ public class BookingController {
 
         } catch (BookingException e) {
             AlertHelper.showWarning("Booking Gagal", e.getMessage());
+
         } catch (SQLException e) {
-            AlertHelper.showError("Error Database", "Gagal menyimpan pemesanan.");
-            e.printStackTrace();
+            AlertHelper.showError(
+                    "Kesalahan Teknis",
+                    "Terjadi masalah saat terhubung ke server. Pastikan Anda terhubung ke internet dan coba lagi."
+            );
+            //System.err.println("SQL Error during booking process: " + e.getMessage());
+
+        } catch (Exception e) {
+            AlertHelper.showError(
+                    "Error Tidak Terduga",
+                    "Terjadi kesalahan yang tidak terduga. Silakan coba lagi atau hubungi cshotelkenangan1@gmail.com."
+            );
+            System.err.println("Unexpected error during booking: " + e.getMessage());
         }
     }
 

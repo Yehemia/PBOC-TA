@@ -38,18 +38,24 @@ public class ChangePasswordController {
         }
 
         if (!newPassword.equals(confirmPassword)) {
-            AlertHelper.showError( "Error", "Password baru dan konfirmasi tidak cocok.");
+            AlertHelper.showError("Error", "Password baru dan konfirmasi tidak cocok.");
             return;
         }
 
         int userId = Session.getInstance().getCurrentUser().getId();
-        boolean success = UserDAO.changePassword(userId, oldPassword, newPassword);
 
-        if (success) {
-            AlertHelper.showInformation("Sukses", "Password berhasil diubah.");
-            closeStage();
-        } else {
-            AlertHelper.showError("Error", "Gagal mengubah password. Pastikan password lama Anda benar.");
+        try {
+            boolean success = UserDAO.changePassword(userId, oldPassword, newPassword);
+
+            if (success) {
+                AlertHelper.showInformation("Sukses", "Password berhasil diubah.");
+                closeStage();
+            } else {
+                AlertHelper.showError("Gagal", "Gagal mengubah password. Pastikan password lama Anda benar.");
+            }
+        } catch (Exception e) {
+            AlertHelper.showError("Kesalahan Sistem", "Terjadi masalah saat mencoba mengubah password Anda.");
+            System.err.println("Error changing password: " + e.getMessage());
         }
     }
 

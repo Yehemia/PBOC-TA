@@ -26,6 +26,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -73,9 +74,7 @@ public class PaymentController {
     }
 
     private void startTimer() {
-        if (timer != null) {
-            timer.cancel();
-        }
+        if (timer != null) timer.cancel();
         timeSeconds.set(10 * 60);
         timer = new Timer(true);
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -91,12 +90,24 @@ public class PaymentController {
                         timerLabel.setText("Waktu Habis!");
                         confirmPaymentButton.setDisable(true);
                         stopTimer();
-                        AlertHelper.showWarning("Waktu Habis", "Waktu pembayaran telah habis.");
+                        handlePaymentTimeout();
                     }
                 });
             }
         }, 1000, 1000);
     }
+
+    private void handlePaymentTimeout() {
+        try {
+            reservationService.cancelReservation(reservation);
+            AlertHelper.showWarning("Waktu Habis", "Waktu pembayaran telah habis. Pesanan Anda telah dibatalkan secara otomatis.");
+            closeWindow();
+        } catch (SQLException e) {
+            AlertHelper.showError("Error", "Gagal membatalkan pesanan secara otomatis setelah waktu habis.");
+            System.err.println("Failed to auto-cancel reservation: " + e.getMessage());
+        }
+    }
+
 
     private void stopTimer() {
         if (timer != null) {
@@ -108,19 +119,18 @@ public class PaymentController {
     @FXML
     private void processPayment() {
         stopTimer();
-
         confirmPaymentButton.setDisable(true);
         confirmPaymentButton.setText("Memproses...");
 
-        Task<Void> paymentTask = new Task<>() {
+        Task<String> paymentTask = new Task<>() {
             @Override
-            protected Void call() throws Exception {
+            protected String call() throws Exception {
                 reservationService.confirmPayment(reservation.getId());
                 String pdfPath = PDFGenerator.generateInvoice(reservation);
                 if (pdfPath != null && customer != null && customer.getEmail() != null) {
                     EmailUtil.sendInvoiceEmailWithAttachment(customer.getEmail(), pdfPath);
                 }
-                return null;
+                return pdfPath;
             }
         };
 
@@ -132,8 +142,17 @@ public class PaymentController {
         paymentTask.setOnFailed(e -> {
             confirmPaymentButton.setDisable(false);
             confirmPaymentButton.setText("Saya Sudah Bayar");
-            AlertHelper.showError("Proses Gagal", "Terjadi kesalahan saat memproses pembayaran.");
-            paymentTask.getException().printStackTrace();
+            Throwable ex = paymentTask.getException();
+
+            if (ex instanceof SQLException) {
+                AlertHelper.showError("Kesalahan Database", "Gagal memproses pembayaran karena masalah pada server. Silakan coba lagi.");
+            } else if (ex instanceof IOException) {
+                AlertHelper.showError("Kesalahan File", "Gagal membuat atau mengirim invoice. Namun, pembayaran Anda mungkin sudah tercatat.");
+            } else {
+                AlertHelper.showError("Proses Gagal", "Terjadi kesalahan saat memproses pembayaran.");
+            }
+
+            System.err.println("Error during payment processing: " + ex.getMessage());
             startTimer();
         });
 

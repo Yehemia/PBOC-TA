@@ -144,7 +144,7 @@ public class OfflineReservationController {
             clearSelectedStyle();
             card.setStyle("-fx-background-color: #EAF2F8; -fx-border-color: #3498DB; -fx-border-width: 2; -fx-background-radius: 8px; -fx-border-radius: 8px;");
             selectedRoomType = roomType;
-            validateForm(); // Panggil validasi setelah memilih kamar
+            validateForm();
         });
 
         card.setCursor(Cursor.HAND);
@@ -191,43 +191,43 @@ public class OfflineReservationController {
                     selectedRoomType, guestName, checkInDate, checkOutDate, paymentMethod
             );
 
+            String successMessage = "Reservasi berhasil dibuat.";
             if ("cash".equalsIgnoreCase(paymentMethod)) {
                 reservationService.confirmPayment(newReservation.getId());
-                AlertHelper.showInformation("Sukses", "Reservasi tunai berhasil disimpan dan dicatat lunas.");
-
+                successMessage = "Reservasi tunai berhasil disimpan dan dicatat lunas.";
             } else if ("online".equalsIgnoreCase(paymentMethod)) {
                 showQRCodePaymentScene(newReservation);
                 reservationService.confirmPayment(newReservation.getId());
-                AlertHelper.showInformation("Sukses", "Pembayaran cashless berhasil dikonfirmasi lunas.");
-
-            } else {
-                AlertHelper.showInformation("Sukses", "Reservasi berhasil dibuat. Pembayaran akan dilakukan nanti.");
+                successMessage = "Pembayaran cashless berhasil dikonfirmasi lunas.";
             }
 
-            String filePath = PDFGenerator.generateInvoice(newReservation);
-            if (filePath != null) {
-                try {
+            AlertHelper.showInformation("Sukses", successMessage);
+
+            try {
+                String filePath = PDFGenerator.generateInvoice(newReservation);
+                if (filePath != null) {
                     File pdfFile = new File(filePath);
                     if (Desktop.isDesktopSupported()) {
                         Desktop.getDesktop().open(pdfFile);
                     } else {
                         AlertHelper.showWarning("Fitur Tidak Didukung", "Tidak dapat membuka PDF otomatis. File tersimpan di: " + filePath);
                     }
-                } catch (IOException e) {
-                    AlertHelper.showWarning("Gagal Membuka PDF", "Gagal membuka struk PDF otomatis. File tersimpan di: " + filePath);
-                    e.printStackTrace();
+                } else {
+                    AlertHelper.showError("Gagal Membuat PDF", "Terjadi kesalahan saat membuat file struk PDF.");
                 }
-            } else {
-                AlertHelper.showError("Gagal Membuat PDF", "Terjadi kesalahan saat membuat file struk PDF.");
+            } catch (IOException e) {
+                AlertHelper.showWarning("Gagal Membuka PDF", "Gagal membuka struk PDF otomatis. File akan tetap tersimpan di folder aplikasi.");
+                System.err.println("Failed to open PDF: " + e.getMessage());
             }
+
             clearForm();
             loadAvailableRoomTypes();
 
         } catch (BookingException e) {
             AlertHelper.showWarning("Booking Gagal", e.getMessage());
         } catch (SQLException e) {
-            AlertHelper.showError("Error Database", "Gagal menyimpan reservasi ke database.");
-            e.printStackTrace();
+            AlertHelper.showError("Error Database", "Gagal menyimpan reservasi ke database. Periksa koneksi ke server.");
+            System.err.println("SQL Error during offline booking: " + e.getMessage());
         }
     }
 

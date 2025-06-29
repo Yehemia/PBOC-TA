@@ -83,8 +83,8 @@ public class HistoryBookingController {
                             AlertHelper.showInformation("Sukses", "Reservasi berhasil dibatalkan.");
                             loadHistoryData();
                         } catch (SQLException e) {
-                            AlertHelper.showError("Error", "Gagal membatalkan reservasi karena masalah database.");
-                            e.printStackTrace();
+                            AlertHelper.showError("Error", "Gagal membatalkan reservasi karena masalah koneksi ke server.");
+                            System.err.println("Failed to cancel reservation due to SQL error: " + e.getMessage());
                         }
                     }
                 });

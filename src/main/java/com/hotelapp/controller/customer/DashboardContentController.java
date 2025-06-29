@@ -2,6 +2,7 @@ package com.hotelapp.controller.customer;
 
 import com.hotelapp.dao.RoomTypeDAO;
 import com.hotelapp.model.RoomType;
+import com.hotelapp.util.AlertHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -67,6 +68,8 @@ public class DashboardContentController {
         loadTask.setOnFailed(e -> {
             loadingIndicator.setVisible(false);
             roomFlowPane.setDisable(false);
+            AlertHelper.showError("Gagal Memuat Kamar", "Terjadi kesalahan saat mengambil daftar kamar dari server.");
+            System.err.println("Failed to load available room types: " + loadTask.getException().getMessage());
         });
 
         new Thread(loadTask).start();

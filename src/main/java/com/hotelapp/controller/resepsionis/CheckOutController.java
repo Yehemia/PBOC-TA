@@ -16,6 +16,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 
+import java.sql.SQLException;
 import java.util.Optional;
 
 public class CheckOutController {
@@ -86,9 +87,12 @@ public class CheckOutController {
             refreshData();
         } catch (BookingException e) {
             AlertHelper.showWarning("Gagal", e.getMessage());
+        } catch (SQLException e) {
+            AlertHelper.showError("Error Database", "Terjadi masalah saat memproses check-out di database.");
+            System.err.println("SQL error during checkout: " + e.getMessage());
         } catch (Exception e) {
-            AlertHelper.showError("Error", "Gagal memproses check-out karena masalah server.");
-            e.printStackTrace();
+            AlertHelper.showError("Error Tidak Terduga", "Gagal memproses check-out karena masalah pada sistem.");
+            System.err.println("Unexpected error during checkout: " + e.getMessage());
         }
     }
 

@@ -56,22 +56,28 @@ public class ResetPasswordController {
 
         if (isTokenValid) {
             String hashedPassword = PasswordUtil.hashPassword(newPassword);
-            boolean isPasswordUpdated = UserDAO.updatePassword(user.getId(), hashedPassword);
 
-            if (isPasswordUpdated) {
-                VerificationService.markAllTokensUsed(user.getId());
-                AlertHelper.showInformation("Sukses", "Password Anda telah berhasil diubah. Silakan login kembali.");
+            try {
+                if (UserDAO.updatePassword(user.getId(), hashedPassword)) {
+                    VerificationService.markAllTokensUsed(user.getId());
+                    AlertHelper.showInformation("Sukses", "Password Anda telah berhasil diubah. Silakan login kembali.");
 
-                try {
-                    Parent root = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/login.fxml"));
-                    Stage stage = (Stage) resetPasswordButton.getScene().getWindow();
-                    stage.setScene(new Scene(root));
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    try {
+                        Parent root = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/login.fxml"));
+                        Stage stage = (Stage) resetPasswordButton.getScene().getWindow();
+                        stage.setScene(new Scene(root));
+                    } catch (IOException e) {
+                        AlertHelper.showError("Gagal Navigasi", "Gagal kembali ke halaman login.");
+                        System.err.println("Failed to load login.fxml after password reset: " + e.getMessage());
+                    }
+                } else {
+                    AlertHelper.showError("Gagal", "Terjadi kesalahan saat mengupdate password.");
                 }
-            } else {
-                AlertHelper.showError("Gagal", "Terjadi kesalahan saat mengupdate password di database.");
+            } catch (Exception e) {
+                AlertHelper.showError("Kesalahan Database", "Gagal menyimpan password karena masalah pada server.");
+                System.err.println("Error updating password: " + e.getMessage());
             }
+
         } else {
             AlertHelper.showError("Kode Salah", "Kode verifikasi yang Anda masukkan salah atau sudah kedaluwarsa.");
         }

@@ -1,4 +1,3 @@
-/* --- room-detail-style.css (Versi Perbaikan) --- */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 /* --- Root Pane --- */
@@ -11,7 +10,7 @@
 .detail-scroll-pane {
     -fx-background-color: transparent;
     -fx-background: transparent;
-    -fx-hbar-policy: never; /* Sembunyikan scrollbar horizontal */
+    -fx-hbar-policy: never; /* Hidescrollbar horizontal */
 }
 
 /* --- Kontainer untuk Teks (Memberi Jarak dari Tepi) --- */

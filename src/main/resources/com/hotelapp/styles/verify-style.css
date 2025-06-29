@@ -1,7 +1,4 @@
-/* Impor gaya utama agar tidak menulis ulang. Ganti 'login-style.css' jika Anda sudah punya file CSS utama. */
 @import url("login-style.css");
-
-/* Gaya khusus untuk halaman verifikasi */
 
 .subtitle-text {
     -fx-font-family: "Poppins", sans-serif;

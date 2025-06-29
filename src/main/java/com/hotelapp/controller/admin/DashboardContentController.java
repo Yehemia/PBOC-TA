@@ -4,6 +4,7 @@ import com.hotelapp.dao.PenaltyDAO;
 import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.dao.RoomDAO;
 import com.hotelapp.dao.UserDAO;
+import com.hotelapp.util.AlertHelper;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -36,11 +37,11 @@ public class DashboardContentController {
     @FXML private PieChart roomTypePieChart;
     @FXML private VBox legendContainer;
     private final List<Color> colorPalette = Arrays.asList(
-            Color.web("#5499C7"), // Biru
-            Color.web("#A455F1"), // Ungu
-            Color.web("#F9A458"), // Oranye
-            Color.web("#E74C3C"), // Merah
-            Color.web("#34CAA5")  // Hijau
+            Color.web("#5499C7"),
+            Color.web("#A455F1"),
+            Color.web("#F9A458"),
+            Color.web("#E74C3C"),
+            Color.web("#34CAA5")
     );
 
     @FXML
@@ -90,7 +91,8 @@ public class DashboardContentController {
         });
 
         task.setOnFailed(e -> {
-            e.getSource().getException().printStackTrace();
+            AlertHelper.showError("Gagal Memuat Grafik", "Tidak dapat mengambil data reservasi");
+            System.err.println("Failed to load room type data: " + task.getException().getMessage());
         });
 
         new Thread(task).start();
@@ -179,6 +181,11 @@ public class DashboardContentController {
         task.setOnSucceeded(e -> {
             revenueChart.getData().clear();
             revenueChart.getData().add(task.getValue());
+        });
+
+        task.setOnFailed(e -> {
+            AlertHelper.showError("Gagal Memuat Grafik", "Tidak dapat mengambil data tren pendapatan harian.");
+            System.err.println("Failed to load revenue trend data: " + task.getException().getMessage());
         });
 
         new Thread(task).start();

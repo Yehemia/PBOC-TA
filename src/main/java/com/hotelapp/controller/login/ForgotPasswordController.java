@@ -5,6 +5,7 @@ import com.hotelapp.model.User;
 import com.hotelapp.service.VerificationService;
 import com.hotelapp.util.AlertHelper;
 import com.hotelapp.util.EmailUtil;
+import com.hotelapp.util.ValidationUtil;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -27,7 +28,7 @@ public class ForgotPasswordController {
     @FXML
     void handleSendCode(ActionEvent event) {
         String email = emailField.getText().trim();
-        if (email.isEmpty() || !email.contains("@")) {
+        if (email.isEmpty() || !ValidationUtil.isEmailValid(email)) {
             AlertHelper.showWarning("Email Tidak Valid", "Harap masukkan alamat email yang valid.");
             return;
         }
@@ -42,12 +43,10 @@ public class ForgotPasswordController {
         try {
             String token = VerificationService.createAndSaveToken(user.getId());
             new Thread(() -> EmailUtil.sendPasswordResetEmail(user.getEmail(), token)).start();
-
             navigateToResetPassword(user);
-
         } catch (SQLException e) {
-            e.printStackTrace();
-            AlertHelper.showError("Database Error", "Gagal membuat token verifikasi.");
+            AlertHelper.showError("Kesalahan Teknis", "Gagal membuat kode verifikasi karena masalah pada server.");
+            System.err.println("Database Error on token creation: " + e.getMessage());
         }
     }
 

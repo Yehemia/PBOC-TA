@@ -17,13 +17,16 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.List;
 
 public class AddRoomTypeDialogController {
@@ -101,17 +104,7 @@ public class AddRoomTypeDialogController {
 
             String imageUrlForDatabase = null;
             if (selectedImageFile != null) {
-                try {
-                    imageUrlForDatabase = uploadImageToServer(selectedImageFile);
-                    if (imageUrlForDatabase == null) {
-                        AlertHelper.showError("Upload Gagal", "Gagal meng-upload gambar. URL dari server kosong.");
-                        return;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    AlertHelper.showError("Upload Error", "Terjadi kesalahan saat meng-upload gambar: " + e.getMessage());
-                    return;
-                }
+                imageUrlForDatabase = uploadImageToServer(selectedImageFile);
             } else if (roomTypeToEdit != null) {
                 imageUrlForDatabase = roomTypeToEdit.getImageUrl();
             }
@@ -133,9 +126,15 @@ public class AddRoomTypeDialogController {
 
         } catch (NumberFormatException e) {
             AlertHelper.showError("Format Salah", "Input untuk 'Harga' dan 'Kapasitas Tamu' harus berupa angka.");
-        } catch (Exception e) {
-            AlertHelper.showError("Database Error", "Gagal menyimpan data ke database. Error: " + e.getMessage());
-            e.printStackTrace();
+        } catch (ConnectException | HttpTimeoutException e) {
+            AlertHelper.showError("Upload Error", "Tidak dapat terhubung ke server upload gambar. Periksa koneksi internet Anda.");
+            System.err.println("Image upload connection error: " + e.getMessage());
+        } catch (IOException | InterruptedException e) {
+            AlertHelper.showError("Upload Gagal", "Terjadi kesalahan saat meng-upload gambar: " + e.getMessage());
+            System.err.println("Image upload failed: " + e.getMessage());
+        } catch (SQLException e) {
+            AlertHelper.showError("Database Error", "Gagal menyimpan data ke database. Pastikan tidak ada data duplikat.");
+            System.err.println("Database error on save room type: " + e.getMessage());
         }
     }
 

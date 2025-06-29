@@ -5,12 +5,12 @@ import com.hotelapp.model.User;
 import com.hotelapp.service.VerificationService;
 import com.hotelapp.util.AlertHelper;
 import com.hotelapp.util.EmailUtil;
+import com.hotelapp.util.ValidationUtil; // <-- Import ValidationUtil
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert; // <-- IMPORT BARU
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -18,13 +18,29 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.URL; // <-- IMPORT BARU
+import java.net.URL;
 import java.sql.SQLException;
 
 public class RegisterController {
     @FXML private TextField usernameField, nameField, emailField;
     @FXML private PasswordField passwordField;
     @FXML private Hyperlink loginLink;
+
+
+    @FXML
+    public void initialize() {
+        emailField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.trim().isEmpty()) {
+                if (ValidationUtil.isEmailValid(newValue)) {
+                    emailField.setStyle("");
+                } else {
+                    emailField.setStyle("-fx-border-color: red; -fx-border-width: 1.5px; -fx-border-radius: 10px;");
+                }
+            } else {
+                emailField.setStyle("");
+            }
+        });
+    }
 
     @FXML
     public void handleRegister(ActionEvent event) {
@@ -35,6 +51,12 @@ public class RegisterController {
 
         if (username.isBlank() || name.isBlank() || email.isBlank() || password.isBlank()) {
             AlertHelper.showWarning( "Form Tidak Lengkap", "Semua field wajib diisi!");
+            return;
+        }
+
+        // Cek validasi terakhir sebelum submit
+        if (!ValidationUtil.isEmailValid(email)) {
+            AlertHelper.showWarning("Format Email Salah", "Silakan masukkan alamat email yang valid.");
             return;
         }
 
@@ -102,5 +124,4 @@ public class RegisterController {
             e.printStackTrace();
         }
     }
-
 }

@@ -53,7 +53,7 @@ public class PenaltyController {
     public void markPenaltyPaid() {
         Penalty selectedPenalty = penaltyTable.getSelectionModel().getSelectedItem();
         if (selectedPenalty == null) {
-            AlertHelper.showWarning("Peringatan", "Harap pilih data penalty yang ingin dikonfirmasi.");
+            AlertHelper.showWarning("Peringatan", "Harap pilih data denda yang ingin dikonfirmasi lunas.");
             return;
         }
 
@@ -66,15 +66,15 @@ public class PenaltyController {
             try {
                 double paidAmount = Double.parseDouble(amountStr.trim());
                 penaltyService.markPenaltyAsPaid(selectedPenalty.getId(), paidAmount);
-                AlertHelper.showInformation("Sukses", "Status denda berhasil diubah menjadi 'paid'.");
+                AlertHelper.showInformation("Sukses", "Status denda berhasil diubah");
                 refreshData();
             } catch (NumberFormatException e) {
-                AlertHelper.showError("Error Input", "Input tidak valid. Harap masukkan angka.");
+                AlertHelper.showError("Input Tidak Valid", "Input jumlah pembayaran harus berupa angka.");
             } catch (BookingException e) {
-                AlertHelper.showWarning("Gagal", e.getMessage());
+                AlertHelper.showWarning("Proses Gagal", e.getMessage());
             } catch (SQLException e) {
-                AlertHelper.showError("Error Database", "Gagal mengupdate status denda.");
-                e.printStackTrace();
+                AlertHelper.showError("Error Database", "Gagal mengupdate status denda karena masalah koneksi server.");
+                System.err.println("SQL Error marking penalty as paid: " + e.getMessage());
             }
         });
     }

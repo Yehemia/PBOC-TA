@@ -35,14 +35,11 @@ public class RoomManagementController {
     @FXML private TableColumn<Room, Integer> roomNumberColumn;
     @FXML private TableColumn<Room, String> roomStatusColumn;
     @FXML private Label roomInstanceLabel;
-    @FXML private ProgressIndicator instanceLoadingIndicator; // WAJIB: Tambahkan fx:id ini di FXML Anda
+    @FXML private ProgressIndicator instanceLoadingIndicator;
 
     @FXML
     public void initialize() {
-        if (instanceLoadingIndicator != null) {
-            instanceLoadingIndicator.setVisible(false);
-        }
-
+        if (instanceLoadingIndicator != null) instanceLoadingIndicator.setVisible(false);
         setupRoomTypeTable();
         setupRoomInstanceTable();
         loadRoomTypes();
@@ -87,19 +84,18 @@ public class RoomManagementController {
             }
         };
         loadTypesTask.setOnSucceeded(e -> roomTypeTable.setItems(FXCollections.observableArrayList(loadTypesTask.getValue())));
+
         loadTypesTask.setOnFailed(e -> {
-            e.getSource().getException().printStackTrace();
-            AlertHelper.showError("Gagal Memuat", "Tidak dapat mengambil data tipe kamar.");
+            AlertHelper.showError("Gagal Memuat", "Tidak dapat mengambil data tipe kamar dari server.");
+            System.err.println("Failed to load room types: " + loadTypesTask.getException().getMessage());
         });
         new Thread(loadTypesTask).start();
     }
 
     private void loadRoomInstancesInBackground(RoomType roomType) {
         roomInstanceLabel.setText("Memuat kamar untuk tipe: " + roomType.getName() + "...");
-        roomInstanceTable.setItems(FXCollections.emptyObservableList()); // Kosongkan tabel
-        if (instanceLoadingIndicator != null) {
-            instanceLoadingIndicator.setVisible(true);
-        }
+        roomInstanceTable.setItems(FXCollections.emptyObservableList());
+        if (instanceLoadingIndicator != null) instanceLoadingIndicator.setVisible(true);
 
         Task<ObservableList<Room>> loadRoomsTask = new Task<>() {
             @Override
@@ -112,18 +108,14 @@ public class RoomManagementController {
         loadRoomsTask.setOnSucceeded(e -> {
             roomInstanceTable.setItems(loadRoomsTask.getValue());
             roomInstanceLabel.setText("Daftar Kamar untuk Tipe: " + roomType.getName());
-            if (instanceLoadingIndicator != null) {
-                instanceLoadingIndicator.setVisible(false);
-            }
+            if (instanceLoadingIndicator != null) instanceLoadingIndicator.setVisible(false);
         });
 
         loadRoomsTask.setOnFailed(e -> {
-            e.getSource().getException().printStackTrace();
             roomInstanceLabel.setText("Gagal memuat data kamar.");
-            if (instanceLoadingIndicator != null) {
-                instanceLoadingIndicator.setVisible(false);
-            }
-            AlertHelper.showError("Error", "Terjadi kesalahan saat mengambil data kamar.");
+            if (instanceLoadingIndicator != null) instanceLoadingIndicator.setVisible(false);
+            AlertHelper.showError("Error", "Terjadi kesalahan saat mengambil data kamar dari server.");
+            System.err.println("Failed to load room instances: " + loadRoomsTask.getException().getMessage());
         });
 
         new Thread(loadRoomsTask).start();

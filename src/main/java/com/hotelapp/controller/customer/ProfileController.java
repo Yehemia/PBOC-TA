@@ -1,6 +1,7 @@
 package com.hotelapp.controller.customer;
 
 import com.hotelapp.model.User;
+import com.hotelapp.util.AlertHelper;
 import com.hotelapp.util.Session;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -37,18 +38,29 @@ public class ProfileController {
     public void updateProfile() {
         User currentUser = Session.getInstance().getCurrentUser();
         if (currentUser != null) {
-            currentUser.setName(nameField.getText());
-            currentUser.setEmail(emailField.getText());
-            currentUser.setUsername(usernameField.getText());
+            String oldUsername = currentUser.getUsername();
+            String newUsername = usernameField.getText().trim();
 
-            boolean updated = com.hotelapp.dao.UserDAO.updateUser(currentUser);
-            if (updated) {
-                System.out.println("Profile berhasil diperbarui!");
-            } else {
-                System.err.println("Gagal memperbarui profile.");
+            currentUser.setName(nameField.getText().trim());
+            currentUser.setEmail(emailField.getText().trim());
+            currentUser.setUsername(newUsername);
+
+            try {
+                boolean updated = com.hotelapp.dao.UserDAO.updateUser(currentUser);
+                if (updated) {
+                    AlertHelper.showInformation("Sukses", "Profil Anda berhasil diperbarui!");
+                } else {
+                    currentUser.setUsername(oldUsername);
+                    AlertHelper.showError("Gagal", "Gagal memperbarui profil. Username atau email mungkin sudah digunakan.");
+                }
+            } catch (Exception e) {
+                currentUser.setUsername(oldUsername);
+                AlertHelper.showError("Kesalahan Sistem", "Terjadi masalah saat mencoba memperbarui profil Anda.");
+                System.err.println("Error updating profile: " + e.getMessage());
             }
         }
     }
+
     @FXML
     private void handleChangePassword(ActionEvent event) {
         try {

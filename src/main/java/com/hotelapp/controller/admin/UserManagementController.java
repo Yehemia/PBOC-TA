@@ -48,16 +48,24 @@ public class UserManagementController {
     private void filterUsers(String keyword) {
         Task<ObservableList<User>> task = new Task<>() {
             @Override
-            protected ObservableList<User> call() {
-                if (keyword == null || keyword.trim().isEmpty()) {
-                    return FXCollections.observableArrayList(UserDAO.getAllUsers());
-                } else {
-                    return FXCollections.observableArrayList(UserDAO.searchUsers(keyword));
+            protected ObservableList<User> call() throws Exception {
+                try {
+                    if (keyword == null || keyword.trim().isEmpty()) {
+                        return FXCollections.observableArrayList(UserDAO.getAllUsers());
+                    } else {
+                        return FXCollections.observableArrayList(UserDAO.searchUsers(keyword));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Gagal memuat data pengguna", e);
                 }
             }
         };
+
         task.setOnSucceeded(event -> usersTable.setItems(task.getValue()));
-        task.setOnFailed(event -> event.getSource().getException().printStackTrace());
+        task.setOnFailed(event -> {
+            AlertHelper.showError("Gagal Memuat Data", "Tidak dapat mengambil data pengguna dari server.");
+            System.err.println("Failed to filter/load users: " + task.getException().getMessage());
+        });
         new Thread(task).start();
     }
 

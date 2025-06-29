@@ -47,7 +47,8 @@ public class LoginController {
             Stage stage = (Stage) registerLink.getScene().getWindow();
             stage.setScene(new Scene(root, 920, 710));
         } catch (IOException e) {
-            e.printStackTrace();
+            AlertHelper.showError("Gagal Memuat Halaman", "Tidak dapat membuka halaman pendaftaran.");
+            System.err.println("Failed to load register.fxml: " + e.getMessage());
         }
     }
 
@@ -58,7 +59,8 @@ public class LoginController {
             Stage stage = (Stage) forgotPasswordLink.getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (IOException e) {
-            e.printStackTrace();
+            AlertHelper.showError("Gagal Memuat Halaman", "Tidak dapat membuka halaman lupa password.");
+            System.err.println("Failed to load ForgotPassword.fxml: " + e.getMessage());
         }
     }
 
@@ -79,9 +81,12 @@ public class LoginController {
                 stage.setScene(scene);
                 stage.centerOnScreen();
                 stage.show();
+            } else {
+                AlertHelper.showError("Role Tidak Dikenal", "Role pengguna '" + role + "' tidak valid.");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            AlertHelper.showError("Gagal Memuat Dashboard", "Terjadi kesalahan saat memuat halaman utama Anda.");
+            System.err.println("Failed to load dashboard FXML: " + e.getMessage());
         }
     }
 }
