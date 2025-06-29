@@ -15,14 +15,11 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import java.io.IOException;
 
-
 public class LoginController {
-    @FXML
-    private TextField usernameField;
-
-    @FXML
-    private PasswordField passwordField;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
     @FXML private Hyperlink registerLink;
+    @FXML private Hyperlink forgotPasswordLink;
 
     @FXML
     public void handleLogin(ActionEvent event) {
@@ -30,32 +27,41 @@ public class LoginController {
         String password = passwordField.getText();
 
         if (username.isBlank() || password.isBlank()) {
-            AlertHelper.showWarning("Input Tidak Valid", "Email dan Password tidak boleh kosong.");
+            AlertHelper.showWarning("Input Tidak Valid", "Username dan Password tidak boleh kosong.");
             return;
         }
 
         User user = UserDAO.authenticate(username, password);
         if (user != null) {
-            System.out.println("Login sukses! Role: " + user.getRole());
             Session.getInstance().setCurrentUser(user);
             redirectUser(user.getRole());
         } else {
-            AlertHelper.showError("Login Gagal", "Email atau Password yang Anda masukkan salah.");
+            AlertHelper.showError("Login Gagal", "Username atau Password salah, atau akun Anda tidak aktif.");
         }
     }
 
     @FXML
     public void handleShowRegister(ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(
-                    getClass().getResource("/com/hotelapp/fxml/register.fxml")
-            );
-            Stage stage = (Stage) usernameField.getScene().getWindow();
+            Parent root = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/register.fxml"));
+            Stage stage = (Stage) registerLink.getScene().getWindow();
             stage.setScene(new Scene(root, 920, 710));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    public void handleForgotPassword(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/com/hotelapp/fxml/ForgotPassword.fxml"));
+            Stage stage = (Stage) forgotPasswordLink.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void redirectUser(String role) {
         try {
             String fxmlFile = switch (role.toLowerCase()) {
@@ -73,8 +79,6 @@ public class LoginController {
                 stage.setScene(scene);
                 stage.centerOnScreen();
                 stage.show();
-            } else {
-                System.out.println("Role tidak dikenali!");
             }
         } catch (IOException e) {
             e.printStackTrace();

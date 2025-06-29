@@ -82,4 +82,35 @@ public class EmailUtil {
             e.printStackTrace();
         }
     }
+
+    public static void sendPasswordResetEmail(String toEmail, String token) {
+        final String senderEmail = ConfigLoader.getProperty("email.username");
+        final String senderPassword = ConfigLoader.getProperty("email.password");
+
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(senderEmail, senderPassword);
+            }
+        });
+
+        try {
+            Message msg = new MimeMessage(session);
+            msg.setFrom(new InternetAddress(senderEmail));
+            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+            msg.setSubject("Instruksi Reset Password Akun Kenangan Inn");
+            msg.setText("Anda menerima email ini karena ada permintaan untuk mengatur ulang password akun Anda.\n\n"
+                    + "Gunakan kode verifikasi di bawah ini untuk melanjutkan:\n\n"
+                    + "Kode Verifikasi: " + token + "\n\n"
+                    + "Kode ini hanya berlaku selama 15 menit. Jika Anda tidak merasa meminta reset password, abaikan email ini.");
+            Transport.send(msg);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
 }

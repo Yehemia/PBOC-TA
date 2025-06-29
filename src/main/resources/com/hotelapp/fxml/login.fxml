@@ -12,7 +12,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane fx:id="rootPane"  prefWidth="1200.0" prefHeight="720.0"  styleClass="main-bg" stylesheets="@../styles/login-style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.login.LoginController">
+<?import javafx.scene.layout.HBox?>
+<StackPane fx:id="rootPane" prefWidth="1200.0" prefHeight="720.0" styleClass="main-bg" stylesheets="@../styles/login-style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.login.LoginController">
     <children>
         <Region styleClass="bottom-arc" StackPane.alignment="BOTTOM_CENTER" />
         <VBox alignment="CENTER" maxWidth="350.0" spacing="15.0" StackPane.alignment="CENTER">
@@ -31,15 +32,14 @@
                         <PasswordField fx:id="passwordField" promptText="password" styleClass="form-input" />
                         <Button fx:id="loginButton" maxWidth="Infinity" onAction="#handleLogin" prefHeight="40.0" styleClass="sign-in-button" text="Sign In" />
 
-                        <VBox alignment="CENTER" spacing="5.0">
+                        <HBox alignment="CENTER" spacing="5.0">
                             <children>
-                                <Label styleClass="or-label" text="or" />
-                                <Hyperlink fx:id="registerLink" onAction="#handleShowRegister" styleClass="create-account-link" text="Create Account" />
+                                <Label styleClass="or-label" text="Tidak punya akun?" />
+                                <Hyperlink fx:id="registerLink" onAction="#handleShowRegister" styleClass="create-account-link" text="Buat Akun" />
+                                <Label styleClass="or-label" text="|" />
+                                <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPassword" styleClass="create-account-link" text="Lupa Password" />
                             </children>
-                            <VBox.margin>
-                                <Insets top="5.0" />
-                            </VBox.margin>
-                        </VBox>
+                        </HBox>
                     </children>
                     <VBox.margin>
                         <Insets top="15.0" />
