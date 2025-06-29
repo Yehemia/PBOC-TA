@@ -4,12 +4,12 @@
     -fx-font-family: "Poppins", sans-serif;
 }
 .main-bg {
-    -fx-background-color: #F4F7FC; /* Latar utama yang terang */
+    -fx-background-color: #F4F7FC;
 }
 
 /* --- SIDEBAR --- */
 .sidebar {
-    -fx-background-color: #2C3E50; /* Biru Malam */
+    -fx-background-color: #2C3E50;
     -fx-background-radius: 0 35 35 0;
 }
 .sidebar-header {

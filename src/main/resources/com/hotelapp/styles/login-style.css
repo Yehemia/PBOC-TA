@@ -75,7 +75,6 @@
 .sign-in-button:hover {
     -fx-background-color: #507A8B; /* Warna sedikit lebih terang saat hover */
 }
-
 /* --- Teks "or" & Link "Create Account" --- */
 .or-label {
     -fx-font-size: 12px;
@@ -85,7 +84,7 @@
 .create-account-link {
     -fx-font-size: 13px;
     -fx-text-fill: #3F6373;
-    -fx-underline: false; /* Menghilangkan garis bawah default */
+    -fx-underline: false;
 }
 
 .create-account-link:hover {

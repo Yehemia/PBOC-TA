@@ -65,7 +65,7 @@
     -fx-icon-color: white;
 }
 
-/* --- Konten di Dalam Halaman --- */
+/* --- Konten card --- */
 .content-card {
     -fx-background-color: white;
     -fx-background-radius: 12px;
