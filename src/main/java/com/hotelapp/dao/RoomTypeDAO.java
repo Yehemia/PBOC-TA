@@ -12,7 +12,8 @@ public class RoomTypeDAO {
         List<RoomType> roomTypes = new ArrayList<>();
         String sql = "SELECT rt.*, COUNT(r.id) as available_rooms_count " +
                 "FROM room_types rt " +
-                "LEFT JOIN rooms r ON rt.id = r.room_type_id AND r.status = 'available' " +
+                "LEFT JOIN rooms r ON rt.id = r.room_type_id AND r.status = 'available' AND r.is_active = TRUE " + // Tambahkan kondisi is_active
+                "WHERE rt.status = 'active' " +
                 "GROUP BY rt.id";
 
         try (Connection con = Database.getConnection();
@@ -36,7 +37,7 @@ public class RoomTypeDAO {
 
     public static RoomType getRoomTypeWithFacilitiesById(int roomTypeId) {
         String sql = "SELECT rt.*, f.id as facility_id, f.name as facility_name, f.icon_literal as facility_icon, " +
-                "(SELECT COUNT(*) FROM rooms r WHERE r.room_type_id = rt.id AND r.status = 'available') AS available_rooms_count " +
+                "(SELECT COUNT(*) FROM rooms r WHERE r.room_type_id = rt.id AND r.status = 'available' AND r.is_active = TRUE) AS available_rooms_count " +
                 "FROM room_types rt " +
                 "LEFT JOIN room_type_facilities rtf ON rt.id = rtf.room_type_id " +
                 "LEFT JOIN facilities f ON rtf.facility_id = f.id " +

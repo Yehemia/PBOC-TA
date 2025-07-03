@@ -3,8 +3,10 @@ package com.hotelapp.service;
 import com.hotelapp.dao.PenaltyDAO;
 import com.hotelapp.dao.ReservationDAO;
 import com.hotelapp.dao.RoomDAO;
+import com.hotelapp.dao.UserDAO;
 import com.hotelapp.model.*;
 import com.hotelapp.util.Database;
+import com.hotelapp.util.EmailUtil;
 import com.hotelapp.util.GeneratorUtil;
 
 import java.sql.Connection;
@@ -196,7 +198,12 @@ public class ReservationService {
             RoomDAO.updateRoomStatus(reservation.getRoomId(), "available", conn);
 
             conn.commit();
+            User customer = UserDAO.getUserById(reservation.getUserId());
+            Room room = RoomDAO.getRoomById(reservation.getRoomId());
 
+            if (customer != null && customer.getEmail() != null && room != null) {
+                new Thread(() -> EmailUtil.sendCancellationEmail(customer.getEmail(), reservation, room)).start();
+            }
         } catch (SQLException e) {
             if (conn != null) {
                 try {

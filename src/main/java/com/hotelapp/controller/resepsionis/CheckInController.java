@@ -29,7 +29,7 @@ public class CheckInController {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("bookingCode"));
         idColumn.setText("Kode Booking");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("guestName"));
-        roomColumn.setCellValueFactory(new PropertyValueFactory<>("roomId"));
+        roomColumn.setCellValueFactory(new PropertyValueFactory<>("roomNumber"));
         checkInColumn.setCellValueFactory(new PropertyValueFactory<>("checkIn"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 

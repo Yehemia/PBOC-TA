@@ -12,31 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RoomDAO {
-    public static Room findSampleAvailableRoomByType(int roomTypeId) {
-        String sql = "SELECT * FROM rooms WHERE room_type_id = ? AND status = 'available' LIMIT 1";
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setInt(1, roomTypeId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    RoomType roomType = RoomTypeDAO.getRoomTypeById(roomTypeId);
-                    if (roomType != null) {
-                        return new Room(
-                                rs.getInt("id"),
-                                rs.getInt("room_number"),
-                                rs.getString("status"),
-                                roomType
-                        );
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public static Room findFirstAvailableRoom(int roomTypeId, Connection conn) throws SQLException {
         String sql = "SELECT * FROM rooms WHERE room_type_id = ? AND status = 'available' AND is_active = TRUE LIMIT 1 FOR UPDATE";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -80,11 +55,10 @@ public class RoomDAO {
 
     public static List<Room> getAvailableRooms() {
         List<Room> rooms = new ArrayList<>();
-        String sql = "SELECT * FROM rooms WHERE status = 'available'";
+        String sql = "SELECT * FROM rooms WHERE status = 'available' AND is_active = TRUE";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-
             while (rs.next()) {
                 int roomTypeId = rs.getInt("room_type_id");
                 RoomType roomType = RoomTypeDAO.getRoomTypeWithFacilitiesById(roomTypeId);

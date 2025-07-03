@@ -36,7 +36,7 @@ public class CheckOutController {
         idColumn.setText("Kode Booking");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("bookingCode"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("guestName"));
-        roomColumn.setCellValueFactory(new PropertyValueFactory<>("roomId"));
+        roomColumn.setCellValueFactory(new PropertyValueFactory<>("roomNumber"));
         checkInTimeColumn.setCellValueFactory(new PropertyValueFactory<>("checkInTime"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 

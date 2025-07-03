@@ -216,12 +216,16 @@ public class ReservationDAO {
 
     public static List<Reservation> getReservationsForCheckIn() {
         List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT * FROM reservations WHERE status = 'pending' AND DATE(check_in) = CURDATE()";
+        String sql = "SELECT res.*, r.room_number FROM reservations res " +
+                "JOIN rooms r ON res.room_id = r.id " +
+                "WHERE res.status = 'pending' AND DATE(res.check_in) <= CURDATE()";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(mapReservation(rs));
+                Reservation reservation = mapReservation(rs);
+                reservation.setRoomNumber(rs.getInt("room_number"));
+                list.add(reservation);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -231,12 +235,16 @@ public class ReservationDAO {
 
     public static List<Reservation> getReservationsForCheckOut() {
         List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT * FROM reservations WHERE status = 'checked_in'";
+        String sql = "SELECT res.*, r.room_number FROM reservations res " +
+                "JOIN rooms r ON res.room_id = r.id " +
+                "WHERE res.status = 'checked_in'";
         try (Connection con = Database.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(mapReservation(rs));
+                Reservation reservation = mapReservation(rs);
+                reservation.setRoomNumber(rs.getInt("room_number"));
+                list.add(reservation);
             }
         } catch (Exception e) {
             e.printStackTrace();

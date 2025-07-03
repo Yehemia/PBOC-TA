@@ -8,6 +8,7 @@ import com.hotelapp.service.ReservationService;
 import com.hotelapp.util.AlertHelper;
 import com.hotelapp.util.PDFGenerator;
 import com.hotelapp.util.QRCodeGenerator;
+import com.hotelapp.util.ReceiptPrinter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -202,23 +203,7 @@ public class OfflineReservationController {
             }
 
             AlertHelper.showInformation("Sukses", successMessage);
-
-            try {
-                String filePath = PDFGenerator.generateInvoice(newReservation);
-                if (filePath != null) {
-                    File pdfFile = new File(filePath);
-                    if (Desktop.isDesktopSupported()) {
-                        Desktop.getDesktop().open(pdfFile);
-                    } else {
-                        AlertHelper.showWarning("Fitur Tidak Didukung", "Tidak dapat membuka PDF otomatis. File tersimpan di: " + filePath);
-                    }
-                } else {
-                    AlertHelper.showError("Gagal Membuat PDF", "Terjadi kesalahan saat membuat file struk PDF.");
-                }
-            } catch (IOException e) {
-                AlertHelper.showWarning("Gagal Membuka PDF", "Gagal membuka struk PDF otomatis. File akan tetap tersimpan di folder aplikasi.");
-                System.err.println("Failed to open PDF: " + e.getMessage());
-            }
+            ReceiptPrinter.print(newReservation);
 
             clearForm();
             loadAvailableRoomTypes();
