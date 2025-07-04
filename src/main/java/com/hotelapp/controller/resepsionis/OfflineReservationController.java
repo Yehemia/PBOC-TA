@@ -13,8 +13,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -35,7 +37,9 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 public class OfflineReservationController {
 
@@ -175,44 +179,82 @@ public class OfflineReservationController {
         });
     }
 
+    @FXML
     public void handleSubmit() {
         String guestName = nameField.getText().trim();
         LocalDate checkInDate = checkInDatePicker.getValue();
         LocalDate checkOutDate = checkOutDatePicker.getValue();
         String paymentMethod = paymentMethodComboBox.getValue();
 
-        if (guestName.isEmpty() || selectedRoomType == null || checkInDate == null ||
-                checkOutDate == null || paymentMethod == null) {
+        if (guestName.isEmpty() || selectedRoomType == null || checkInDate == null || checkOutDate == null || paymentMethod == null) {
             AlertHelper.showWarning("Input Tidak Valid", "Harap lengkapi semua data dan pilih tipe kamar.");
             return;
         }
 
         try {
-            Reservation newReservation = reservationService.createOfflineBooking(
-                    selectedRoomType, guestName, checkInDate, checkOutDate, paymentMethod
-            );
-
-            String successMessage = "Reservasi berhasil dibuat.";
             if ("cash".equalsIgnoreCase(paymentMethod)) {
-                reservationService.confirmPayment(newReservation.getId());
-                successMessage = "Reservasi tunai berhasil disimpan dan dicatat lunas.";
-            } else if ("online".equalsIgnoreCase(paymentMethod)) {
-                showQRCodePaymentScene(newReservation);
-                reservationService.confirmPayment(newReservation.getId());
-                successMessage = "Pembayaran cashless berhasil dikonfirmasi lunas.";
+                long nights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+                double totalPrice = selectedRoomType.getPrice() * nights;
+
+                Optional<Double> cashReceivedOpt = showCashPaymentDialog(totalPrice);
+
+                if (cashReceivedOpt.isPresent()) {
+                    processAndFinalizeBooking(guestName, checkInDate, checkOutDate, paymentMethod);
+                }
+            } else {
+                processAndFinalizeBooking(guestName, checkInDate, checkOutDate, paymentMethod);
             }
+        } catch (Exception e) {
+            if (e instanceof BookingException) {
+                AlertHelper.showWarning("Booking Gagal", e.getMessage());
+            } else if (e instanceof SQLException) {
+                AlertHelper.showError("Error Database", "Gagal menyimpan reservasi ke database.");
+                e.printStackTrace();
+            } else {
+                AlertHelper.showError("Error Tidak Terduga", "Terjadi kesalahan yang tidak terduga.");
+                e.printStackTrace();
+            }
+        }
+    }
 
-            AlertHelper.showInformation("Sukses", successMessage);
-            ReceiptPrinter.print(newReservation);
+    private void processAndFinalizeBooking(String guestName, LocalDate checkIn, LocalDate checkOut, String paymentMethod) throws SQLException, BookingException {
+        Reservation newReservation = reservationService.createOfflineBooking(
+                selectedRoomType, guestName, checkIn, checkOut, paymentMethod
+        );
+        reservationService.confirmPayment(newReservation.getId());
 
-            clearForm();
-            loadAvailableRoomTypes();
+        if ("online".equalsIgnoreCase(paymentMethod)) {
+            showQRCodePaymentScene(newReservation);
+        }
 
-        } catch (BookingException e) {
-            AlertHelper.showWarning("Booking Gagal", e.getMessage());
-        } catch (SQLException e) {
-            AlertHelper.showError("Error Database", "Gagal menyimpan reservasi ke database. Periksa koneksi ke server.");
-            System.err.println("SQL Error during offline booking: " + e.getMessage());
+        AlertHelper.showInformation("Sukses", "Reservasi untuk " + guestName + " berhasil dibuat dan dicatat lunas.");
+        ReceiptPrinter.print(newReservation);
+
+        clearForm();
+        loadAvailableRoomTypes();
+    }
+
+    private Optional<Double> showCashPaymentDialog(double totalBill) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/resepsionis/CashPayment.fxml"));
+            Parent root = loader.load();
+
+            CashPaymentController controller = loader.getController();
+            controller.setTotalBill(totalBill);
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Konfirmasi Pembayaran Tunai");
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            dialogStage.initOwner(submitButton.getScene().getWindow());
+            dialogStage.setScene(new Scene(root));
+            dialogStage.setResizable(false);
+
+            dialogStage.showAndWait();
+
+            return controller.getCashReceived();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Optional.empty();
         }
     }
 

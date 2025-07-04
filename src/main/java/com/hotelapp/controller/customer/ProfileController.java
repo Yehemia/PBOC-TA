@@ -1,8 +1,10 @@
 package com.hotelapp.controller.customer;
 
+import com.hotelapp.dao.UserDAO;
 import com.hotelapp.model.User;
 import com.hotelapp.util.AlertHelper;
 import com.hotelapp.util.Session;
+import com.hotelapp.util.ValidationUtil;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -41,8 +43,14 @@ public class ProfileController {
             String oldUsername = currentUser.getUsername();
             String newUsername = usernameField.getText().trim();
 
+            String newEmail = emailField.getText().trim();
+            if (newEmail.isBlank() || !ValidationUtil.isEmailValid(newEmail)) {
+                AlertHelper.showWarning("Input Tidak Valid", "Alamat email tidak boleh kosong dan harus dalam format yang benar.");
+                return;
+            }
+
             currentUser.setName(nameField.getText().trim());
-            currentUser.setEmail(emailField.getText().trim());
+            currentUser.setEmail(newEmail);
             currentUser.setUsername(newUsername);
 
             try {
@@ -51,10 +59,13 @@ public class ProfileController {
                     AlertHelper.showInformation("Sukses", "Profil Anda berhasil diperbarui!");
                 } else {
                     currentUser.setUsername(oldUsername);
+                    currentUser.setEmail(UserDAO.getUserById(currentUser.getId()).getEmail());
                     AlertHelper.showError("Gagal", "Gagal memperbarui profil. Username atau email mungkin sudah digunakan.");
                 }
             } catch (Exception e) {
                 currentUser.setUsername(oldUsername);
+                // Kembalikan juga email lama jika gagal
+                currentUser.setEmail(UserDAO.getUserById(currentUser.getId()).getEmail());
                 AlertHelper.showError("Kesalahan Sistem", "Terjadi masalah saat mencoba memperbarui profil Anda.");
                 System.err.println("Error updating profile: " + e.getMessage());
             }

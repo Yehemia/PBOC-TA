@@ -201,7 +201,7 @@ public class ReservationService {
             User customer = UserDAO.getUserById(reservation.getUserId());
             Room room = RoomDAO.getRoomById(reservation.getRoomId());
 
-            if (customer != null && customer.getEmail() != null && room != null) {
+            if (customer != null && customer.getEmail() != null && !customer.getEmail().isBlank() && room != null) {
                 new Thread(() -> EmailUtil.sendCancellationEmail(customer.getEmail(), reservation, room)).start();
             }
         } catch (SQLException e) {

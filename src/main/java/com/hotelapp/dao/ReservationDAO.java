@@ -39,7 +39,7 @@ public class ReservationDAO {
 
     public static List<Reservation> getReservationsByUserId(int userId) {
         List<Reservation> reservations = new ArrayList<>();
-        String sql = "SELECT res.id, res.booking_code, res.room_id, res.check_in, res.check_out, res.status, " +
+        String sql = "SELECT res.id, res.user_id, res.booking_code, res.room_id, res.check_in, res.check_out, res.status, res.payment_status, " +
                 "r.room_number, rt.name as room_type_name " +
                 "FROM reservations res " +
                 "JOIN rooms r ON res.room_id = r.id " +
@@ -60,8 +60,10 @@ public class ReservationDAO {
                         rs.getString("room_type_name"),
                         rs.getInt("room_number")
                 );
-                // Ambil dan set kode booking
+                reservation.setUserId(rs.getInt("user_id"));
                 reservation.setBookingCode(rs.getString("booking_code"));
+                reservation.setPaymentStatus(rs.getString("payment_status"));
+
                 reservations.add(reservation);
             }
         } catch (Exception e) {
@@ -86,48 +88,12 @@ public class ReservationDAO {
         }
     }
 
-    public static List<Reservation> getAllReservations() {
-        List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT res.*, r.room_number " +
-                "FROM reservations res " +
-                "JOIN rooms r ON res.room_id = r.id " +
-                "ORDER BY res.id DESC";
-
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Reservation reservation = mapReservation(rs);
-                reservation.setRoomNumber(rs.getInt("room_number"));
-                list.add(reservation);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
     public static boolean processCheckIn(int reservationId, Connection conn) throws SQLException {
         String sql = "UPDATE reservations SET status = 'checked_in', check_in_time = NOW() WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, reservationId);
             return ps.executeUpdate() > 0;
         }
-    }
-
-    public static int getJumlahReservasiHariIni() {
-        String sql = "SELECT COUNT(*) FROM reservations WHERE DATE(created_at) = CURDATE()";
-        return getCount(sql);
-    }
-
-    public static int getJumlahCheckInHariIni() {
-        String sql = "SELECT COUNT(*) FROM reservations WHERE status = 'checked_in' AND DATE(check_in_time) = CURDATE()";
-        return getCount(sql);
-    }
-
-    public static int getJumlahCheckOutHariIni() {
-        String sql = "SELECT COUNT(*) FROM reservations WHERE status = 'checked_out' AND DATE(check_out_time) = CURDATE()";
-        return getCount(sql);
     }
 
     public static int getReservationCount(String searchTerm, java.time.LocalDate startDate, java.time.LocalDate endDate) {

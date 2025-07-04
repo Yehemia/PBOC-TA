@@ -5,15 +5,15 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" styleClass="payment-root" stylesheets="@../../styles/payment-style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.customer.PaymentController">
+<VBox alignment="CENTER" styleClass="payment-root" stylesheets="@../../styles/payment-style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.hotelapp.controller.customer.PaymentController">
     <children>
-        <VBox spacing="25.0" styleClass="payment-card">
+        <VBox prefHeight="488.0" prefWidth="756.0" spacing="25.0" styleClass="payment-card">
             <children>
                 <Label styleClass="payment-title" text="Konfirmasi Pembayaran" />
                 <HBox spacing="30.0">

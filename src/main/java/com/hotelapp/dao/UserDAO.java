@@ -117,21 +117,6 @@ public class UserDAO {
         return null;
     }
 
-    private static String hashSha256(String password) {
-        try {
-            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (java.security.NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public static int getTotalCustomers() {
         String sql = "SELECT COUNT(*) FROM users WHERE role = 'customer'";
         try (Connection con = Database.getConnection();
