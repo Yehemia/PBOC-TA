@@ -13,7 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 public class CheckInController {
-
+    @FXML private TextField searchField;
     @FXML private TableView<Reservation> checkInTable;
     @FXML private TableColumn<Reservation, String> idColumn;
     @FXML private TableColumn<Reservation, String> nameColumn;
@@ -35,6 +35,10 @@ public class CheckInController {
 
         addActionButtons();
         refreshData();
+
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            refreshData(); // Panggil refreshData setiap kali teks berubah
+        });
     }
 
     private void addActionButtons() {
@@ -73,10 +77,11 @@ public class CheckInController {
 
     @FXML
     public void refreshData() {
+        String keyword = searchField.getText();
         Task<ObservableList<Reservation>> task = new Task<>() {
             @Override
             protected ObservableList<Reservation> call() {
-                return FXCollections.observableArrayList(ReservationDAO.getReservationsForCheckIn());
+                return FXCollections.observableArrayList(ReservationDAO.getReservationsForCheckIn(keyword));
             }
         };
         task.setOnSucceeded(e -> checkInTable.setItems(task.getValue()));

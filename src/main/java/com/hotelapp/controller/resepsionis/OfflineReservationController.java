@@ -64,8 +64,24 @@ public class OfflineReservationController {
 
     private void setupValidationAndListeners() {
         submitButton.setDisable(true);
-
         final LocalDate today = LocalDate.now();
+
+        nameField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.isEmpty()) {
+                validateForm();
+                return; // Izinkan jika kolom kosong
+            }
+
+            // Iterasi pada setiap karakter dari input baru
+            for (char c : newValue.toCharArray()) {
+                // Memeriksa apakah karakter BUKAN huruf, spasi, atau titik
+                if (!Character.isLetter(c) && !Character.isWhitespace(c) && c != '.') {
+                    // Jika ditemukan karakter yang tidak valid, kembalikan ke nilai lama dan hentikan proses
+                    nameField.setText(oldValue);
+                    return;
+                }
+            }
+        });
 
         checkInDatePicker.setDayCellFactory(picker -> new DateCell() {
             @Override

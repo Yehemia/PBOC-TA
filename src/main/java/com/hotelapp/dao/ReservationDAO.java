@@ -180,14 +180,26 @@ public class ReservationDAO {
         return 0;
     }
 
-    public static List<Reservation> getReservationsForCheckIn() {
+    public static List<Reservation> getReservationsForCheckIn(String keyword) {
         List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT res.*, r.room_number FROM reservations res " +
-                "JOIN rooms r ON res.room_id = r.id " +
-                "WHERE res.status = 'pending' AND DATE(res.check_in) <= CURDATE()";
+        StringBuilder sql = new StringBuilder(
+                "SELECT res.*, r.room_number FROM reservations res " +
+                        "JOIN rooms r ON res.room_id = r.id " +
+                        "WHERE res.status = 'pending' AND DATE(res.check_in) <= CURDATE()"
+        );
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND res.booking_code LIKE ?");
+        }
+
         try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            if (keyword != null && !keyword.isBlank()) {
+                ps.setString(1, "%" + keyword + "%");
+            }
+
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Reservation reservation = mapReservation(rs);
                 reservation.setRoomNumber(rs.getInt("room_number"));
@@ -252,7 +264,6 @@ public class ReservationDAO {
                 rs.getString("payment_status"),
                 rs.getString("guest_name")
         );
-        // Tambahkan baris ini
         reservation.setBookingCode(rs.getString("booking_code"));
         return reservation;
     }
