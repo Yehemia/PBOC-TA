@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 public class ReceiptPrinter {
@@ -41,59 +42,59 @@ public class ReceiptPrinter {
         }
 
         try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            NumberFormat currencyFormat = getCurrencyFormatter();
             stream.write(ESC_INIT);
-
-            // Header
-            stream.write(ESC_ALIGN_CENTER);
-            stream.write(ESC_BOLD_ON);
-            stream.write("KENANGAN INN\n".getBytes());
-            stream.write(ESC_BOLD_OFF);
-            stream.write("Jl. Anaheim No. 2\n".getBytes());
-            stream.write("Telp: 021-555-1234\n".getBytes());
-            stream.write(ESC_ALIGN_LEFT);
-            printLineSeparator(stream);
-
-            // Info Reservasi
-            stream.write(("ID Booking: ").getBytes("CP437"));
-            stream.write(ESC_BOLD_ON);
-            stream.write((reservation.getBookingCode() + "\n").getBytes("CP437"));
-            stream.write(ESC_BOLD_OFF);
-            stream.write(("Nama Tamu : ").getBytes("CP437"));
-            stream.write(ESC_BOLD_ON);
-            stream.write((reservation.getGuestName() + "\n").getBytes("CP437"));
-            stream.write(ESC_BOLD_OFF);
-            printLineSeparator(stream);
-
-            // Info Kamar
-            stream.write(("Kamar     : " + room.getRoomNumber() + " (" + room.getRoomType().getName() + ")\n").getBytes("CP437"));
-            stream.write(("Check-in  : " + dtf.format(reservation.getCheckIn()) + "\n").getBytes("CP437"));
-            stream.write(("Check-out : " + dtf.format(reservation.getCheckOut()) + "\n").getBytes("CP437"));
-            printLineSeparator(stream);
-
-            // Total Pembayaran
-            stream.write(ESC_ALIGN_CENTER);
-            stream.write("Total Bayar\n".getBytes("CP437"));
-            stream.write(ESC_DOUBLE_HEIGHT_WIDTH);
-            stream.write((currencyFormat.format(reservation.getTotalPrice()) + "\n").getBytes("CP437"));
-            stream.write(ESC_NORMAL_TEXT);
-            stream.write(ESC_ALIGN_LEFT);
-            printLineSeparator(stream);
-
-            // Footer
-            printCentered(stream, "TERIMA KASIH");
+            //HEADER
+            printCentered(stream, ESC_BOLD_ON, "KENANGAN INN");
+            printCentered(stream, ESC_NORMAL_TEXT, "Jl. IN DULU No. 123, Temben");
+            printCentered(stream, ESC_NORMAL_TEXT, "Telp: 0812-3456-7890");
             stream.write(FEED_LINE);
-            printCentered(stream, "Selamat Menikmati Liburan");
 
+            //DETAIL RESERVASI
+            printLineSeparator(stream, '=');
+            printKeyValuePair(stream, "Booking ID", reservation.getBookingCode());
+            printKeyValuePair(stream, "Nama Tamu", reservation.getGuestName());
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            printKeyValuePair(stream, "Waktu Cetak", dtf.format(java.time.LocalDateTime.now()));
+            printLineSeparator(stream, '-');
+
+            // --- DETAIL MENGINAP ---
+            long nights = ChronoUnit.DAYS.between(reservation.getCheckIn(), reservation.getCheckOut());
+            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            printKeyValuePair(stream, "Check-in", dateFormat.format(reservation.getCheckIn()));
+            printKeyValuePair(stream, "Check-out", dateFormat.format(reservation.getCheckOut()));
+            printKeyValuePair(stream, "Kamar", room.getRoomNumber() + " (" + room.getRoomType().getName() + ")");
+            printKeyValuePair(stream, "Durasi", nights + " malam");
+            printLineSeparator(stream, '-');
+
+            //RINCIAN BIAYA
+            NumberFormat currencyFormat = getCurrencyFormatter();
+            double pricePerNight = room.getRoomType().getPrice();
+
+            stream.write("Rincian Biaya:\n".getBytes("CP437"));
+            printKeyValuePair(stream, nights + " malam x " + currencyFormat.format(pricePerNight), currencyFormat.format(pricePerNight * nights));
+
+            printLineSeparator(stream, '-');
+
+            //TOTAL
+            stream.write(ESC_BOLD_ON);
+            printKeyValuePair(stream, "TOTAL BAYAR", currencyFormat.format(reservation.getTotalPrice()));
+            stream.write(ESC_BOLD_OFF);
+            printLineSeparator(stream, '=');
+            stream.write(FEED_LINE);
+
+            // --- FOOTER ---
+            printCentered(stream, ESC_NORMAL_TEXT, "Terima kasih atas kunjungan Anda");
+            printCentered(stream, ESC_NORMAL_TEXT, "Selamat Menikmati Liburan");
+
+            // Feed and Cut
             stream.write(FEED_LINE);
             stream.write(FEED_LINE);
             stream.write(CUT_PAPER);
 
+            // Kirim ke Printer
             DocPrintJob job = printService.createPrintJob();
             Doc doc = new SimpleDoc(stream.toByteArray(), DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
             job.print(doc, new HashPrintRequestAttributeSet());
-
             System.out.println("Struk berhasil dikirim ke printer: " + PRINTER_NAME);
 
         } catch (Exception e) {
@@ -102,14 +103,21 @@ public class ReceiptPrinter {
         }
     }
 
-    private static void printCentered(ByteArrayOutputStream stream, String text) throws IOException {
+    private static void printKeyValuePair(ByteArrayOutputStream stream, String key, String value) throws IOException {//Rata KIrir kanan
+        int remainingSpace = CHARS_PER_LINE - key.length() - value.length();
+        String padding = " ".repeat(Math.max(1, remainingSpace));
+        stream.write((key + padding + value + "\n").getBytes("CP437"));
+    }
+
+    private static void printCentered(ByteArrayOutputStream stream, byte[] style, String text) throws IOException {
         int padding = (CHARS_PER_LINE - text.length()) / 2;
         String paddedText = " ".repeat(Math.max(0, padding)) + text + "\n";
+        stream.write(style);
         stream.write(paddedText.getBytes("CP437"));
     }
 
-    private static void printLineSeparator(ByteArrayOutputStream stream) throws IOException {
-        stream.write(("-".repeat(CHARS_PER_LINE) + "\n").getBytes("CP437"));
+    private static void printLineSeparator(ByteArrayOutputStream stream, char character) throws IOException {
+        stream.write((String.valueOf(character).repeat(CHARS_PER_LINE) + "\n").getBytes("CP437"));
     }
 
     private static NumberFormat getCurrencyFormatter() {

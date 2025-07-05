@@ -140,20 +140,16 @@ public class UserManagementController {
     }
 
     private void handleDeleteUser(User user) {
-        // jika user sudah tidak aktif, tidk akan diproses
         if ("inactive".equalsIgnoreCase(user.getAccountStatus())) {
             AlertHelper.showInformation("Informasi", "User ini sudah berstatus tidak aktif.");
             return;
         }
-
-        // tidak mengizinkan admin menonaktifkan akunnya sendiri
         User currentUser = Session.getInstance().getCurrentUser();
         if (currentUser != null && currentUser.getId() == user.getId()) {
             AlertHelper.showError("Aksi Ditolak", "Anda tidak dapat menonaktifkan akun Anda sendiri.");
             return;
         }
 
-        // menonaktifkan admin dan memastikan bukan admin terakhir
         if ("admin".equalsIgnoreCase(user.getRole())) {
             long activeAdminCount = usersTable.getItems().stream()
                     .filter(u -> "admin".equalsIgnoreCase(u.getRole()) && "active".equalsIgnoreCase(u.getAccountStatus()))
