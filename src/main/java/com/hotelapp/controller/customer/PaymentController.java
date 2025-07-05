@@ -86,7 +86,7 @@ public class PaymentController {
         totalPriceLabel.setText(currencyFormat.format(reservation.getTotalPrice()));
 
         // Buat konten untuk QR code dan generate gambarnya.
-        String qrContent = "Booking ID: " + reservation.getId() + " | Total: " + reservation.getTotalPrice();
+        String qrContent = "Booking ID: " + reservation.getBookingCode() + " | Total: " + reservation.getTotalPrice();
         Image qrImage = QRCodeGenerator.generateQRCode(qrContent, 200, 200);
         qrImageView.setImage(qrImage);
     }

@@ -22,6 +22,10 @@ public class PenaltyDAO {
      */
     public static boolean addPenalty(Penalty penalty, Connection con) throws SQLException {
         // Perintah SQL untuk memasukkan data baru ke tabel 'penalties'.
+        // INSERT INTO penalties(...) : "Masukkan satu baris data baru ke tabel 'penalties'".
+        // VALUES (?, ?, ?, ?, NOW()): "Isi kolom-kolom tersebut dengan nilai ini".
+        // ?                         : Placeholder yang akan diisi oleh Java untuk keamanan.
+        // NOW()                     : Fungsi database untuk mengisi waktu saat ini secara otomatis.
         // Tanda tanya (?) adalah placeholder yang akan diisi nanti.
         String sql = "INSERT INTO penalties (reservation_id, amount, reason, penalty_status, created_at) VALUES (?, ?, ?, ?, NOW())";
 
@@ -118,6 +122,9 @@ public class PenaltyDAO {
      */
     public static double getTotalPaidPenalties() {
         // Perintah SQL untuk menjumlahkan (SUM) kolom 'amount'
+        // SELECT SUM(amount)      : "Hitung TOTAL JUMLAH dari semua nilai di kolom 'amount'".
+        // FROM penalties          : Dari tabel 'penalties'.
+        // WHERE penalty_status = 'paid': "Tapi, hanya hitung baris yang statusnya 'paid'".
         // hanya untuk baris yang statusnya 'paid'.
         String sql = "SELECT SUM(amount) FROM penalties WHERE penalty_status = 'paid'";
         try (Connection con = Database.getConnection();

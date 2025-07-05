@@ -100,7 +100,7 @@ public class ProfileController {
             // Muat FXML untuk dialog ubah password.
             URL fxmlUrl = getClass().getResource("/com/hotelapp/fxml/customer/ChangePassword.fxml");
             if (fxmlUrl == null) {
-                System.err.println("Cannot find FXML file for change password dialog.");
+                System.err.println("FXML tidak ditemukan.");
                 return;
             }
             Parent root = FXMLLoader.load(fxmlUrl);

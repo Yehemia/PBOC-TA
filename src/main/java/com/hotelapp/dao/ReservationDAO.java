@@ -59,6 +59,12 @@ public class ReservationDAO {
      * @return Sebuah daftar (List) berisi objek-objek Reservasi.
      */
     public static List<Reservation> getReservationsByUserId(int userId) {
+        // SELECT res.id, ..., r.room_number, rt.name: "mengambil kolom-kolom ini...".
+        // FROM reservations res                        : Dari tabel 'reservations' (diberi alias 'res').
+        // JOIN rooms r ON res.room_id = r.id         : "Gabungkan dengan tabel 'rooms' (alias 'r') dimana ID-nya cocok".
+        // JOIN room_types rt ON r.room_type_id = rt.id: "Gabungkan lagi dengan tabel 'room_types' (alias 'rt')".
+        // WHERE res.user_id = ?                        : "Filter hanya untuk user dengan ID ini".
+        // ORDER BY res.created_at DESC                 : "Urutkan dari yang paling baru".
         List<Reservation> reservations = new ArrayList<>();
         String sql = "SELECT res.id, res.user_id, res.booking_code, res.room_id, res.check_in, res.check_out, res.status, res.payment_status, " +
                 "r.room_number, rt.name as room_type_name " +
@@ -136,6 +142,9 @@ public class ReservationDAO {
      */
     public static int getReservationCount(String searchTerm, LocalDate startDate, LocalDate endDate) {
         // StringBuilder digunakan untuk membuat query SQL secara dinamis.
+        // SELECT COUNT(*) : "Hitung jumlah total baris yang cocok dengan kondisi di bawah ini".
+                // WHERE (... LIKE ? OR ... LIKE ?) : Kondisi pencarian teks. LIKE '%' berarti "mengandung".
+                // AND ... BETWEEN ? AND ?          : Kondisi filter rentang tanggal.
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM reservations res WHERE (res.guest_name LIKE ? OR res.booking_code LIKE ?)");
 
         // Jika filter tanggal ada, tambahkan kondisi WHERE untuk tanggal.
@@ -188,7 +197,7 @@ public class ReservationDAO {
             sql.append(" AND res.check_in BETWEEN ? AND ?");
         }
 
-        // 'LIMIT ? OFFSET ?' adalah kunci untuk pagination di SQL.
+        // 'LIMIT ? OFFSET ?' adalah kunci untuk pagination di SQL Batasi hasil query hanya sebanyak ? baris". (misal: 25)
         // LIMIT menentukan berapa banyak data, OFFSET menentukan mulai dari data ke berapa.
         sql.append(" ORDER BY res.id DESC LIMIT ? OFFSET ?");
 

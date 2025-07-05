@@ -27,6 +27,12 @@ public class RoomDAO {
      * @throws SQLException jika ada error SQL.
      */
     public static Room findFirstAvailableRoom(int roomTypeId, Connection conn) throws SQLException {
+        // SELECT * FROM rooms          : "Ambil semua kolom dari tabel 'rooms'".
+        // WHERE ... status = 'available' : "Hanya yang statusnya 'available'".
+        // LIMIT 1                      : "Cukup ambil 1 baris saja yang pertama kali ketemu".
+        // FOR UPDATE                   : "KUNCI baris yang ditemukan ini! Jangan biarkan proses lain
+        //                                mengganggunya sampai transaksi saya selesai (commit/rollback)".
+        // Ini adalah query paling kritis untuk mencegah double booking.
         String sql = "SELECT * FROM rooms WHERE room_type_id = ? AND status = 'available' AND is_active = TRUE LIMIT 1 FOR UPDATE";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, roomTypeId);
