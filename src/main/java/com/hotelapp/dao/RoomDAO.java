@@ -11,7 +11,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Ini adalah kelas DAO (Data Access Object) untuk Kamar Fisik (Room).
+ * Mengelola semua interaksi dengan tabel 'rooms' di database.
+ */
 public class RoomDAO {
+
+    /**
+     * Mencari satu kamar yang tersedia (available) dari tipe tertentu.
+     * 'FOR UPDATE' digunakan untuk mengunci baris ini agar tidak diambil oleh proses lain secara bersamaan,
+     * ini penting untuk mencegah double booking.
+     * @param roomTypeId ID tipe kamar yang dicari.
+     * @param conn Koneksi database untuk transaksi.
+     * @return Objek Room jika ditemukan, atau null jika tidak ada.
+     * @throws SQLException jika ada error SQL.
+     */
     public static Room findFirstAvailableRoom(int roomTypeId, Connection conn) throws SQLException {
         String sql = "SELECT * FROM rooms WHERE room_type_id = ? AND status = 'available' AND is_active = TRUE LIMIT 1 FOR UPDATE";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -30,6 +44,12 @@ public class RoomDAO {
         }
         return null;
     }
+
+    /**
+     * Mencari kamar berdasarkan ID-nya.
+     * @param roomId ID kamar yang dicari.
+     * @return Objek Room jika ditemukan.
+     */
     public static Room getRoomById(int roomId) {
         String sql = "SELECT * FROM rooms WHERE id = ?";
         try (Connection con = Database.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -53,6 +73,10 @@ public class RoomDAO {
         return null;
     }
 
+    /**
+     * Mengambil daftar semua kamar yang statusnya 'available'.
+     * @return Daftar kamar yang tersedia.
+     */
     public static List<Room> getAvailableRooms() {
         List<Room> rooms = new ArrayList<>();
         String sql = "SELECT * FROM rooms WHERE status = 'available' AND is_active = TRUE";
@@ -77,6 +101,10 @@ public class RoomDAO {
         return rooms;
     }
 
+    /**
+     * Menghitung jumlah total kamar yang ada di hotel.
+     * @return Jumlah total kamar.
+     */
     public static int getTotalRooms() {
         String sql = "SELECT COUNT(*) FROM rooms";
         try (Connection con = Database.getConnection();
@@ -89,6 +117,11 @@ public class RoomDAO {
         return 0;
     }
 
+    /**
+     * Mengambil daftar semua unit kamar berdasarkan tipe kamarnya.
+     * @param typeId ID tipe kamar.
+     * @return Daftar unit kamar.
+     */
     public static List<Room> getRoomsByTypeId(int typeId) {
         List<Room> rooms = new ArrayList<>();
         String sql = "SELECT * FROM rooms WHERE room_type_id = ? AND is_active = TRUE";
@@ -109,6 +142,12 @@ public class RoomDAO {
         } catch (Exception e) { e.printStackTrace(); }
         return rooms;
     }
+
+    /**
+     * Membuat data kamar fisik baru di database.
+     * @param room Objek Room yang akan disimpan.
+     * @return true jika berhasil.
+     */
     public static boolean createRoom(Room room) {
         String sql = "INSERT INTO rooms (room_number, status, room_type_id) VALUES (?, ?, ?)";
         try (Connection con = Database.getConnection();
@@ -123,6 +162,11 @@ public class RoomDAO {
         return false;
     }
 
+    /**
+     * Mengubah data kamar fisik yang sudah ada di database.
+     * @param room Objek Room dengan data yang sudah diubah.
+     * @return true jika berhasil.
+     */
     public static boolean updateRoom(Room room) {
         String sql = "UPDATE rooms SET room_number = ?, status = ?, room_type_id = ? WHERE id = ?";
         try (Connection con = Database.getConnection();
@@ -138,6 +182,12 @@ public class RoomDAO {
         return false;
     }
 
+    /**
+     * Menonaktifkan sebuah kamar (soft delete).
+     * Kamar tidak benar-benar dihapus, hanya status 'is_active' diubah menjadi FALSE.
+     * @param roomId ID kamar yang akan dinonaktifkan.
+     * @return true jika berhasil.
+     */
     public static boolean deleteRoom(int roomId) {
         String sql = "UPDATE rooms SET is_active = FALSE WHERE id = ?";
         try (Connection con = Database.getConnection();
@@ -151,6 +201,11 @@ public class RoomDAO {
     }
 
 
+    /**
+     * Memeriksa apakah sebuah nomor kamar sudah ada di database.
+     * @param roomNumber Nomor kamar yang akan diperiksa.
+     * @return true jika sudah ada, false jika belum.
+     */
     public static boolean roomNumberExists(int roomNumber) {
         String sql = "SELECT COUNT(*) FROM rooms WHERE room_number = ?";
         try (Connection con = Database.getConnection();
@@ -167,6 +222,11 @@ public class RoomDAO {
         return false;
     }
 
+    /**
+     * Mencari kamar berdasarkan kata kunci (nomor kamar atau nama tipe kamar).
+     * @param keyword Kata kunci pencarian.
+     * @return Daftar kamar yang cocok.
+     */
     public static List<Room> searchRooms(String keyword) {
         List<Room> rooms = new ArrayList<>();
         String sql = "SELECT r.* FROM rooms r " +
@@ -177,8 +237,8 @@ public class RoomDAO {
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             String searchPattern = "%" + keyword + "%";
-            ps.setString(1, searchPattern); // r.room_number
-            ps.setString(2, searchPattern); // rt.name
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -202,6 +262,14 @@ public class RoomDAO {
         return rooms;
     }
 
+    /**
+     * Mengubah status sebuah kamar (misal dari 'available' menjadi 'booked').
+     * @param roomId ID kamar yang akan diubah.
+     * @param newStatus Status baru.
+     * @param conn Koneksi database untuk transaksi.
+     * @return true jika berhasil.
+     * @throws SQLException jika ada error SQL.
+     */
     public static boolean updateRoomStatus(int roomId, String newStatus, Connection conn) throws SQLException {
         String sql = "UPDATE rooms SET status = ? WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {

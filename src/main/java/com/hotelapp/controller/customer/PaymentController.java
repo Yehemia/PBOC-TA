@@ -35,30 +35,44 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Controller untuk halaman pembayaran.
+ * Menampilkan detail, QR code, dan timer untuk pembayaran.
+ */
 public class PaymentController {
 
+    // @FXML menghubungkan variabel ke komponen FXML.
     @FXML private Label roomTypeLabel, datesLabel, nightsLabel, totalPriceLabel, timerLabel;
     @FXML private ImageView qrImageView;
     @FXML private Button confirmPaymentButton;
 
-    private Reservation reservation;
-    private Room room;
-    private User customer;
+    private Reservation reservation; // Data reservasi yang akan dibayar.
+    private Room room; // Data kamar dari reservasi.
+    private User customer; // Data pelanggan yang melakukan reservasi.
 
-    private Timer timer;
-    private final AtomicInteger timeSeconds = new AtomicInteger(10 * 60);
+    private Timer timer; // Objek Timer untuk countdown.
+    private final AtomicInteger timeSeconds = new AtomicInteger(10 * 60); // Waktu 10 menit dalam detik.
     private final ReservationService reservationService = new ReservationService();
 
+    /**
+     * Menerima data reservasi dari halaman sebelumnya dan memulai proses.
+     * @param reservation Objek reservasi.
+     */
     public void setReservation(Reservation reservation) {
         this.reservation = reservation;
         this.room = RoomDAO.getRoomById(reservation.getRoomId());
         this.customer = Session.getInstance().getCurrentUser();
-        updateUI();
-        startTimer();
+        updateUI(); // Tampilkan detail di UI.
+        startTimer(); // Mulai countdown.
     }
 
+    /**
+     * Mengisi semua komponen UI dengan data dari reservasi.
+     */
     private void updateUI() {
         if (reservation == null || room == null) return;
+
+        // Tampilkan info tipe kamar, tanggal, dan durasi menginap.
         roomTypeLabel.setText(room.getRoomType().getName());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM uuuu", new Locale("id", "ID"));
         String checkIn = reservation.getCheckIn().format(formatter);
@@ -66,37 +80,52 @@ public class PaymentController {
         datesLabel.setText(checkIn + " - " + checkOut);
         long nights = ChronoUnit.DAYS.between(reservation.getCheckIn(), reservation.getCheckOut());
         nightsLabel.setText(nights + " malam");
+
+        // Tampilkan total harga dalam format mata uang.
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
         totalPriceLabel.setText(currencyFormat.format(reservation.getTotalPrice()));
+
+        // Buat konten untuk QR code dan generate gambarnya.
         String qrContent = "Booking ID: " + reservation.getId() + " | Total: " + reservation.getTotalPrice();
         Image qrImage = QRCodeGenerator.generateQRCode(qrContent, 200, 200);
         qrImageView.setImage(qrImage);
     }
 
+    /**
+     * Memulai timer countdown untuk pembayaran.
+     */
     private void startTimer() {
-        if (timer != null) timer.cancel();
-        timeSeconds.set(10 * 60);
-        timer = new Timer(true);
+        if (timer != null) timer.cancel(); // Hentikan timer lama jika ada.
+        timeSeconds.set(10 * 60); // Reset waktu ke 10 menit.
+        timer = new Timer(true); // 'true' agar thread timer menjadi daemon.
+
+        // Jadwalkan tugas yang akan dijalankan setiap 1 detik.
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                int currentSeconds = timeSeconds.decrementAndGet();
+                int currentSeconds = timeSeconds.decrementAndGet(); // Kurangi waktu 1 detik.
+                // Update UI di JavaFX Application Thread.
                 Platform.runLater(() -> {
                     if (currentSeconds > 0) {
                         int minutes = currentSeconds / 60;
                         int seconds = currentSeconds % 60;
                         timerLabel.setText(String.format("Selesaikan dalam %02d:%02d", minutes, seconds));
                     } else {
+                        // Jika waktu habis.
                         timerLabel.setText("Waktu Habis!");
                         confirmPaymentButton.setDisable(true);
                         stopTimer();
-                        handlePaymentTimeout();
+                        handlePaymentTimeout(); // Panggil metode untuk menangani timeout.
                     }
                 });
             }
-        }, 1000, 1000);
+        }, 1000, 1000); // Mulai setelah 1 detik, ulangi setiap 1 detik.
     }
 
+    /**
+     * Menangani kejadian ketika waktu pembayaran habis.
+     * Reservasi akan dibatalkan secara otomatis.
+     */
     private void handlePaymentTimeout() {
         try {
             reservationService.cancelReservation(reservation);
@@ -108,7 +137,9 @@ public class PaymentController {
         }
     }
 
-
+    /**
+     * Menghentikan timer.
+     */
     private void stopTimer() {
         if (timer != null) {
             timer.cancel();
@@ -116,17 +147,24 @@ public class PaymentController {
         }
     }
 
+    /**
+     * Memproses pembayaran saat tombol "Saya Sudah Bayar" diklik.
+     */
     @FXML
     private void processPayment() {
         stopTimer();
         confirmPaymentButton.setDisable(true);
         confirmPaymentButton.setText("Memproses...");
 
+        // Gunakan Task untuk menjalankan proses konfirmasi pembayaran di background thread.
         Task<String> paymentTask = new Task<>() {
             @Override
             protected String call() throws Exception {
+                // Konfirmasi pembayaran di database.
                 reservationService.confirmPayment(reservation.getId());
+                // Generate invoice PDF.
                 String pdfPath = PDFGenerator.generateInvoice(reservation);
+                // Jika PDF berhasil dibuat dan customer punya email, kirim email.
                 if (pdfPath != null && customer != null && customer.getEmail() != null) {
                     EmailUtil.sendInvoiceEmailWithAttachment(customer.getEmail(), pdfPath);
                 }
@@ -134,31 +172,28 @@ public class PaymentController {
             }
         };
 
+        // Setelah task berhasil...
         paymentTask.setOnSucceeded(e -> {
             closeWindow();
-            showSuccessDialog();
+            showSuccessDialog(); // Tampilkan dialog sukses.
         });
 
+        // Jika task gagal...
         paymentTask.setOnFailed(e -> {
             confirmPaymentButton.setDisable(false);
             confirmPaymentButton.setText("Saya Sudah Bayar");
             Throwable ex = paymentTask.getException();
-
-            if (ex instanceof SQLException) {
-                AlertHelper.showError("Kesalahan Database", "Gagal memproses pembayaran karena masalah pada server. Silakan coba lagi.");
-            } else if (ex instanceof IOException) {
-                AlertHelper.showError("Kesalahan File", "Gagal membuat atau mengirim invoice. Namun, pembayaran Anda mungkin sudah tercatat.");
-            } else {
-                AlertHelper.showError("Proses Gagal", "Terjadi kesalahan saat memproses pembayaran.");
-            }
-
+            AlertHelper.showError("Proses Gagal", "Terjadi kesalahan saat memproses pembayaran.");
             System.err.println("Error during payment processing: " + ex.getMessage());
-            startTimer();
+            startTimer(); // Mulai ulang timer jika gagal.
         });
 
         new Thread(paymentTask).start();
     }
 
+    /**
+     * Menampilkan dialog konfirmasi pembayaran sukses.
+     */
     private void showSuccessDialog() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/hotelapp/fxml/customer/PaymentSuccessDialog.fxml"));
@@ -169,9 +204,9 @@ public class PaymentController {
             }
             Stage dialogStage = new Stage();
             dialogStage.initModality(Modality.APPLICATION_MODAL);
-            dialogStage.initStyle(StageStyle.TRANSPARENT);
+            dialogStage.initStyle(StageStyle.TRANSPARENT); // Dialog tanpa border default.
             Scene scene = new Scene(root);
-            scene.setFill(Color.TRANSPARENT);
+            scene.setFill(Color.TRANSPARENT); // Latar belakang transparan.
             dialogStage.setScene(scene);
             dialogStage.showAndWait();
         } catch (IOException e) {
@@ -179,6 +214,9 @@ public class PaymentController {
         }
     }
 
+    /**
+     * Metode pembantu untuk menutup jendela pembayaran.
+     */
     private void closeWindow() {
         Stage stage = (Stage) confirmPaymentButton.getScene().getWindow();
         if (stage != null) {
